@@ -47,6 +47,16 @@ if [[ $dry_run == "0" ]]; then
     mkdir -p $HOME/Personal
 
     sudo apt update && sudo apt upgrade
+
+    # Initial git setup
+    git submodule init && git submodule sync
+    git submodule update
+    git config --global user.email "inom@iturdikulov.com"
+    git config --global user.name "Inom Turdikulov"
+
+    # Minimal install of most required packages
+    sudo apt install -y yadm build-essential curl ca-certificates git firefox-esr kitty rsync
+
     if [ $? -ne 0 ]; then
       echo "Failed to update system, check logs above and try to fix all issues."
       exit 1
