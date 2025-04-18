@@ -63,3 +63,9 @@ I use yadm to bootstrap my system, there are some steps to make systemd work:
 sudo apt install -y yadm git
 yadm clone https://github.com/iturdikulov/dev
 ```
+
+## Gnome
+
+- Dark theme
+- Gnome Tweaks Dark theme for legacy applications
+- Extension: https://extensions.gnome.org/extension/723/pixel-saver/
