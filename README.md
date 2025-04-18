@@ -25,6 +25,28 @@ sudo vi /etc/NetworkManager/NetworkManager.conf
 # Charge managed=false to managed=true, save and reboot.
 ```
 
+## Change fstab file to support compression
+
+Currently, (04/2025), live installer does not support add mount option for btrfs compression.
+So requires editing `fstab` file.
+
+Before actual install (writing files), immediately after partitioning we can edit
+the `fstab` file:
+
+```
+# Get to a terminal by doing ctrl+alt+f3
+# Hit enter to activate the console
+nano /target/mount/etc/fstab
+
+# Adjust volume like this to enable compression
+# add compress=lzo, compress=zlib, or compress=zstd
+# I use level 1 for speed on nvme SDD
+
+# Example, do NOT copy/paste, just use same mount option, "..." means there is
+# some other mount options
+... /  btrfs defaults,compress=zstd:1 ... 0 1
+```
+
 ## Bootstrapping
 
 I use yadm to bootstrap my system, there some steps to make systemd work:
