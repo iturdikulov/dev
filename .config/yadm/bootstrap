@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-# Verify sudo access
-timeout 2 sudo id && echo Sudo Access Granted || exit 1
-
 grep=""
 dry_run="0"
 

@@ -49,6 +49,13 @@ nano /target/mount/etc/fstab
 
 ## Bootstrapping
 
+Before running script, verify sudo access, on Debian you might need add user to
+sudo group and logout/login.
+
+```
+sudo adduser $USER -G sudo
+```
+
 I use yadm to bootstrap my system, there are some steps to make systemd work:
 
 ```
