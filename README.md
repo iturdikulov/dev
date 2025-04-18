@@ -60,7 +60,7 @@ usermod -aG sudo <username>
 I use yadm to bootstrap my system, there are some steps to make systemd work:
 
 ```
-sudo apt install -y yadm git
+sudo apt install -y yadm git zsh
 yadm clone https://github.com/iturdikulov/dev
 ```
 
