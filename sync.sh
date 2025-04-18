@@ -17,7 +17,9 @@ rcp() {
     "$@"
 }
 
-rcp --delete /mnt/.ssh $HOME/
-rcp --delete /mnt/Wiki $HOME/
-rcp --delete /mnt/Videos $HOME/
-rcp --delete /mnt/Life/ $HOME/Documents/Personal
+BASE_PATH=/mnt/inom
+
+rcp --delete $BASE_PATH/.ssh $HOME/
+rcp --delete $BASE_PATH/Wiki $HOME/
+rcp --delete $BASE_PATH/Videos $HOME/
+rcp --delete $BASE_PATH/Life/ $HOME/Documents/Personal
