@@ -1,15 +1,6 @@
 #!/usr/bin/env bash
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-if [ -z "$DEV_ENV" ]; then
-    echo "env var DEV_ENV needs to be present"
-    exit 1
-fi
-
-# if i just did DEV_ENV=$(pwd) ./run then this is needed for the rest of the
-# scripts
-export DEV_ENV="$DEV_ENV"
-
 grep=""
 dry_run="0"
 
@@ -61,7 +52,7 @@ if [[ $dry_run == "0" ]]; then
     fi
 fi
 
-log "RUN: env: $env -- grep: $grep"
+log "RUN, grep: $grep"
 
 runs_dir=`find $script_dir/runs -mindepth 1 -maxdepth 1 -executable`
 
