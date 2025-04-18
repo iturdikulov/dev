@@ -25,8 +25,11 @@ sudo vi /etc/NetworkManager/NetworkManager.conf
 # Charge managed=false to managed=true, save and reboot.
 ```
 
-## Goal
+## Bootstrapping
 
-20 minute script using bash
+I use yadm to bootstrap my system, there some steps to make systemd work:
 
-No more ansible, simple bashing and I like what i have created
+```
+sudo apt install -y yadm git
+yadm clone https://github.com/iturdikulov/dev
+```
