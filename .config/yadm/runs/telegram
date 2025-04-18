@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sudo apt install telegram-desktop
+sudo apt install -y telegram-desktop
