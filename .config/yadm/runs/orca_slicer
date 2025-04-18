@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# libwebkit2gtk-4.0-dev was required for Orca v2.3.0
+sudo apt install -y libwebkit2gtk-4.0-dev
+wget -O $HOME/.local/bin/OrcaSlicer.AppImage https://github.com/SoftFever/OrcaSlicer/releases/download/v2.3.0/OrcaSlicer_Linux_AppImage_V2.3.0.AppImage
+chmod a+x $HOME/.local/bin/OrcaSlicer.AppImage
+
+mkdir -p $HOME/.local/share/applications
+cat > $HOME/.local/share/applications/OrcaSlicer.desktop << EOF
+[Desktop Entry]
+Version=2.3.0
+Name=OrcaSlicer
+Comment=OrcaSlicer
+GenericName=OrcaSlicer
+Exec=$HOME/.local/bin/OrcaSlicer.AppImage
+Icon=$HOME/.local/bin/icons/OrcaSlicer
+Terminal=false
+Type=Application
+Categories=GTK;Graphics
+StartupNotify=true
+EOF

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+sudo apt install qemu-system libvirt-daemon-system virt-manager
+sudo adduser `id -un` libvirt

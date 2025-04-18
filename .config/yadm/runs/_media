@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sudo apt install mpv obs-studio audacity shotcut lmms ffmpeg yt-dlp
