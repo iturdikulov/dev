@@ -1,0 +1,10 @@
+- [x] zsh config
+- [x] Code Font installation
+- [x] kitty config (colors, fonts)
+- [ ] neovim conifg
+- [ ] tmux config
+- [ ] Required APPS
+- [ ] Dev APPS
+- [ ] Work project toolset Sync
+- [ ] Scripts
+- [x] https://extensions.gnome.org/extension/723/pixel-saver/
