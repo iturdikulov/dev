@@ -11,6 +11,5 @@ cd $HOME/.cargo/bin
 if [ -n "$(lspci|grep VGA|grep -i 'AMD\|ATI')" ]; then
     if [ ! -n "$(lspci|grep VGA|grep AMD)" ]; then
         # Install radeontop if an AMD card is present
-        ./cargo install --locked --path . --no-default-features --features="tui"
     fi
 fi
