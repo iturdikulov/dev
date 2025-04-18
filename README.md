@@ -49,7 +49,7 @@ nano /target/mount/etc/fstab
 
 ## Bootstrapping
 
-I use yadm to bootstrap my system, there some steps to make systemd work:
+I use yadm to bootstrap my system, there are some steps to make systemd work:
 
 ```
 sudo apt install -y yadm git
