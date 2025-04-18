@@ -49,8 +49,11 @@ nano /target/mount/etc/fstab
 
 ## Bootstrapping
 
-Before running script, verify sudo access, on Debian you might need add user to
-sudo group and reboot.
+Before running script, verify:
+- sudo access
+- added additional repositories in "Software & Update" or in /etc/sources.list (contrib, non-free, non-free-firmware)
+
+On Debian you might need to add user to sudo group and reboot.
 
 ```
 su -
