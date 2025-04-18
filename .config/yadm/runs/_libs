@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 sudo apt -y update
-sudo apt -y install git delta ripgrep pavucontrol xclip jq tldr shutter python3-pip fzf gpg
+sudo apt -y install git ripgrep pavucontrol xclip jq tldr shutter python3-pip fzf gpg 7zip
