@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt install zsh
+sudo apt install -y zsh
 sudo chsh -s $(which zsh)
 chsh -s $(which zsh)
 git clone --recursive https://github.com/changs/slimzsh.git ~/.slimzsh
