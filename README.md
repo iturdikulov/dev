@@ -54,7 +54,7 @@ sudo group and logout/login.
 
 ```
 su -
-adduser $USER -G sudo
+adduser your_user_name -G sudo
 ```
 
 I use yadm to bootstrap my system, there are some steps to make systemd work:
