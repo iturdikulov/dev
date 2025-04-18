@@ -1,10 +1,11 @@
 - [x] zsh config
 - [x] Code Font installation
 - [x] kitty config (colors, fonts)
-- [ ] neovim conifg
+- [ ] token, gnupg, gpg-agent, ssh-agent config
+- [ ] neovim config, LSP for all progs, TDD, compilers, gdb, etc.
 - [ ] tmux config
 - [ ] Required APPS
 - [ ] Dev APPS
-- [ ] Work project toolset Sync
-- [ ] Scripts
+- [ ] Work project toolset, sync
+- [ ] Scripts, aliases, etc.
 - [x] https://extensions.gnome.org/extension/723/pixel-saver/
