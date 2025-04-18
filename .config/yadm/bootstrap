@@ -39,12 +39,10 @@ if [[ $dry_run == "0" ]]; then
         exit 1
     fi
 
-    # Create few directories
     if [[ -z "$HOME" ]]; then
         echo "HOME env var is not set"
         exit 1
     fi
-    mkdir -p $HOME/Personal
 
     sudo apt update && sudo apt upgrade
 
@@ -73,7 +71,7 @@ for s in $runs_dir; do
         continue
     fi
 
-    log "running script: $s"
+    log "--- running script: $s ---"
 
     if [[ $dry_run == "0" ]]; then
         $s
