@@ -3,12 +3,14 @@
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # Installing additional tools
-cargo install stylua --features luajit
-cargo install atuin
+cd $HOME/.cargo/bin
+
+./cargo install stylua --features luajit
+./cargo install atuin
 
 if [ -n "$(lspci|grep VGA|grep -i 'AMD\|ATI')" ]; then
     if [ ! -n "$(lspci|grep VGA|grep AMD)" ]; then
         # Install radeontop if an AMD card is present
-        cargo install --locked --path . --no-default-features --features="tui"
+        ./cargo install --locked --path . --no-default-features --features="tui"
     fi
 fi
