@@ -67,5 +67,5 @@ yadm clone https://github.com/iturdikulov/dev
 ## Gnome
 
 - Dark theme
-- Gnome Tweaks Dark theme for legacy applications
+- Gnome Tweaks `Adwaita Dark` theme for legacy applications
 - Extension: https://extensions.gnome.org/extension/723/pixel-saver/
