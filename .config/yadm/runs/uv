@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
 
 curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install some tools
+$HOME/.local/bin/uv tool install --upgrade ruff basedpyright debugpy mypy ipython pipdeptree
