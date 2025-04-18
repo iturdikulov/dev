@@ -1,11 +1,15 @@
 - [x] zsh config
 - [x] Code Font installation
 - [x] kitty config (colors, fonts)
-- [ ] token, gnupg, gpg-agent, ssh-agent config: https://raw.githubusercontent.com/LuciusChen/.emacs.d/refs/heads/main/sh/gpg-backup.sh
-- [ ] neovim config, LSP for all progs, TDD, compilers, gdb, etc. https://github.com/williamboman/mason.nvim?tab=readme-ov-file#requirements, https://github.com/ThePrimeagen/init.lua/
 - [ ] tmux config
-- [ ] Required APPS
-- [ ] Dev APPS
-- [ ] Work project toolet, sync
-- [ ] Scripts, aliases, etc.
+- [ ] scripts, aliases, hotkeys, etc.
+- [ ] shares mounts
+- [ ] external services sync (browser, mail, etc.)
+- [ ] pass sync
+- [ ] books workflow v2
+- [ ] gtk bookmarks
+- [x] gnupg config with gpg-agent/ssh-agent
+- [ ] token
+- [ ] neovim config, LSP for all progs, TDD, compilers, gdb, etc. https://github.com/williamboman/mason.nvim?tab=readme-ov-file#requirements, https://github.com/ThePrimeagen/init.lua/
+- [ ] Work project toolset, sync
 - [x] https://extensions.gnome.org/extension/723/pixel-saver/
