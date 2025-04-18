@@ -3,4 +3,4 @@
 sudo apt install nodejs npm
 npm config set prefix ~/.local/npm
 npm i -g n biome pnpm
-n lts
+$HOME/.local/npm/bin/n lts
