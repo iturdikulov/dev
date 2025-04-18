@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+wget -O $HOME/.local/bin/FreeCAD.AppImage https://github.com/FreeCAD/FreeCAD/releases/download/1.0.0/FreeCAD_1.0.0-conda-Linux-x86_64-py311.AppImage
+chmod a+x $HOME/.local/bin/FreeCAD.AppImage
+
+mkdir -p $HOME/.local/share/applications
+cat > $HOME/.local/share/applications/Freecad.desktop << EOF
+[Desktop Entry]
+Version=1.0
+Name=FreeCAD
+Comment=FreeCAD
+GenericName=FreeCAD
+Exec=$HOME/.local/bin/FreeCAD.AppImage
+Icon=$HOME/.local/bin/icons/freecad
+Terminal=false
+Type=Application
+Icon=Freecad
+Categories=GTK;Graphics
+StartupNotify=true
+EOF

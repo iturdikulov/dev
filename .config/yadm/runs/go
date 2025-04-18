@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+VERSION=1.24.2
+wget -O /tmp/go_$VERSION.tar.gz "https://go.dev/dl/go$VERSION.linux-amd64.tar.gz"
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf "/tmp/go_$VERSION.tar.gz"
+rm "/tmp/go_$VERSION.tar.gz"
+
+echo "set correct GOPATH and PATH in your shell!"
