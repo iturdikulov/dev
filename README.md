@@ -67,8 +67,10 @@ sudo apt install -y yadm git zsh
 yadm clone https://github.com/iturdikulov/dev
 ```
 
-## Gnome
+## Post install
 
-- Dark theme
-- Gnome Tweaks `Adwaita Dark` theme for legacy applications
-- Extension: https://extensions.gnome.org/extension/723/pixel-saver/
+- Hide unwanted titlebars of some apps: https://extensions.gnome.org/extension/723/pixel-saver/
+- Focus new windows as I expected: https://extensions.gnome.org/extension/2182/noannoyance/
+- System Preferences: dark theme, default applications
+- Gnome Tweaks, `Adwaita Dark` theme for legacy applications
+- Sync Account

@@ -13,10 +13,15 @@ addToPathFront() {
     fi
 }
 
-# Atuin
-if (( $+commands[atuin] )); then
-  eval "$(atuin init zsh)"
-fi
+initTool() {
+    if (( $+commands[$1] )); then
+	eval "$($1 init zsh)"
+    fi
+}
+
+# Init tools
+initTool "atuin"
+initTool "zoxide"
 
 export EDITOR=nvim
 
@@ -37,4 +42,6 @@ addToPath /usr/games
 # Aliases
 alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
 alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
-alias vi=nvim
+alias vi='nvim'
+alias mux='tmux attach || tmux new'
+alias fd='fdfind'
