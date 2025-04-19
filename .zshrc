@@ -1,5 +1,12 @@
 [ -f "$HOME/.slimzsh/slim.zsh" ] && source "$HOME/.slimzsh/slim.zsh"
 
+
+addToPath() {
+    if [[ "$PATH" != *"$1"* ]]; then
+        export PATH=$PATH:$1
+    fi
+}
+
 addToPathFront() {
     if [[ ! -z "$2" ]] || [[ "$PATH" != *"$1"* ]]; then
         export PATH=$1:$PATH
@@ -23,6 +30,9 @@ addToPathFront $HOME/.local/.npm-global/bin
 addToPathFront $HOME/.local/scripts
 addToPathFront $HOME/.local/bin
 addToPathFront $HOME/.local/npm/bin
+
+addToPath /usr/local/games
+addToPath /usr/games
 
 # Aliases
 alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
