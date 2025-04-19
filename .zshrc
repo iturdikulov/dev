@@ -49,3 +49,9 @@ alias mux='tmux attach || tmux new'
 alias fd='fdfind'
 alias trash='gio trash'
 alias f='$(fzf) && nvim -- "$f"'
+alias grep='grep --color'
+alias l='ls'
+alias ls='ls --color=auto'
+alias ll='ls -la'          # long listing format
+alias l.='ls -d .* --color=auto' # hidden files
+

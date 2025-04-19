@@ -1,3 +1,11 @@
 #!/usr/bin/env bash
 
 sudo apt install -y aria2 wget curl thunderbird rsync
+
+# WARN: Enable firewall for debian!
+sudo apt install -y ufw
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw enable
+sudo ufw status verbose
