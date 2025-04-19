@@ -19,7 +19,10 @@ rcp() {
 
 BASE_PATH=/mnt/inom
 
+read -p "Sync files!"
+
 rcp --delete $BASE_PATH/.ssh $HOME/
 rcp --delete $BASE_PATH/Wiki $HOME/
 rcp --delete $BASE_PATH/Videos $HOME/
 rcp --delete $BASE_PATH/Life/ $HOME/Documents/Personal
+rcp --delete $BASE_PATH/.thunderbird/ $HOME/thunderbird_import
