@@ -53,7 +53,7 @@ Before running script, verify:
 - sudo access
 - added additional repositories in "Software & Update" or in /etc/sources.list (contrib, non-free, non-free-firmware)
 
-On Debian you might need to add user to sudo group and reboot.
+On Debian you might need to add user into sudo group and reboot.
 
 ```
 su -
@@ -72,5 +72,6 @@ yadm clone https://github.com/iturdikulov/dev
 - Hide unwanted titlebars of some apps: https://extensions.gnome.org/extension/723/pixel-saver/
 - Focus new windows as I expected: https://extensions.gnome.org/extension/2182/noannoyance/
 - System Preferences: dark theme, default applications
-- Gnome Tweaks, `Adwaita Dark` theme for legacy applications
+- Settings, `Dark` theme, Resolution, scale-factor, refresh rate
 - Sync Account
+- Configure desktop app run arguments (in KDE very easy): foot --maximized
