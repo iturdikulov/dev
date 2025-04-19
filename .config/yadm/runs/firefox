@@ -1,3 +1,22 @@
 #!/usr/bin/env bash
 
 sudo apt install -y firefox-esr
+
+# Configure firefox
+sudo mkdir -p /etc/firefox-esr/pref
+
+cat << EOF_FF
+// IMPORTANT: Start your code on the 2nd line
+pref("app.update.auto", false);
+pref("app.update.enabled", false);
+pref("browser.tabs.remote.autostart", false);
+pref("browser.startup.homepage", "about:blank");
+pref("startup.homepage_welcome_url", "");
+pref("datareporting.policy.firstRunURL", "");
+EOF_FF|sudo tee /etc/firefox-esr/firefox.cfg
+
+cat << EOF_CFG
+pref("general.config.filename", "firefox.cfg");
+pref("general.config.obscure_value", 0);
+pref("browser.shell.checkDefaultBrowser", 0);
+EOF_CFG|sudo tee /etc/firefox-esr/pref/autoconfig.js
