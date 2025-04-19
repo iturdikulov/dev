@@ -13,3 +13,4 @@
 - [ ] token
 - [ ] neovim config, LSP for all progs, TDD, compilers, gdb, etc. https://github.com/williamboman/mason.nvim?tab=readme-ov-file#requirements, https://github.com/ThePrimeagen/init.lua/
 - [ ] Work project toolset, sync
+- [ ] add sha verification for all runners!

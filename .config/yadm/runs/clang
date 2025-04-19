@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sudo apt install clang-19 clangd-19
