@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd $script_dir
+
+sudo apt -y install tlp tlp-rdw
+sudo tlp start
+tlp-stat -s
+
+# TODO
+# https://gitlab.com/asus-linux/asusctl
+# https://wiki.debian.org/NvidiaGraphicsDrivers
