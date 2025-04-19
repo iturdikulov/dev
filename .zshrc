@@ -13,15 +13,17 @@ addToPathFront() {
     fi
 }
 
-initTool() {
-    if (( $+commands[$1] )); then
-	eval "$($1 init zsh)"
-    fi
-}
 
 # Init tools
-initTool "atuin"
-initTool "zoxide"
+if (( $+commands[zoxide] )); then 
+    eval "$(zoxide init zsh)"
+fi
+if (( $+commands[fzf] )); then 
+    source <(fzf --zsh)
+fi
+if (( $+commands[atuin] )); then 
+    eval "$(atuin init zsh)"
+fi
 
 export EDITOR=nvim
 
@@ -45,3 +47,5 @@ alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E
 alias vi='nvim'
 alias mux='tmux attach || tmux new'
 alias fd='fdfind'
+alias trash='gio trash'
+alias f='$(fzf) && nvim -- "$f"'
