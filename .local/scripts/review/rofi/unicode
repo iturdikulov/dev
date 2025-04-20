@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#! nix-shell -i sh -p libnotify wl-clipboard
+
+# This scripts iterate over text files, extract char and description
+# then user can select char and scirpt will copy it into clipboard
+
+# TODO: import https://oeis.org/wiki/List_of_LaTeX_mathematical_symbols
+#       and cheatsheet
+
+# Source: /usr/share/X11/locale/en_US.UTF-8/Compose
+# I configured compose key to rwin: `rwin, <, 3` -> ♥
+compose_chars_path="$(dirname $0)/compose_chars.txt"
+
+chars_path="$(dirname $0)/emoji.txt"
+
+# Generated using i_all.sh from
+# https://github.com/ryanoasis/nerd-fonts/tree/master/bin/scripts/lib
+icons_path="$(dirname $0)/nerd_icons.txt"
+
+# The famous "get a menu of emojis to copy" script.
+
+# Get user selection via dmenu from emoji file.
+chosen=$(cut -d ';' -f1 $compose_chars_path $chars_path $icons_path | \
+rofi -window-title emoji -dmenu -i -l 20  -theme theme/filemenu.rasi | \
+sed "s/ .*//"|tr -d '[]')
+
+# Exit if none chosen.
+[ -z "$chosen" ] && exit
+
+printf "$chosen" | wl-copy
+notify-send "'$chosen' copied to clipboard." &

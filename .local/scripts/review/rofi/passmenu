@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# Prompts for a pass entry, then for a specific field. Similar to passmenu, but
+# uses rofi, and can resume from a previous session.
+#
+# Example: passmenu [RESUME]
+
+ROFI_CMD='rofi -dmenu -theme theme/passmenu.rasi'
+MSG_CMD='notify-send'
+set -e
+shopt -s nullglob globstar
+
+if command -v xclip 3>&1 >/dev/null; then
+  _copy() {
+    xclip -selection clipboard -in
+  }
+elif command -v wl-copy 2>&1 >/dev/null; then
+  _copy() {
+    wl-copy
+  }
+else
+  notify-send "No clipboard backend available (xclip or ydotool)"
+  exit 1
+fi
+
+if [[ $1 == -r ]]; then
+    resume=1; shift
+fi
+
+LAST_ENTRY_FILE=/tmp/_upm
+if [[ -n $resume && -f $LAST_ENTRY_FILE ]]; then
+  entry="$(<$LAST_ENTRY_FILE)"
+else
+  prefix=${PASSWORD_STORE_DIR-~/.password-store}
+  password_files=( "$prefix"/**/*.gpg  )
+  password_files=( "${password_files[@]#"$prefix"/}"  )
+  password_files=( "${password_files[@]%.gpg}" )
+  entry=$(printf "%s\n" "${password_files[@]}" | $ROFI_CMD -p "...")
+fi
+
+if [[ -z $entry ]]; then
+  $MSG_CMD "Error!" "Failed to select $entry"
+  exit 1
+fi
+
+echo "$entry" >/tmp/_upm
+secrets="$(pass show "$entry")"
+if [[ -n $secrets ]]; then
+  fields=$(awk -F': ' -F ':' 'NR>1 && !/^otpauth:/ {print $1}' <<<"$secrets")
+  field=$(printf "password\n%s\notp\n" "${fields[@]}" | $ROFI_CMD -p "$entry")
+  case $field in
+    password) pass -c "$entry" ;;
+    otp) printf "%s" "$(pass otp -c "$entry")" ;;
+    *) printf "%s" "$(awk -v "key=$field:" '$1 == key {print $2}' <<<"$secrets")" | _copy ;;
+  esac
+  $MSG_CMD "Success!" "Copied <b>$entry/$field</b> to clipboard"
+else
+  $MSG_CMD "Error!" "Failed to retrieve $entry"
+  exit 2
+fi

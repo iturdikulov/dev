@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+# TODO: convert to golang
+"""
+Enables toggling the keyboard layout between English and Russian, toggle the RGB Light
+
+Used libraries:
+    - [hid · PyPI](https://pypi.org/project/hid/)
+"""
+
+import sys
+import hid
+import subprocess
+
+vendor_id = 0x4B42
+
+usage_page = 0xFF60
+usage = 0x61
+report_length = 32
+
+def toggle_layout():
+    """Toggles the keyboard layout between English and Russian using xkb-switch."""
+    try:
+        current_layout = subprocess.check_output(["xkb-switch"]).decode().strip()
+        new_layout = "ru" if current_layout == "us(colemak_dh)" else "us(colemak_dh)"
+
+        subprocess.run(["setxkbmap", "-layout", new_layout])
+
+        if new_layout == "ru":
+            send_raw_report([0x31])
+        else:
+            send_raw_report([0x30])
+    except subprocess.CalledProcessError as e:
+        print(f"Error toggling layout: {e}")
+
+
+def get_raw_hid_interface():
+    device_interfaces = hid.enumerate(vendor_id)
+    raw_hid_interfaces = [
+        i
+        for i in device_interfaces
+        if i["usage_page"] == usage_page and i["usage"] == usage
+    ]
+
+    if len(raw_hid_interfaces) == 0:
+        return None
+
+    interface = hid.Device(path=raw_hid_interfaces[0]["path"])
+    return interface
+
+
+def send_raw_report(data):
+    interface = get_raw_hid_interface()
+
+    if interface is None:
+        print("No device found")
+        sys.exit(1)
+
+    request_data = [0x00] * (report_length + 1)  # First byte is Report ID
+    request_data[1 : len(data) + 1] = data
+    request_report = bytes(request_data)
+
+    print("Request:")
+    print(request_report)
+
+    try:
+        interface.write(request_report)
+    finally:
+        interface.close()
+
+
+if __name__ == "__main__":
+    toggle_layout()

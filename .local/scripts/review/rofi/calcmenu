@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# Launch a rofi-powered calculator.
+#
+# SYNOPSIS:
+#   calcmenu
+
+rofi \
+  -show calc \
+  -modi calc \
+  -theme theme/calcmenu \
+  $@

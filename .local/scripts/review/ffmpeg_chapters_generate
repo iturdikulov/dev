@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""
+Get existing video metadata
+
+`ffmpeg -i INPUT.mp4 -f ffmetadata FFMETADATAFILE`
+
+Check there are no existing chapters.
+Watch the video, noting chapters into a `chapters.txt` file as you go.
+Place `FFMETADATAFILE`, `chapters.txt`, and the video file in the same directory.
+
+chapters.txt example:
+
+0:23:20 Start
+0:40:30 First Performance
+0:40:56 Break
+1:04:44 Second Performance
+1:24:45 Crowd Shots
+1:27:45 Credits
+
+Run the helper script to append chapters to FFMETADATAFILE.
+
+`python3 helper.py`
+
+Create a new video, copying the video and audio from the original without re-encoding.
+
+`ffmpeg -i INPUT.mp4 -i FFMETADATAFILE -map_metadata 1 -codec copy OUTPUT.mp4`
+"""
+
+import re
+
+chapters = list()
+
+with open('chapters.txt', 'r') as f:
+   for line in f:
+      x = re.match(r"(\d):(\d{2}):(\d{2}) (.*)", line)
+      hrs = int(x.group(1))
+      mins = int(x.group(2))
+      secs = int(x.group(3))
+      title = x.group(4)
+
+      minutes = (hrs * 60) + mins
+      seconds = secs + (minutes * 60)
+      timestamp = (seconds * 1000)
+      chap = {
+         "title": title,
+         "startTime": timestamp
+      }
+      chapters.append(chap)
+
+text = ""
+
+for i in range(len(chapters)-1):
+   chap = chapters[i]
+   title = chap['title']
+   start = chap['startTime']
+   end = chapters[i+1]['startTime']-1
+   text += f"""
+[CHAPTER]
+TIMEBASE=1/1000
+START={start}
+END={end}
+title={title}
+"""
+
+with open("FFMETADATAFILE", "a") as myfile:
+    myfile.write(text)
+

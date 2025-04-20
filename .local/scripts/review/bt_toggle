@@ -1,0 +1,11 @@
+#!/bin/sh
+
+device="70:26:05:60:AB:40"
+
+if bluetoothctl info "$device" | grep 'Connected: yes' -q; then
+  bluetoothctl disconnect "$device"
+  notify-send "Bluetooth" "$device disconnected"
+else
+  bluetoothctl connect "$device"
+  notify-send "Bluetooth" "$device connected"
+fi

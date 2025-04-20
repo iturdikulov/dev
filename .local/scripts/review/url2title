@@ -1,0 +1,13 @@
+#!/bin/sh
+
+
+if [ -z "$1" ]; then
+    echo "Usage: url2title <url>"
+    exit 1
+fi
+
+# TODO: we can do a lot optimization here
+# NUITKA?
+curl $1 2> /dev/null|\
+    awk -vRS="</title>" '/<title>/{gsub(/.*<title>|\n+/,"");print;exit}'|\
+    python -c "import html; import sys; print(html.unescape(sys.stdin.read()))"
