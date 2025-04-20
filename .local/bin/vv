@@ -1,13 +1,12 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # vv: VT View
-# https://github.com/hackerb9/vv
 
-# Version 1.9.3
-# B9 May 2023
+# Version 1.9.4
+# B9 November 2024
 
 # Use sixel graphics to show images inside a terminal (e.g., xterm).
-# Copyright (c) 2019..2023 hackerb9, under the terms of GNU GPL 3+.
+# Copyright (c) 2019..2024 hackerb9, under the terms of GNU GPL 3+.
 
 # Some nice features:
 # * Can display any image type. (Via ImageMagick).
@@ -108,7 +107,7 @@
 declare -g  timeout=0.25       # Max secs to wait for control sequence response.
 declare -gi ssdelay=5	       # Num secs to linger during slideshow.
 declare -g  viewmode="fast"    # Show "fast" or "full" images.
-declare -gi previewlines=12      # Height of fast preview image (in text lines).
+declare -gi previewlines=8      # Height of fast preview image (in text lines).
 declare -g  background="gray20" # Default for bg (alpha) if autodetection fails
 declare -g  foreground="gray80" # Default for fg (text) if autodetection fails
 declare -g  rflag="ask"		# Empty string means do not recurse dirs.
@@ -256,6 +255,16 @@ prerequisites() {
 	pdfinfo() {
 	    notice "Page count is slow. Please install pdfinfo (poppler-utils)."
 	    echo "Pages: $(identify "$1" | grep -c PDF)"
+	}
+    fi
+    if command -v chrome >/dev/null; then
+	dumpdom() { chrome --headless --dump-dom "$@"; }
+    elif command -v chromium >/dev/null; then
+	dumpdom() { chromium --headless --dump-dom "$@"; }
+    else
+	dumpdom() {
+	    notice "If yandex mistakes w3m for a bot, please install chrome to run headless javascript."
+	    curl "$@"
 	}
     fi
     if [[ $BASH_VERSINFO -lt 5 ]]; then
@@ -541,7 +550,7 @@ inittermkey() {
 
     # To be valid, we must enable terminal application mode key sequences.
     if tput smkx; then
-	for k in $(infocmp -L1 | egrep 'key_|cursor_'); do
+	for k in $(infocmp -L1 | grep -E 'key_|cursor_'); do
 	    a=""; x=""
 	    # Example "k:	key_down=\EOB,"
 	    a=${k#*key_}
@@ -644,17 +653,17 @@ saverenamemove() {
 	local path=$(realpath "$file")
     fi
     local dir=$(dirname "$path")
-    local ext=${f##*.};    [[ "$f" != "$ext" ]] || ext=""
+    local ext=${f##*.};    [[ "$f" != "$ext" && "$ext" != */* ]] || ext=""
     local base=$(basename "$file" ".$ext")
     local IFS=$'\n'		# Tildify shouldn't split on spaaces
     tput el
     stty echo		 # Temporarily show characters the user types.
     tput cnorm		 # Temporarily show the cursor.
     if [[ "$mode" == "rename" ]]; then
-	read -d $'\r' -p "Rename to: " -e -i $(tildify "$path") newname
+	read -d $'\r' -p "Rename to: " -e -i "$(tildify "$path")" newname
     elif [[ "$mode" == "save" ]]; then
 	read -d $'\r' -p "Save a copy of $base in: " -e \
-	     -i $(tildify "${lastuseddir:-$dir}/") newname
+	     -i "$(tildify "${lastuseddir:-$dir}/")" newname
     else
 	read -d $'\r' -p "Move to: " -e -i "$(tildify "${lastuseddir:-$dir}/")" newname
     fi
@@ -673,14 +682,14 @@ saverenamemove() {
     fi
     [[ -d "$newname" ]] && newname+="/."   # Use existing directory.
     [[ "$newname" != */ ]] || newname+="." # Never end with a "/" (for dirname.)
-    mkdir -p $(dirname "$newname")
+    mkdir -p "$(dirname "$newname")"
     newname=$(realpath "$newname" 2>/dev/null) # Canonicalize
 
     if [[ "$newname"  &&  "$newname" != "$dir"  &&  ! "$newname" -ef "$path" ]]
     then
 	if [[ -d "$newname" ]]; then
 	    # New directory specified, so keep same filename
-	    newname="$newname/$base.$ext"
+	    newname="$newname/$base"
 	fi
 
 	local newext="${newname##*.}"
@@ -689,7 +698,7 @@ saverenamemove() {
 	    ext="$newext"
 	fi
 
-	if [[ "$newname" != *$ext ]]; then
+	if [[ "$newname" != *"$ext" ]]; then
 	    # User specified filename without the extension.
 	    newname="$newname.$ext"
 	fi
@@ -734,6 +743,7 @@ saverenamemove() {
 		E "Filename is now $newname";
 		f="$newname"  # Write to outerscope variable "$f". (!!!)
 	    else
+		E "Failed: filename is still \"$file\""
 		return 1
 	    fi
 	fi
@@ -759,7 +769,6 @@ sidebyside() {
 	    -auto-orient \
 	    -geometry ">${half}x>$((height-fontheight))" \
 	    -label "$1" "$1" -label "$2" "$2" sixel:-
-    viewmode=ss
     SHOULDREDRAW=yup
 }
 
@@ -822,7 +831,8 @@ reverseimagesearch() {
 yandeximagesearch() {
     # Reverse image search using yandex and w3m
     # Yandex is not the best but has a simple interface we can access
-    # without javascript. (Unlike Tineye, Bing, and Google.)
+    # (Unlike Tineye, Bing, and Google). Yandex does require
+    # javascript, so we use 'chrome --dump-dom' to retrieve the html.
     local file="$1"
     local output resultPage deleteme="" # Local vars
     local scale=">1000x>1000"	# Image size to scale to before searching.
@@ -839,7 +849,7 @@ yandeximagesearch() {
     url="https://yandex.com/images/search?rpt=imageview"
     url+="&format=json"
     url+='&request=%7B%22blocks%22%3A%5B%7B%22block%22%3A%22cbir-controller__upload%3Aajax%22%7D%5D%7D'
-    cookie="yp=999999999999.sp.aflt%3A999999999999.szm.1; my=YywBAAA="
+    cookie=""
 
     # Upload the image and save the output to search through.
     # Note: Curl's "@filename" splits filenames with commas & semicolons.
@@ -873,8 +883,11 @@ yandeximagesearch() {
 
 
     if [[ "$resultPage" ]]; then
-	echo "Found $(unuriescape "$resultPage")" >&2
-	w3m https://yandex.com$resultPage
+	echo "Found yandex.com/$(unuriescape "$resultPage")" >&2
+	dumpdom https://yandex.com$resultPage |
+	    sed 's|<head>|<base href="https://yandex.com/images"><head>|' > "$tmpdir/yandex.html"
+	w3m "$tmpdir/yandex.html"
+	rm "$tmpdir/yandex.html" 2>/dev/null
     else
 	echo "Error parsing results from Yandex." >&2
     fi
@@ -1185,10 +1198,10 @@ fakefile() {
 showimage() {
     # Shows the file named in $1 using sixel.
 
-    # Global variable $viewmode is either "full", which enlarges it to
-    # the full size of the terminal window, or it is "fast", which
-    # scales the image down, removes colors, and takes other shortcuts
-    # for the fastest preview.
+    # Global variable $viewmode is (usually) either "full", which
+    # enlarges it to the full size of the terminal window, or it is
+    # "fast", which scales the image down, removes colors, and takes
+    # other shortcuts for the fastest preview.
 
     # Note that "full size" is not exactly the same as "full screen".
     # In a terminal emulator, the sixel graphics are just a window.
@@ -1268,7 +1281,7 @@ showimage() {
     local osc8uri="file://`hostname --fqdn``realpath "$1"`"
     debug "OSC 8 URI link goes to $osc8uri"
 
-    # All set let's show it.
+    # All set let's show it. 
     case $viewmode in
 	full|width|bestfit)	# Large, high quality and slow. (about 1 second)
 	    e "preparing $viewmode"
@@ -1320,7 +1333,8 @@ showimage() {
     esac
     tput el
     if [[ "$output" ]]; then
-	echo -n "$output"
+	local ST=$'\e\\\\'			     # String Terminator is Esc \.
+	echo -n "$output" | sed "s/-${ST}/${ST}\n/g"	# (sed kludge for bug in IM 6.9.12)
 	SHOULDREDRAW=""		# Reset redraw flag until SIGWINCH trips it
     else
 	# Error. ImageMagick must have failed as $output is empty.
@@ -1448,10 +1462,11 @@ doit () {
 	    # Use read timeout to check several times a second for window resize.
 	    REPLY=
 	    while [[ -z $REPLY && -z $SHOULDREDRAW ]]; do
-		read $BASH4BUG -s -n1 -t 0.25 < /dev/tty
-		local e=$?
-		if [[ $e -gt 0 ]]; then
+		if read $BASH4BUG -s -n1 -t 0.25 < /dev/tty; then
+		    break
+		else
 		    # Read command returned an error (usually timeout).
+		    local e=$?
 		    if [[ "$slideshow" ]]; then
 			if doslideshow "$f"; then
 			    continue 3 # User hit q to quit vv
@@ -1815,12 +1830,14 @@ dotfordot() {
 
 
     ### Show pieces
+    local ST=$'\e\\\\'			     # String Terminator is Esc \.
     local IFS=$'\n'
     for f in $(ls -1v $tmpdir/*crop.ppm); do
 	echo -en "$f\r"
 	convert "$f" "$f.sixel"
-	cat "$f.sixel"
-    done
+	cat "$f.sixel" | sed "s/-${ST}/${ST}\n/g"	# (sed kludge for bug in IM 6.9.12)
+    done 
+
 
     ### All done
     rm $tmpdir/*crop.*
