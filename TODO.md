@@ -16,3 +16,4 @@
 - [ ] add sha verification for all runners!
 - [x] setup autostart
 - [ ] https://userbase.kde.org/KWin_Rules, rule to maximize foot
+- [ ] obsidian
