@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+
+rofi_command="rofi -dmenu"
+
+### Options ###
+power_off="	Shutdown"
+reboot="	Reboot"
+rebootinto="	Reboot into..."
+lock="	Lock"
+suspend="⏾	Sleep"
+logout="󰍃	Logout"
+
+# Variable passed to rofi
+options="$lock\n$reboot\n$rebootinto\n$power_off\n$logout\n$suspend"
+choice=$(echo -e "$options" | $rofi_command )
+choice="${choice#*	}"
+
+case $choice in
+    ${power_off#*	})
+        systemctl poweroff
+        ;;
+    ${reboot#*	})
+        systemctl reboot
+        ;;
+    ${rebootinto#*	})
+        entry=$(systemctl reboot --boot-loader-entry=help | rofi -dmenu -i -p "Reboot into...")
+        [[ -n "$entry" ]] && systemctl reboot --boot-loader-entry="$entry"
+        ;;
+    ${suspend#*	})
+        systemctl suspend
+        ;;
+    ${logout#*	})
+        if ! command -v hyprctl >/dev/null; then
+            loginctl kill-user $(whoami)
+        else
+            hyprctl dispatch exit
+        fi
+        ;;
+    ${lock#*	})
+        swaylock
+        ;;
+esac

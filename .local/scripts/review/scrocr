@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# A script that takes a screenshot (prompts you for what region/window to
+# capture) and stores it in the clipboard.
+
+tmp=$(mktemp)
+trap "rm -f '$tmp'" EXIT
+
+delay=${1:-0}
+
+# Delay for long enough that we can refocus the targeted window
+hyprshot --mode region --raw |\
+convert - -units PixelsPerInch -resample 300 -sharpen 12x6.0 - |\
+tesseract -l eng+rus stdin stdout |\
+sed '$d' |\
+perl -0777 -pe 's/^(\s*\n)+|(\s*\n)+$//g' |\
+wl-copy && notify-send "OCR completed" "Copied text to clipboard"

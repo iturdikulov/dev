@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+rofi -show file-browser-extended \
+     $@ \
+     -show-icons \
+     -theme theme/filemenu.rasi

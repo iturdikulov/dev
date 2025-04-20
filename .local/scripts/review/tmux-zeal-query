@@ -1,0 +1,15 @@
+#!/bin/sh
+
+session_name="zeal-session"
+
+# Run zeal if not exists
+pgrep zeal >/dev/null && echo "Process found" || zeal &
+
+tmux has-session -t $session_name 2>/dev/null
+if [ $? != 0 ]; then
+    tmux new-session -d -s "$session_name" zsh
+fi
+
+wlrctl window focus app_id:org.zealdocs.zeal
+tmux send -t $session_name C-u
+tmux send -t $session_name "zeal $@ &" ENTER

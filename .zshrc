@@ -26,6 +26,7 @@ if (( $+commands[atuin] )); then
 fi
 
 export NNN_PLUG="d:dragdrop;D:dups;c:chksum;f:fzcd;F:fixname;m:mymount;o:oldbigfile;R:rsync;s:suedit";
+export NNN_TRASH='gio trash'
 
 export EDITOR=nvim
 
@@ -35,17 +36,40 @@ addToPathFront /usr/local/go/bin
 export N_PREFIX="$HOME/.local/n"
 addToPathFront $HOME/.local/n/bin/
 
-addToPathFront $HOME/.local/.npm-global/bin
+addToPathFront $HOME/.local/tmux/bin
 addToPathFront $HOME/.local/scripts
 addToPathFront $HOME/.config/nnn/plugins
+addToPathFront $HOME/.local/.npm-global/bin
 addToPathFront $HOME/.local/bin
-addToPathFront $HOME/.local/tmux/bin
 addToPathFront $HOME/.local/npm/bin
 
 addToPath /usr/local/games
 addToPath /usr/games
 
-# Aliases
+alias sudo='sudo '
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+mkdirp() {
+  mkdir -p "$1" && cd "$1";
+}; compdef take=mkdir
+
+alias y='wl-copy'
+alias p='wl-paste'
+
+alias reboot='reboot || sudo reboot'
+
+alias free='free -m' # show sizes in MB
+alias ports='netstat -tpl'
+
+alias path_dirs='echo -e ${PATH//:/\\n}'
+alias df='df -h'                          # human-readable sizes
+alias info='info --vi-keys' # Info vi mode
+alias watch='watch --color' # Color using watch
+alias chown="chown --preserve-root" # Do not do chown for root directory
+alias chmod="chmod --preserve-root"
+alias E="SUDO_EDITOR=nvim sudo -e"
+
 alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
 alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
 alias vi='nvim'
@@ -58,4 +82,24 @@ alias l='ls'
 alias ls='ls --color=auto'
 alias ll='ls -la'          # long listing format
 alias l.='ls -d .* --color=auto' # hidden files
+
+alias jc='journalctl -xeu'
+alias sc=systemctl
+
+weather () {
+    curl -s wttr.in/$1?3nQ | head -n -1 | grep -v ┼
+}
+
+qcode (){
+    cat $@ | qrencode -t ansiutf8
+}
+
+
+
+
+
+
+
+
+
 

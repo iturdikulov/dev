@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#! nix-shell -i sh -p xidel
+
+format=${1:-markdown}
+url=${2:-$(wl-paste)}
+
+# if pdf don't grab title
+if [[ $url == *.pdf ]]; then
+    title=""
+else
+    # Use curl to fetch the page and extract the title with sed
+    title=$(url2title "$url")
+
+    # If failed to get title try to use primary clipboard
+    if [[ -z $title ]]; then
+        url=$(wl-paste)
+        title=$(url2title "$url")
+    fi
+fi
+
+if [[ $format == "title" ]]; then
+    printf "$url\n$title"
+else
+    echo "[$title]($url)"
+fi

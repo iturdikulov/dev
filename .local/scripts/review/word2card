@@ -1,0 +1,19 @@
+#!/bin/sh
+
+word=$1
+RU_PATTERN='[А-Яа-яЁё]+'  # regex pattern for Cyrillic characters
+
+if [[ "$word" =~ $RU_PATTERN ]]; then
+    dict="LingvoUniversal (Ru-En)"
+else
+    dict="LingvoUniversal (En-Ru)"
+fi
+
+text=$(sdcv --use-dict="$dict" --non-interactive --json-output $word)
+definition=$(echo $text | jq -r .[0].definition)
+# remove only first line
+definition=$(echo "$definition" | sed '1d')
+# remove numbers.wav regex pattern
+definition=$(echo "$definition" | sed 's/[0-9]\{1,4\}\.wav//g')
+
+echo -e "$word\n&#10;$definition"
