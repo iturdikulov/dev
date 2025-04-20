@@ -26,7 +26,7 @@ if (( $+commands[atuin] )); then
 fi
 
 export NNN_PLUG="d:dragdrop;D:dups;c:chksum;f:fzcd;F:fixname;m:mymount;o:oldbigfile;R:rsync;s:suedit";
-export NNN_TRASH='gio trash'
+export NNN_TRASH="2"
 
 export EDITOR=nvim
 
