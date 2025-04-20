@@ -25,6 +25,8 @@ if (( $+commands[atuin] )); then
     eval "$(atuin init zsh)"
 fi
 
+export NNN_PLUG="d:dragdrop;D:dups;c:chksum;f:fzcd;F:fixname;m:mymount;o:oldbigfile;R:rsync;s:suedit";
+
 export EDITOR=nvim
 
 export GOPATH=$HOME/.local/go
@@ -35,7 +37,9 @@ addToPathFront $HOME/.local/n/bin/
 
 addToPathFront $HOME/.local/.npm-global/bin
 addToPathFront $HOME/.local/scripts
+addToPathFront $HOME/.config/nnn/plugins
 addToPathFront $HOME/.local/bin
+addToPathFront $HOME/.local/tmux/bin
 addToPathFront $HOME/.local/npm/bin
 
 addToPath /usr/local/games
