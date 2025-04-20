@@ -1,11 +1,43 @@
 #!/usr/bin/env bash
 
-sudo apt install -y aria2 wget curl thunderbird rsync
+sudo apt install -y aria2 wget curl thunderbird rsync nfs-common kdeconnect
+
+# KDE automount script
+cat > "$HOME/.config/autostart/kde_connect.desktop" << EOF
+[Desktop Entry]
+Exec=$HOME/.local/scripts/kde_connect.sh
+Icon=dialog-scripts
+Name=kde_connect.sh
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+EOF
 
 # WARN: Enable firewall for debian!
 sudo apt install -y ufw
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
+
 sudo ufw allow ssh
+sudo ufw allow nfs
+
+# KDE connect rules
+sudo ufw allow 1716:1764/tcp
+sudo ufw allow 1716:1764/udp
+
 sudo ufw enable
 sudo ufw status verbose
+
+for share in anime movie shows
+do
+    # Add nfs share mount entry
+    if ! grep -q "kama:/$share" /etc/fstab ; then
+        echo "Mounting $share share"
+        mkdir -p "$HOME/Videos/$share"
+        echo "kama:/$share $HOME/Videos/$share nfs noauto,nofail,noatime,nfsvers=4.2,x-systemd.automount,x-systemd.idle-timeout=120 0 0" | \
+    	    sudo tee --append /etc/fstab
+        sudo mount "$HOME/Videos/$share"
+    fi
+done
+
+sudo systemctl daemon-reload

@@ -5,15 +5,15 @@
 - [ ] tmux config
 - [ ] scripts, aliases, hotkeys, etc.
 - [ ] shares mounts
+- [ ] backup script & service
 - [ ] external services sync (browser, mail, etc.)
-- [ ] pass sync
+- [x] pass sync
 - [ ] books workflow v2
-- [ ] gtk bookmarks
 - [x] gnupg config with gpg-agent/ssh-agent
 - [ ] token
 - [ ] neovim config, LSP for all progs, TDD, compilers, gdb, etc. https://github.com/williamboman/mason.nvim?tab=readme-ov-file#requirements, https://github.com/ThePrimeagen/init.lua/
 - [ ] Work project toolset, sync
 - [ ] add sha verification for all runners!
 - [x] setup autostart
+- [x] obsidian
 - [ ] https://userbase.kde.org/KWin_Rules, rule to maximize foot
-- [ ] obsidian
