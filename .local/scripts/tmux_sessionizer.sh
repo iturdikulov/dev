@@ -7,7 +7,7 @@ else
         fdfind --type=directory --max-depth=1 \
                 --exclude='_*' \
                 --no-follow --full-path $HOME \
-        ~/Media \
+        ~/Videos \
         ~/.local \
         ~/Projects/ \
         ~/Personal/)| fzf --tac)
