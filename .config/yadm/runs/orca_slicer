@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
+# TODO: parmetrize!
+
 # libwebkit2gtk-4.0-dev was required for Orca v2.3.0
 sudo apt install -y libwebkit2gtk-4.0-dev
-wget -O $HOME/.local/bin/OrcaSlicer.AppImage https://github.com/SoftFever/OrcaSlicer/releases/download/v2.3.0/OrcaSlicer_Linux_AppImage_V2.3.0.AppImage
+wget -O $HOME/.local/bin/OrcaSlicer.AppImage 
 chmod a+x $HOME/.local/bin/OrcaSlicer.AppImage
 
 mkdir -p $HOME/.local/share/applications
