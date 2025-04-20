@@ -1,0 +1,70 @@
+# For vim:
+*.swp
+.*.sw[a-z]
+*.un~
+.netrwhist
+
+# OS generated files #
+######################
+.DS_Store?
+.DS_Store
+.CFUserTextEncoding
+.Trash
+.Xauthority
+thumbs.db
+Thumbs.db
+Icon?
+
+# Code stuffs #
+###############
+.ccls-cache/
+.sass-cache/
+__pycache__/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Compiled thangs #
+###################
+*.class
+*.o
+*.pyc
+*.elc
+
+# Entr signal files
+###################
+.entr_*
+
+# Distribution / packaging
+build/
+.cache
+.tox/
+.nox/
+.coverage
+.coverage.*
+
+# Journals & logs
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+.idea/

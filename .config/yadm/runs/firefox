@@ -1,3 +1,22 @@
 #!/usr/bin/env bash
 
 sudo apt install -y firefox-esr
+
+# Custom desktop shortcut to fix focus issue in wayland
+# TODO: maybe not required in future
+APP_NAME=firefox-ww
+mkdir -p $HOME/.local/share/applications
+cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
+[Desktop Entry]
+Name=$APP_NAME
+GenericName=$APP_NAME
+Exec=$HOME/.local/scripts/ww.sh -f firefox-esr -c firefox-esr %u
+Icon=firefox
+Terminal=false
+Type=Application
+Categories=Network
+StartupNotify=true
+EOF
+
+# Set firefox-ww as the default browser application for http/https protocols
+xdg-mime default firefox-ww.desktop x-scheme-handler/http x-scheme-handler/https
