@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+sudo apt install -y libsdl2-dev
+
+# TODO: parametrize!
+
 mkdir -p ~/.local/bin
 cd ~/.local/bin
 
@@ -27,7 +31,7 @@ Comment[fr]=Moteur de jeu 2D et 3D multiplateforme avec un éditeur riche en fon
 Comment[nl]=Multi-platform 2D- en 3d-game-engine met een veelzijdige editor
 Comment[zh_CN]=多平台 2D 和 3D 游戏引擎，带有功能丰富的编辑器
 Exec=$HOME/.local/bin/godot %f
-Icon=$HOME/.local/bin/icons/godot
+Icon=$HOME/.local/bin/icons/godot.svg
 Terminal=false
 PrefersNonDefaultGPU=true
 Type=Application

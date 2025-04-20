@@ -2,19 +2,20 @@
 
 set -u
 
-APP_VERSION=1.0.0
+APP_VERSION=1.8.9
 
-APP_NAME=freecad
-APP_DESKTOP_NAME=FreeCAD
-APP_DESKTOP_DESCRIPTION="Feature based parametric 3D CAD modeler"
-APP_DESKTOP_CATEGORIES="Graphics;Science"
+APP_NAME=obsidian
+APP_DESKTOP_NAME=Obsidian
+APP_DESKTOP_DESCRIPTION="A powerful knowledge base that works on top of a local folder of plain text Markdown files"
+APP_DESKTOP_CATEGORIES="Development;Education"
 
 APP_PATH="$HOME/.local/bin/$APP_NAME"
 TMP_PATH="/tmp/$APP_NAME"
-APP_URL="https://github.com/FreeCAD/FreeCAD/releases/download/$APP_VERSION/FreeCAD_$APP_VERSION-conda-Linux-x86_64-py311.AppImage"
-SHA_256_SUM="4b1c53e7f444a7897875064e059be84c0ebb8848dd58bc034dcdd1ccc407dbc7"
+APP_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v$APP_VERSION/Obsidian-$APP_VERSION.AppImage"
+SHA_256_SUM="43dde3caac1c58e9fccbd1ff1a4305b53f784a5ebdef9c59d53851c87c615186"
 
 wget -O $TMP_PATH $APP_URL
+echo "$SHA_256_SUM $TMP_PATH"
 echo "$SHA_256_SUM $TMP_PATH" | sha256sum --check || exit 1
 
 mv $TMP_PATH $APP_PATH
