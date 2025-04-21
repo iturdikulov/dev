@@ -1,5 +1,8 @@
 [ -f "$HOME/.slimzsh/slim.zsh" ] && source "$HOME/.slimzsh/slim.zsh"
 
+precmd() {
+    print -Pn "\e]133;A\e\\"
+}
 
 addToPath() {
     if [[ "$PATH" != *"$1"* ]]; then
@@ -15,13 +18,13 @@ addToPathFront() {
 
 
 # Init tools
-if (( $+commands[zoxide] )); then 
+if (( $+commands[zoxide] )); then
     eval "$(zoxide init zsh)"
 fi
-if (( $+commands[fzf] )); then 
+if (( $+commands[fzf] )); then
     source <(fzf --zsh)
 fi
-if (( $+commands[atuin] )); then 
+if (( $+commands[atuin] )); then
     eval "$(atuin init zsh)"
 fi
 
@@ -86,13 +89,31 @@ alias l.='ls -d .* --color=auto' # hidden files
 alias jc='journalctl -xeu'
 alias sc=systemctl
 
+if (( $+commands[apt] )); then
+    alias apts='apt-cache search'
+    alias aptshow='apt-cache show'
+    alias aptinst='sudo apt-get install -V'
+    alias aptupd='sudo apt-get update'
+    alias aptupg='sudo apt-get dist-upgrade -V && sudo apt-get autoremove'
+    alias aptupgd='sudo apt-get update && sudo apt-get dist-upgrade -V && sudo apt-get autoremove'
+    alias aptrm='sudo apt-get remove'
+    alias aptpurge='sudo apt-get remove --purge'
+    alias chkup='/usr/lib/update-notifier/apt-check -p --human-readable'
+    alias chkboot='cat /var/run/reboot-required'
+    alias pkgfiles='dpkg --listfiles'
+fi
+
 weather () {
     curl -s wttr.in/$1?3nQ | head -n -1 | grep -v ┼
 }
 
+# define a word
+define() { curl -s "dict://dict.org/d:$1" | tail -n +4| head -n -3 | less; }
+
 qcode (){
     cat $@ | qrencode -t ansiutf8
 }
+
 
 
 
