@@ -4,6 +4,6 @@ sudo apt install -y postgresql-client mariadb-client
 
 PKGURL="https://dbeaver.io/files/dbeaver-ce_latest_amd64.deb"
 cd /tmp
-wget2 -O dbeaver-ce_latest_amd64.deb $PKGURL
+wget2 --progress=bar --output-document dbeaver-ce_latest_amd64.deb $PKGURL
 sudo apt install -y ./dbeaver-ce_latest_amd64.deb
 rm ./dbeaver-ce_latest_amd64.deb

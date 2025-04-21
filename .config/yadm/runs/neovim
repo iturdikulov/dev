@@ -21,7 +21,7 @@ while (( "$#" )); do
   esac
 done
 
-wget2 -O $downloaded_file \
+wget2 --progress=bar --output-document $downloaded_file \
   https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz
 
 echo "95aaa8e89473f5421114f2787c13ae0ec6e11ebbd1a13a1bd6fcf63420f8073f  $downloaded_file" \

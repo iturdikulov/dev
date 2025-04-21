@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 
 VERSION=1.24.2
-wget2 -O /tmp/go_$VERSION.tar.gz "https://go.dev/dl/go$VERSION.linux-amd64.tar.gz"
+echo "Downloading GO"
+wget2 --progress=bar --output-document /tmp/go_$VERSION.tar.gz "https://go.dev/dl/go$VERSION.linux-amd64.tar.gz"
+
+echo "Installing GO"
 sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf "/tmp/go_$VERSION.tar.gz"
 rm "/tmp/go_$VERSION.tar.gz"
 
 echo "set correct GOPATH and PATH in your shell!"
+
+# Install Glow: render markdown on the CLI, with pizzazz!
+# TODO: future, maybe aviable in repo, https://packages.debian.org/unstable/main/glow
+/usr/local/go/bin/go install github.com/charmbracelet/glow@latest

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 sudo apt purge -y vlc
-sudo apt install -y mpv obs-studio audacity kdenlive lmms ffmpeg yt-dlp
+sudo apt install -y mpv obs-studio audacity kdenlive lmms ffmpeg yt-dlp cmus

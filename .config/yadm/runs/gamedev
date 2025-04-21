@@ -10,7 +10,7 @@ cd ~/.local/bin
 APP=Godot_v4.4.1-stable_linux.x86_64
 URL=https://github.com/godotengine/godot/releases/download/4.4.1-stable/$APP.zip
 
-wget2 "$URL" || exit 1
+wget2 --progress=bar --output-document "$URL" || exit 1
 [ -e ./*7z ] && 7z x ./*7z && rm -f ./*7z
 [ -e ./*tar.* ] && tar fx ./*tar.* && rm -f ./*tar.*
 [ -e ./*zip ] && unzip -qq ./*zip 1>/dev/null && rm -f ./*zip

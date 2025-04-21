@@ -3,6 +3,11 @@
 precmd() {
     print -Pn "\e]133;A\e\\"
 }
+unsetopt correct_all
+
+if [ -f "$HOME/.config/io.datasette.llm/keys.json" ]; then
+    export OPENROUTER_API_KEY="$(jq -r .openrouter $HOME/.config/io.datasette.llm/keys.json)"
+fi
 
 addToPath() {
     if [[ "$PATH" != *"$1"* ]]; then
@@ -32,6 +37,7 @@ export NNN_PLUG="d:dragdrop;D:dups;c:chksum;f:fzcd;F:fixname;m:mymount;o:oldbigf
 export NNN_TRASH="2"
 
 export EDITOR=nvim
+export PASSWORD_STORE_ENABLE_EXTENSIONS=true
 
 export GOPATH=$HOME/.local/go
 addToPathFront /usr/local/go/bin
@@ -44,6 +50,7 @@ addToPathFront $HOME/.local/scripts
 addToPathFront $HOME/.config/nnn/plugins
 addToPathFront $HOME/.local/.npm-global/bin
 addToPathFront $HOME/.local/bin
+addToPathFront $HOME/.local/go/bin
 addToPathFront $HOME/.local/npm/bin
 
 addToPath /usr/local/games
@@ -107,20 +114,14 @@ weather () {
     curl -s wttr.in/$1?3nQ | head -n -1 | grep -v ┼
 }
 
-# define a word
-define() { curl -s "dict://dict.org/d:$1" | tail -n +4| head -n -3 | less; }
-
 qcode (){
     cat $@ | qrencode -t ansiutf8
 }
 
+q() {
+    llm -s "Use a brief style for answer, limit output to 140-500 characters." "$*"|glow
+}
 
-
-
-
-
-
-
-
-
-
+def() {
+    llm -s "Define the word "[WORD]" in simple English, providing a few common example sentence and a brief Russian translation of the definition. Also, include common synonyms and antonyms, output should fit in $(tput lines) lines and $(tput cols)." "$*"|glow
+}
