@@ -3,7 +3,7 @@
 BASE_VERSION=4.4
 VERSION="$BASE_VERSION".1
 
-wget2 -O /tmp/blender.tar.xz "https://ftp.nluug.nl/pub/graphics/blender/release/Blender$BASE_VERSION/blender-$VERSION-linux-x64.tar.xz"
+wget2 --progress=bar --output-document /tmp/blender.tar.xz "https://ftp.nluug.nl/pub/graphics/blender/release/Blender$BASE_VERSION/blender-$VERSION-linux-x64.tar.xz"
 mkdir -p ~/.local/share/applications
 cat > $HOME/.local/share/applications/Blender.desktop << EOF
 [Desktop Entry]

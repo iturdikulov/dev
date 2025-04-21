@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 LANGUAGES=$(cat <<-END
+python
 go
-nodejs
 javascript
+nodejs
 tmux
 typescript
 zsh
@@ -11,7 +12,6 @@ cpp
 c
 lua
 rust
-python
 bash
 php
 haskell

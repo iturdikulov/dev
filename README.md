@@ -71,7 +71,20 @@ yadm clone https://github.com/iturdikulov/dev
 
 - Hide unwanted titlebars of some apps: https://extensions.gnome.org/extension/723/pixel-saver/
 - Focus new windows as I expected: https://extensions.gnome.org/extension/2182/noannoyance/
+- System Prefrences: layout `kcmshell5 kcm_keyboard`
 - System Preferences: dark theme, default applications
 - Settings, `Dark` theme, Resolution, scale-factor, refresh rate
 - Sync Account
 - Configure desktop app run arguments (in KDE very easy): foot --maximized
+
+### LLM CLI
+
+```
+llm install llm-openrouter
+pass show ...|y
+llm keys set openrouter
+llm models
+
+# Set default model, for example
+llm models default openrouter/google/gemini-2.5-flash-preview
+```

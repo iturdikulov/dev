@@ -14,7 +14,7 @@ TMP_PATH="/tmp/$APP_NAME"
 APP_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v$APP_VERSION/Obsidian-$APP_VERSION.AppImage"
 SHA_256_SUM="43dde3caac1c58e9fccbd1ff1a4305b53f784a5ebdef9c59d53851c87c615186"
 
-wget2 -O $TMP_PATH $APP_URL
+wget2 --progress=bar --output-document $TMP_PATH $APP_URL
 echo "$SHA_256_SUM $TMP_PATH"
 echo "$SHA_256_SUM $TMP_PATH" | sha256sum --check || exit 1
 

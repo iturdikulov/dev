@@ -4,7 +4,7 @@
 
 # libwebkit2gtk-4.0-dev was required for Orca v2.3.0
 sudo apt install -y libwebkit2gtk-4.0-dev
-wget2 -O $HOME/.local/bin/OrcaSlicer.AppImage
+wget2 --progress=bar --output-document $HOME/.local/bin/OrcaSlicer.AppImage
 chmod a+x $HOME/.local/bin/OrcaSlicer.AppImage
 
 mkdir -p $HOME/.local/share/applications
