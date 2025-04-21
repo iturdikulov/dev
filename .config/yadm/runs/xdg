@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+xdg-mime default nvim.desktop \
+    text/x-adasrc application/x-shellscript \
+    application/toml application/xml \
+    application/x-yaml application/x-ruby \
+    application/x-awk application/x-perl \
+    application/x-php application/vnd.coffeescript \
+    application/json application/javascript \
+    text/plain text/x-csrc \
+    text/x-chdr text/x-cobol \
+    text/x-c++src text/x-crystal \
+    text/x-csharp text/css \
+    text/x-eiffel text/x-elixir \
+    text/x-fortran text/x-go \
+    text/x-groovy text/x-haskell \
+    text/x-java text/x-lua \
+    text/x-makefile text/markdown \
+    text/x-objcsrc text/x-ocaml \
+    text/x-pascal text/x-python \
+    text/rust text/x-scala \
+    text/vnd.trolltech.linguist
+
+xdg-mime default writer.desktop \
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document \
+    application/vnd.oasis.opendocument.text
+
+xdg-mime default org.kde.okular.desktop \
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document application/pdf \
+    application/epub+zip application/x-fictionbook+xml \
+    application/x-mobipocket-ebook application/vnd.ms-htmlhelp \
+    application/x-cb7 application/vnd.comicbook-rar application/x-cbt \
+    application/vnd.comicbook+zip application/postscript \
+    image/vnd.djvu+multipage

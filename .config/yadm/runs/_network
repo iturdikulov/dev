@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt install -y aria2 wget curl thunderbird rsync nfs-common kdeconnect sshfs
+sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs
 
 # KDE automount script
 cat > "$HOME/.config/autostart/kde_connect.desktop" << EOF

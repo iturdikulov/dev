@@ -44,7 +44,7 @@ if [[ $dry_run == "0" ]]; then
     git config --global user.name "Inom Turdikulov"
 
     # Minimal install of most required packages
-    sudo apt install -y yadm wget build-essential curl ca-certificates git
+    sudo apt install -y yadm wget2 build-essential curl ca-certificates git
 
     if [ $? -ne 0 ]; then
       echo "Failed to update system, check logs above and try to fix all issues."
