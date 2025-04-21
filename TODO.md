@@ -1,4 +1,4 @@
-- [ ] cht_sh, popup?
+
 - [ ] sdcv, like cht_sh, popup?
 - [ ] scripts
 - [ ] aliases & functions
@@ -11,11 +11,13 @@
 - [ ] neovim config, LSP for all progs, TDD, compilers, gdb, etc. https://github.com/williamboman/mason.nvim?tab=readme-ov-file#requirements, https://github.com/ThePrimeagen/init.lua/ https://github.com/iturdikulov/nvim
 - [ ] https://github.com/nvzone/typr
 - [ ] https://github.com/NeogitOrg/neogit
+- [ ] https://everything.curl.dev
 
 - [ ] Work project toolset, sync
 - [ ] https://userbase.kde.org/KWin_Rules, rule to maximize foot
 - [ ] add sha verification for all runners!
 
+- [x] cht_sh, popup?
 - [x] zsh config
 - [x] Code Font installation
 - [x] kitty config (colors, fonts)
