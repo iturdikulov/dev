@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+sudo apt install -y nnn coreutils sed archivemount sshfs atool zip unzip
+
+git clone https://github.com/mwh/dragon.git /tmp/dragon
+cd /tmp/dragon
+git checkout 8e0004518cc1e31dc5190673ecf7290c1d27438b
+
+# Install in ~/.local/bin
+make && make install
