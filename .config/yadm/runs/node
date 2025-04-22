@@ -2,5 +2,10 @@
 
 sudo apt install nodejs npm
 npm config set prefix ~/.local/npm
-npm i -g n biome pnpm
+
+npm i -g n
+npm i -g pnpm
+npm i -g @biomejs/biome
+npm i -g @olrtg/emmet-language-server@2.6.1
+
 $HOME/.local/npm/bin/n lts

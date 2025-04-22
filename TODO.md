@@ -17,6 +17,9 @@
 - [ ] https://userbase.kde.org/KWin_Rules, rule to maximize foot
 - [ ] add sha verification for all runners!
 
+- [ ] use ~/.local/share paths for instlled & extracted packages
+- [ ] use symlinks instead PATH modify for some extracted packages (TMUX)
+
 - [x] cht_sh, popup?
 - [x] zsh config
 - [x] Code Font installation

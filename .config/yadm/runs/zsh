@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+git clone https://github.com/changs/slimzsh.git $HOME/.config/slimzsh
+cd $HOME/.config/slimzsh
+git checkout ee3806553d2576b6f34300739efa82c22bd0d10b
+git submodule update --init --recursive
+
 sudo apt install -y zsh
 sudo chsh -s $(which zsh)
 chsh -s $(which zsh)
-git clone --recursive https://github.com/changs/slimzsh.git ~/.slimzsh
-

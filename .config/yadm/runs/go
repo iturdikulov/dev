@@ -10,6 +10,15 @@ rm "/tmp/go_$VERSION.tar.gz"
 
 echo "set correct GOPATH and PATH in your shell!"
 
+cd /usr/local/go/bin/
+
+# Install gopls lang server
+./go install golang.org/x/tools/gopls@latest
+
 # Install Glow: render markdown on the CLI, with pizzazz!
 # TODO: future, maybe aviable in repo, https://packages.debian.org/unstable/main/glow
-/usr/local/go/bin/go install github.com/charmbracelet/glow@latest
+./go install github.com/charmbracelet/glow@latest
+
+# Dev tools
+./go install golang.org/x/tools/cmd/goimports@latest
+./go install mvdan.cc/sh/v3/cmd/shfmt@latest
