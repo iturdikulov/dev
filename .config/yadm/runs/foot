@@ -2,7 +2,7 @@
 
 sudo apt install -y foot
 
- 
+
 APP_NAME=foot_ext
 APP_DESKTOP_NAME=foot_ext
 
@@ -12,10 +12,11 @@ cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
 Version=$APP_VERSION
 Name=$APP_DESKTOP_NAME
 GenericName=$APP_DESKTOP_NAME
-Exec=foot --title foot_ext --app-id=foot_ext --maximized --override colors.background=29243B
+Exec=FOOT_EXT_IGNORE_TMUX=1 foot --title foot_ext --app-id=foot_ext --maximized
 Icon=$HOME/.local/bin/icons/$APP_NAME.svg
 Terminal=false
 Type=Application
 Categories=Utility
 StartupNotify=true
 EOF
+sudo update-desktop-database
