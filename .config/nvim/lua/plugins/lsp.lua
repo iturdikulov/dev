@@ -1,14 +1,3 @@
-local root_files = {
-  '.luarc.json',
-  '.luarc.jsonc',
-  '.luacheckrc',
-  '.stylua.toml',
-  'stylua.toml',
-  'selene.toml',
-  'selene.yml',
-  '.git',
-}
-
 return {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -92,5 +81,32 @@ return {
                 prefix = "",
             },
         })
+
+
+        -- GLOBAL LSP MAPPING DEFAULTS
+        -- grr gra grn gri i_CTRL-S These GLOBAL keymaps are created unconditionally when Nvim starts:
+        -- "grn" is mapped in Normal mode to vim.lsp.buf.rename()
+        -- "gra" is mapped in Normal and Visual mode to vim.lsp.buf.code_action()
+        -- "grr" is mapped in Normal mode to vim.lsp.buf.references()
+        -- "gri" is mapped in Normal mode to vim.lsp.buf.implementation()
+        -- "gO" is mapped in Normal mode to vim.lsp.buf.document_symbol()
+        -- CTRL-S is mapped in Insert mode to vim.lsp.buf.signature_help()
+        -- [d next diagnostics
+        -- ]d previous diagnostics
+
+        -- CUSTOM LSP MAPPINGS
+        local augroup = vim.api.nvim_create_augroup
+        local autocmd = vim.api.nvim_create_autocmd
+        local LSPGroup = augroup('LSPGroup', {})
+        autocmd('LspAttach', {
+            group = LSPGroup,
+            callback = function(e)
+                local opts = { buffer = e.buf }
+                vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
+                vim.keymap.set("n", "go", function() vim.lsp.buf.workspace_symbol() end, opts)
+                vim.keymap.set("n", "gl", function() vim.diagnostic.open_float() end, opts)
+            end
+        })
+
     end
 }
