@@ -12,7 +12,7 @@ cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
 Version=$APP_VERSION
 Name=$APP_DESKTOP_NAME
 GenericName=$APP_DESKTOP_NAME
-Exec=FOOT_EXT_IGNORE_TMUX=1 foot --title foot_ext --app-id=foot_ext --maximized
+Exec=$HOME/.local/scripts/mux.sh
 Icon=$HOME/.local/bin/icons/$APP_NAME.svg
 Terminal=false
 Type=Application

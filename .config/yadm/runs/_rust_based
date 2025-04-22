@@ -7,6 +7,8 @@ cd $HOME/.cargo/bin
 
 ./cargo install stylua --features luajit
 ./cargo install atuin
+./rustup component add rust-analyzer
+./rustup component add rust-src
 
 if [ -n "$(lspci|grep VGA|grep -i 'AMD\|ATI')" ]; then
     if [ ! -n "$(lspci|grep VGA|grep AMD)" ]; then

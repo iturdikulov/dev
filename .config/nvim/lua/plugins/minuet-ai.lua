@@ -18,10 +18,10 @@ return {
                     auto_trigger_ft = {},
                     keymap = {
                         -- accept whole completion
-                        accept = '<C-y>',
+                        accept = '<A-y>',
                         -- accept n lines (prompts for number)
                         -- e.g. "A-z 2 CR" will accept 2 lines
-                        accept_n_lines = '<C-S-y>',
+                        accept_n_lines = '<A-z>',
                         -- Cycle to next completion item, or manually invoke completion
                         next = '<C-f>',
                         -- Cycle to prev completion item, or manually invoke completion
@@ -29,7 +29,7 @@ return {
                     },
                     -- Whether show virtual text suggestion when the completion menu
                     -- (nvim-cmp or blink-cmp) is visible.
-                    show_on_completion_menu = false,
+                    show_on_completion_menu = true,
                 },
                 provider_options = {
                     openai_compatible = {
@@ -46,7 +46,9 @@ return {
                             },
                         },
                     },
-                },            }
+                },
+
+            }
             end,
         },
         { 'nvim-lua/plenary.nvim' },

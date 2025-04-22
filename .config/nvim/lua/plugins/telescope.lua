@@ -1,8 +1,6 @@
 return {
     "nvim-telescope/telescope.nvim",
 
-    tag = "0.1.5",
-
     dependencies = {
         "nvim-lua/plenary.nvim"
     },
@@ -12,7 +10,8 @@ return {
 
         local builtin = require('telescope.builtin')
 
-        vim.keymap.set('n', '<M-f>', builtin.oldfiles, { desc = "Find [f]iles"})
+        vim.keymap.set('n', '<M-f>', builtin.oldfiles, { desc = "Old [f]iles"})
+        vim.keymap.set('n', '<M-F>', builtin.find_files, { desc = "[F]ind [f]iles"})
 
         vim.keymap.set('n', '<leader>ff', function()
             if vim.fn.filereadable(".git/HEAD") == 1 then

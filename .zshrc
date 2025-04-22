@@ -1,17 +1,9 @@
-[ -f "$HOME/.slimzsh/slim.zsh" ] && source "$HOME/.slimzsh/slim.zsh"
+[ -f "$HOME/.config/slimzsh/slim.zsh" ] && source "$HOME/.config/slimzsh/slim.zsh"
 
 precmd() {
     print -Pn "\e]133;A\e\\"
 }
 unsetopt correct_all
-
-if [[ -z "$TMUX" ]] && [[ -z "$FOOT_EXT_IGNORE_TMUX" ]]; then
-    if tmux has-session 2>/dev/null; then
-        exec tmux attach
-    else
-        exec tmux
-    fi
-fi
 
 if [ -f "$HOME/.config/io.datasette.llm/keys.json" ]; then
     export OPENROUTER_API_KEY="$(jq -r .openrouter $HOME/.config/io.datasette.llm/keys.json)"
@@ -51,7 +43,7 @@ export GOPATH=$HOME/.local/go
 addToPathFront /usr/local/go/bin
 
 export N_PREFIX="$HOME/.local/n"
-addToPathFront $HOME/.local/n/bin/
+addToPathFront $HOME/.local/n/bin
 
 addToPathFront $HOME/.local/tmux/bin
 addToPathFront $HOME/.local/scripts
@@ -73,6 +65,8 @@ mkdirp() {
 }; compdef take=mkdir
 
 alias wget='wget2'
+alias py='python3'
+
 alias y='wl-copy'
 alias p='wl-paste'
 

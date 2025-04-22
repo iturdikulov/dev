@@ -3,12 +3,16 @@
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$((
-        fdfind --type=directory --max-depth=1 \
+    selected=$(
+        (
+         echo ~/.config/yadm; \
+         echo ~/.config/nvim; \
+         echo ~/.local/scripts; \
+         echo ~/.local/share; \
+         fdfind --type=directory --max-depth=1 \
                 --exclude='_*' \
                 --no-follow --full-path $HOME \
         ~/Videos \
-        ~/.local \
         ~/Projects/ \
         ~/Personal/)| fzf --tac)
 fi
