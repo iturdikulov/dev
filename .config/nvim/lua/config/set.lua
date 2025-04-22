@@ -66,8 +66,6 @@ vim.g.markdown_fenced_languages = {
 vim.opt.title = true
 vim.opt.titlestring = "%{expand('%:p:h:t')}"
 
-vim.g.markdown_folding = 1 -- enable markdown folding
-
 -- Netrw settings
 vim.g.nerw_keepdir = 0 --  avoid the move files error.
 vim.g.netrw_browse_split = 0

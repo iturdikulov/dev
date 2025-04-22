@@ -76,6 +76,7 @@ yadm clone https://github.com/iturdikulov/dev
 - Settings, `Dark` theme, Resolution, scale-factor, refresh rate
 - Sync Account
 - Configure desktop app run arguments (in KDE very easy): foot --maximized
+- https://wiki.calculate-linux.org/ru/btrbk, TODO: offline?
 
 ### LLM CLI
 
