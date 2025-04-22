@@ -33,10 +33,10 @@ do
     # Add nfs share mount entry
     if ! grep -q "kama:/$share" /etc/fstab ; then
         echo "Mounting $share share"
-        mkdir -p "$HOME/Videos/$share"
-        echo "kama:/$share $HOME/Videos/$share nfs noauto,nofail,noatime,nfsvers=4.2,x-systemd.automount,x-systemd.idle-timeout=120 0 0" | \
+        mkdir -p "$HOME/Media/$share"
+        echo "kama:/$share $HOME/Media/$share nfs noauto,nofail,noatime,nfsvers=4.2,x-systemd.automount,x-systemd.idle-timeout=120 0 0" | \
     	    sudo tee --append /etc/fstab
-        sudo mount "$HOME/Videos/$share"
+        sudo mount "$HOME/Media/$share"
     fi
 done
 
