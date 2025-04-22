@@ -5,6 +5,14 @@ precmd() {
 }
 unsetopt correct_all
 
+if [[ -z "$TMUX" ]] && [[ -z "$FOOT_EXT_IGNORE_TMUX" ]]; then
+    if tmux has-session 2>/dev/null; then
+        exec tmux attach
+    else
+        exec tmux
+    fi
+fi
+
 if [ -f "$HOME/.config/io.datasette.llm/keys.json" ]; then
     export OPENROUTER_API_KEY="$(jq -r .openrouter $HOME/.config/io.datasette.llm/keys.json)"
 fi
@@ -64,6 +72,7 @@ mkdirp() {
   mkdir -p "$1" && cd "$1";
 }; compdef take=mkdir
 
+alias wget='wget2'
 alias y='wl-copy'
 alias p='wl-paste'
 
