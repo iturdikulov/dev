@@ -3,6 +3,17 @@
 precmd() {
     print -Pn "\e]133;A\e\\"
 }
+
+set -o vi
+
+# Make Vi mode transitions faster (KEYTIMEOUT is in hundredths of a second)
+export KEYTIMEOUT=1
+
+# Beginning search in insert mode, redundant with the up/down arrows above
+# but a little easier to press.
+bindkey "^P" history-search-backward
+bindkey "^N" history-search-forward
+
 unsetopt correct_all
 
 if [ -f "$HOME/.config/io.datasette.llm/keys.json" ]; then

@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 
+# Base dependencies
+sudo apt install -y nasm
+
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # Installing additional tools
-cd $HOME/.cargo/bin
+cd "$HOME/.cargo/bin" || { echo "cd failed"; exit 1; }
+
+./cargo install atuin
 
 ./cargo install stylua --features luajit
-./cargo install atuin
+./cargo install asm-lsp
 ./rustup component add rust-analyzer
 ./rustup component add rust-src
 

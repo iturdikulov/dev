@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Global Python
+sudo apt install -y python3 python3-debugpy
+
+# UV for virtual envs
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install some tools
+for tool in ruff basedpyright debugpy mypy ipython pipdeptree sqlfluff llm; do
+    $HOME/.local/bin/uv tool install $tool
+done

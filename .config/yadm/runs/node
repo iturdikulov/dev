@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
-sudo apt install nodejs npm
+# Base dependencies
+sudo apt install nodejs npm shellcheck
+
 npm config set prefix ~/.local/npm
 
 npm i -g n
 npm i -g pnpm
+
 npm i -g @biomejs/biome
 npm i -g @olrtg/emmet-language-server@2.6.1
+npm i -g bash-language-server
 
-$HOME/.local/npm/bin/n lts
+cd "$HOME/.local/npm/bin" || { echo "n binary not found!"; exit 1; }
+./n lts
