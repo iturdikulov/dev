@@ -6,12 +6,12 @@ sudo apt install -y firefox-esr
 # TODO: maybe not required in future
 APP_NAME=firefox-ww
 mkdir -p $HOME/.local/share/applications
-cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
+cat > "$HOME/.local/share/applications/firefox-esr.desktop" << EOF
 [Desktop Entry]
 Name=$APP_NAME
 GenericName=$APP_NAME
-Exec=$HOME/.local/scripts/ww.sh -f firefox-esr -c firefox-esr %u && firefox-esr %u
-Icon=firefox
+Exec=$HOME/.local/scripts/ww.sh -f firefox-esr -c firefox-esr
+Icon=firefox-esr
 Terminal=false
 Type=Application
 Categories=Network
