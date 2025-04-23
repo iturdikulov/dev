@@ -53,8 +53,14 @@ cd "$FIREFOX_PROFILE_SRC" || {
 }
 for i in $(cat <<EOF
 cookies.sqlite
+handlers.json
+prefs.js
+containers.json
 places.sqlite
 permissions.sqlite
+webappsstore.sqlite
+storage.sqlite
+cert9.db
 EOF
 ); do rcp "$FIREFOX_PROFILE_SRC/$i" "$FIREFOX_PROFILE_PATH"; done
 
