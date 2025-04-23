@@ -74,6 +74,7 @@ yadm clone https://github.com/iturdikulov/dev
 - System Prefrences: layout `kcmshell5 kcm_keyboard`
 - System Preferences: dark theme, default applications
 - Settings, `Dark` theme, Resolution, scale-factor, refresh rate
+- Import shortcuts scheme: from `.config/yadm/shortcuts_scheme.kksrc`
 - Sync Account
 - Configure desktop app run arguments (in KDE very easy): foot --maximized
 - https://wiki.calculate-linux.org/ru/btrbk, TODO: offline?
