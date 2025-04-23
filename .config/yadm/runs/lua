@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+sudo apt -y install luarocks
+
+echo "Installing LuaLS"
+MYTMPDIR="$(mktemp -d)"
+trap 'rm -rf -- "$MYTMPDIR"' EXIT
+
+cd $MYTMPDIR
+wget2 --progress=bar https://github.com/LuaLS/lua-language-server/releases/download/3.14.0/lua-language-server-3.14.0-linux-x64.tar.gz
+
+mkdir -p ~/.local/lua-language-server && \
+tar --extract --file lua-language-server-3.14.0-linux-x64.tar.gz -av -C ~/.local/lua-language-server
+
+ln -s ~/.local/lua-language-server/bin/lua-language-server ~/.local/bin/lua-language-server
