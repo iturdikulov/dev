@@ -12,12 +12,6 @@ return {
     },
 
     config = function()
-        vim.lsp.config.clangd = {
-            cmd = {
-                'clangd-19',
-                '--background-index',
-            },
-        }
         vim.lsp.enable('clangd')
         vim.lsp.enable('gdscript')
         vim.lsp.enable('ruff')
