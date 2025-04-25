@@ -32,7 +32,6 @@ addToPathFront() {
     fi
 }
 
-
 # Init tools
 if (( $+commands[zoxide] )); then
     eval "$(zoxide init zsh)"
@@ -71,11 +70,15 @@ alias sudo='sudo '
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
-mkdirp() {
-  mkdir -p "$1" && cd "$1";
-}; compdef take=mkdir
 
-alias wget='wget2'
+if (( $+commands[wget2] )); then
+    alias wget='wget2'
+fi
+
+if (( $+commands[nvim] )); then
+    alias vi='nvim'
+fi
+
 alias py='python3'
 
 alias y='wl-copy'
@@ -96,7 +99,6 @@ alias E="SUDO_EDITOR=nvim sudo -e"
 
 alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
 alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
-alias vi='nvim'
 alias mux='tmux attach || tmux new'
 alias fd='fdfind'
 alias trash='gio trash'
@@ -106,6 +108,7 @@ alias l='ls'
 alias ls='ls --color=auto'
 alias ll='ls -la'          # long listing format
 alias l.='ls -d .* --color=auto' # hidden files
+alias g='git'
 
 alias jc='journalctl -xeu'
 alias sc=systemctl
@@ -124,6 +127,10 @@ if (( $+commands[apt] )); then
     alias pkgfiles='dpkg --listfiles'
 fi
 
+prime-run () {
+    __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __GLX_VENDOR_LIBRARY_NAME=nvidia "$@"
+}
+
 weather () {
     curl -s wttr.in/$1?3nQ | head -n -1 | grep -v ┼
 }
@@ -139,3 +146,14 @@ q() {
 def() {
     llm -s "Define the word "[WORD]" in simple English, providing a few common example sentence and a brief Russian translation of the definition. Also, include common synonyms and antonyms, output should fit in $(tput lines) lines and $(tput cols)." "$*"|glow
 }
+
+nullify() {
+    "$@" > /dev/null 2>&1
+}
+
+if (( $+commands[mpv] )); then
+    local mpv_player=$(which mpv)
+    mpv() {
+        "$mpv_player" "$@" > /dev/null 2>&1 & disown
+    }
+fi
