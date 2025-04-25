@@ -1,22 +1,6 @@
 #!/usr/bin/env zsh
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-grep=""
-dry_run="0"
-
-# Settings
-$TIMEZONE="Europe/Moscow"
-
-while [[ $# -gt 0 ]]; do
-    echo "ARG: \"$1\""
-    if [[ "$1" == "--dry" ]]; then
-        dry_run="1"
-    else
-        grep="$1"
-    fi
-    shift
-done
-
 log() {
     if [[ $dry_run == "1" ]]; then
         echo "[DRY_RUN]: $1"
@@ -46,11 +30,9 @@ if [[ $dry_run == "0" ]]; then
     git config --global user.email "inom@iturdikulov.com"
     git config --global user.name "Inom Turdikulov"
 
-    # Initial system setup
-    sudo timedatectl set-timezone $TIMEZONE
-
     # Minimal install of most required packages
     sudo apt install -y yadm wget2 build-essential curl ca-certificates git jq
+    sudo apt install -y firmware-linux firmware-linux-nonfree
 
     if [ $? -ne 0 ]; then
       echo "Failed to update system, check logs above and try to fix all issues."
@@ -58,19 +40,8 @@ if [[ $dry_run == "0" ]]; then
     fi
 fi
 
-log "RUN, grep: $grep"
+$script_dir/runs/_libs
 
-runs_dir=`find $script_dir/runs -mindepth 1 -maxdepth 1 -executable`
+log "RUNs, go to run dir and execute additional runners: "
+find $script_dir/runs -mindepth 1 -maxdepth 1 -executable
 
-for s in $runs_dir; do
-    if echo "$s" | grep -vq "$grep"; then
-        log "grep \"$grep\" filtered out $s"
-        continue
-    fi
-
-    log "--- running script: $s ---"
-
-    if [[ $dry_run == "0" ]]; then
-        $s
-    fi
-done

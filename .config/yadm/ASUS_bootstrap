@@ -1,11 +1,14 @@
 #!/usr/bin/env zsh
+
+set -e
+
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd $script_dir
 
-sudo apt -y install tlp tlp-rdw
-sudo tlp start
-tlp-stat -s
+# For Steam + nvidia
+sudo apt install -y libgl1-nvidia-glvnd-glx:i386
 
-# TODO
-# https://gitlab.com/asus-linux/asusctl
-# https://wiki.debian.org/NvidiaGraphicsDrivers
+# AMD
+sudo apt install -y firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon
+
+# TODO: asusctl?
