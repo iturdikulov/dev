@@ -7,6 +7,7 @@
 - [ ] token
 - [ ] llm cli
 - [ ] taskwarrior
+- [ ] switch to firewalld
 
 - [ ] neovim config, LSP for all progs, TDD, compilers, gdb, etc. https://github.com/williamboman/mason.nvim?tab=readme-ov-file#requirements, https://github.com/ThePrimeagen/init.lua/ https://github.com/iturdikulov/nvim
 - [ ] https://github.com/nvzone/typr

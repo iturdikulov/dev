@@ -30,6 +30,9 @@ rcp --delete $BASE_PATH/Wiki $HOME/
 rcp --delete $BASE_PATH/Life/ $HOME/Documents/Personal
 rcp --delete $BASE_PATH/.secrets/password-store/ ~/.password-store/
 
+
+read -p "Sync Firefox Profile!"
+
 FIREFOX_PROFILES="$HOME/.mozilla/firefox"
 FIREFOX_PROFILE_PATH="$FIREFOX_PROFILES/inom.default"
 
