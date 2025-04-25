@@ -1,4 +1,4 @@
-## Minimal Debian 12 installation
+## Minimal Debian 13 installation
 
 Use the Netinst ISO - https://www.debian.org/CD/netinst/
 Verify checksums.
@@ -68,6 +68,7 @@ yadm clone https://github.com/iturdikulov/dev
 - System Preferences: dark theme, default applications
 - Settings, `Dark` theme, Resolution, scale-factor, refresh rate
 - Import shortcuts scheme: from `.config/yadm/shortcuts_scheme.kksrc`
+- General behaviour, no animation?
 - Sync Account
 - Configure desktop app run arguments (in KDE very easy): foot --maximized
 - Export/Import gpg backup with script
@@ -79,6 +80,11 @@ yadm clone https://github.com/iturdikulov/dev
 - https://discussion.fedoraproject.org/t/kde-battery-charge-limit-reset-after-reboot/95628/8
 - add kernel parameter to fix freeze `amd_pstate=active` (2025)
 - https://wiki.archlinux.org/title/Laptop/ASUS
+- sudo update-initramfs -c  -k all after frimware install
+`GRUB_CMDLINE_LINUX_DEFAULT="quiet nvidia.NVreg_EnableGpuFirmware=0 amdgpu.dcdebugmask=0x10"`
+sudo update-grub2
+- https://gitlab.com/asus-linux/asusctl
+  -  /etc/asusd/fan_curves.ron
 
 ### LLM CLI
 
