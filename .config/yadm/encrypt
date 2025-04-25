@@ -1,3 +1,5 @@
 .gnupg/*.conf
 .gitconfig
 .local/scripts/kde_connect.sh
+.config/io.datasette.llm/keys.json
+
