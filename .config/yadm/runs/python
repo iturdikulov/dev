@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 
 # Global Python
-sudo apt install -y python3 python3-debugpy
+sudo apt install -y python3
 
 # UV for virtual envs
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
+cd "$HOME/.local/bin" || { echo "Error: Failed to change directory to $HOME/.local/bin" >&2; exit 1; }
+
 # Install some tools
 for tool in ruff basedpyright debugpy mypy ipython pipdeptree sqlfluff llm; do
-    $HOME/.local/bin/uv tool install $tool
+    ./uv tool install $tool
 done
+
+./uv tool run llm install llm-openrouter
+./uv tool run llm models default "openrouter/google/gemini-2.5-flash-preview"

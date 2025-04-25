@@ -15,9 +15,8 @@ cd "$HOME/.cargo/bin" || { echo "cd failed"; exit 1; }
 ./rustup component add rust-analyzer
 ./rustup component add rust-src
 
-if [ -n "$(lspci|grep VGA|grep -i 'AMD\|ATI')" ]; then
-    if [ ! -n "$(lspci|grep VGA|grep AMD)" ]; then
-        sudo apt install -y libdrm-dev
-        ./cargo install amdgpu_top
-    fi
+if [ -n "$(lspci|grep VGA|grep AMD)" ]; then
+    echo "Installing amdgpu_top"
+    sudo apt install -y libdrm-dev
+    ./cargo install amdgpu_top
 fi

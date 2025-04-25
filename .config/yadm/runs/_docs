@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-sudo apt install -y libreoffice-writer libreoffice-draw hunspell-ru mythes-ru sdcv okular
+sudo apt install -y libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv okular
 sudo apt install -y visidata python3-openpyxl
