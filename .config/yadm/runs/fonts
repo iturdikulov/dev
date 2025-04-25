@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-sudo apt install -y fonts-firacode
+sudo apt install -y fonts-firacode fonts-terminus
 fc-cache
