@@ -85,6 +85,12 @@ yadm clone https://github.com/iturdikulov/dev
 sudo update-grub2
 - https://gitlab.com/asus-linux/asusctl
   -  /etc/asusd/fan_curves.ron
+- https://itsecforu.ru/2023/05/30/autossh-zapusk-monitoring-i-perezapusk-ssh-soe/
+- remove discover updates
+```
+sudo rm /etc/xdg/autostart/org.kde.discover.notifier.desktop
+```
+
 
 ### LLM CLI
 
@@ -97,3 +103,11 @@ llm models
 # Set default model, for example
 llm models default openrouter/google/gemini-2.5-flash-preview
 ```
+
+### Shortcuts
+
+M-F2
+C-F10
+M-S-Up/Left/Right/Down - focus between visible windows
+M-Tab
+M-`

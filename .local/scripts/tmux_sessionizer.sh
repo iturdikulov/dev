@@ -11,9 +11,10 @@ else
          echo ~/.local/share; \
          fdfind --type=directory --max-depth=1 \
                 --exclude='_*' \
-                --no-follow --full-path $HOME \
+                --no-follow --full-path "$HOME" \
+        ~/ \
         ~/Videos \
-        ~/Projects/ \
+        ~/Desktop/web \
         ~/Personal/)| fzf --tac)
 fi
 
