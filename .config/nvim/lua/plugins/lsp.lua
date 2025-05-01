@@ -8,7 +8,6 @@ return {
         "hrsh7th/nvim-cmp",
         "L3MON4D3/LuaSnip",
         "saadparwaiz1/cmp_luasnip",
-        "j-hui/fidget.nvim",
     },
 
     config = function()
@@ -41,8 +40,6 @@ return {
             {},
             vim.lsp.protocol.make_client_capabilities(),
             cmp_lsp.default_capabilities())
-
-        require("fidget").setup({})
 
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
 

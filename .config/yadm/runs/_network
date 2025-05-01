@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server
+sudo apt remove -y firewalld
+sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh
 
 # KDE automount script
 cat > "$HOME/.config/autostart/kde_connect.desktop" << EOF
@@ -15,6 +16,7 @@ EOF
 
 # WARN: Enable firewall for debian!
 sudo apt install -y ufw
+sudo systemctl enable ufw.service
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 

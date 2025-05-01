@@ -5,12 +5,9 @@ return {
             -- Invoke special functions to parse list
             require('minuet').setup {
                 provider = 'openai_compatible',
-                request_timeout = 2.5,
+                request_timeout = 5,
                 throttle = 1500, -- Increase to reduce costs and avoid rate limits
                 debounce = 600, -- Increase to reduce costs and avoid rate limits
-                blink = {
-                    enable_auto_complete = true,
-                },
                 virtualtext = {
                     -- Specify the filetypes to enable automatic virtual text completion,
                     -- e.g., { 'python', 'lua' }. Note that you can still invoke manual
@@ -23,9 +20,9 @@ return {
                         -- e.g. "A-z 2 CR" will accept 2 lines
                         accept_n_lines = '<A-z>',
                         -- Cycle to next completion item, or manually invoke completion
-                        next = '<C-f>',
+                        next = '<M-f>',
                         -- Cycle to prev completion item, or manually invoke completion
-                        prev = '<C-S-f>',
+                        prev = '<C-f>',
                     },
                     -- Whether show virtual text suggestion when the completion menu
                     -- (nvim-cmp or blink-cmp) is visible.

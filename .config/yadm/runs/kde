@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sudo apt -y install qdbus-qt5  # required for ww.sh, TODO: maybe need to port (KDE6?)
