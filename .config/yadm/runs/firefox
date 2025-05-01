@@ -1,19 +1,4 @@
 #!/usr/bin/env bash
 
+sudo apt remove -y konqueror
 sudo apt install -y firefox-esr
-
-# Custom desktop shortcut to fix focus issue in wayland
-# TODO: maybe not required in future
-APP_NAME=firefox-ww
-mkdir -p $HOME/.local/share/applications
-cat > "$HOME/.local/share/applications/firefox-esr.desktop" << EOF
-[Desktop Entry]
-Name=$APP_NAME
-GenericName=$APP_NAME
-Exec=$HOME/.local/scripts/ww.sh -f firefox-esr -c firefox-esr
-Icon=firefox-esr
-Terminal=false
-Type=Application
-Categories=Network
-StartupNotify=true
-EOF

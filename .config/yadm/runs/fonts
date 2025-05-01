@@ -1,4 +1,19 @@
 #!/usr/bin/env bash
 
 sudo apt install -y fonts-firacode fonts-terminus
-fc-cache
+
+# Download Terminus Nerd Font (tar.xz)
+OUTPUT_FILE=/tmp/terminus.tar.xz
+
+! [ -f "$OUTPUT_FILE" ] && wget2 -O $OUTPUT_FILE "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Terminus.tar.xz" \
+|| echo "$OUTPUT_FILE already exist, skip downloading"
+
+# Verify
+SHA_SUM=$(sha256sum "$OUTPUT_FILE")
+echo "e857b18a99701528f873275b6012792caf6e30c34c512ee92cda51520140054f" "$OUTPUT_FILE" | sha256sum -c || { echo "Invalid sha $SHA_SUM for $OUTPUT_FILE, skip installing font"; exit 1; }
+
+# Create font directory
+mkdir -p "$HOME/.local/share/fonts/Terminus"
+tar -xf /tmp/terminus.tar.xz -C "$HOME/.local/share/fonts/Terminus" && rm "$OUTPUT_FILE"
+fc-cache -fv
+echo "Terminus Nerd Font installed."

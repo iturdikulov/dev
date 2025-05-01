@@ -1,0 +1,11 @@
+[General]
+count=1
+rules=c49b2837-e72e-4274-abc5-c8f796d58aed
+
+[c49b2837-e72e-4274-abc5-c8f796d58aed]
+Description=Foot
+noborder=true
+noborderrule=3
+types=1
+wmclass=foot_ext
+wmclassmatch=1

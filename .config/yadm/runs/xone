@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+sudo apt -y update
+sudo apt-get install -y dkms "linux-headers-$(uname -r)"
+git clone https://github.com/dlundqvist/xone /tmp/xone
+cd /tmp/xone
+sudo ./install.sh
+sudo ./xone-get-firmware.sh
+sudo ./install/firmware.sh
+rm -rf /tmp/xone
+
