@@ -2,5 +2,5 @@
 .gitconfig
 .local/scripts/kde_connect.sh
 .config/io.datasette.llm/keys.json
-~/.config/environment.d/*.conf
-
+.config/environment.d/*.conf
+.config/yadm/sync.sh

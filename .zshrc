@@ -42,10 +42,14 @@ fi
 if (( $+commands[atuin] )); then
     eval "$(atuin init zsh)"
 fi
+if (( $+commands[direnv] )); then
+    eval "$(direnv hook zsh)"
+fi
 
 export NNN_PLUG="d:dragdrop;D:dups;c:chksum;f:fzcd;F:fixname;m:mymount;o:oldbigfile;R:rsync;s:suedit";
 export NNN_TRASH="2"
 
+export STARDICT_DATA_DIR="$HOME/Documents/dictionary"
 export EDITOR=nvim
 export PASSWORD_STORE_ENABLE_EXTENSIONS=true
 
@@ -127,6 +131,23 @@ if (( $+commands[apt] )); then
     alias pkgfiles='dpkg --listfiles'
 fi
 
+# An rsync that respects gitignore
+rcp() {
+    #   -a = -rlptgoD
+    #   -r = recursive
+    #   -l = copy symlinks as symlinks
+    #   -p = preserve permissions
+    #   -t = preserve mtimes
+    #   -g = preserve owning group
+    #   -o = preserve owner
+    # -z = use compression
+    # -P = show progress on transferred file
+    # -J = don't touch mtimes on symlinks (always errors)
+    rsync -rtzPJ \
+        --include=.git/ \
+        "$@"
+}
+
 prime-run () {
     __NV_PRIME_RENDER_OFFLOAD=1 __VK_LAYER_NV_optimus=NVIDIA_only __GLX_VENDOR_LIBRARY_NAME=nvidia "$@"
 }
@@ -144,7 +165,11 @@ q() {
 }
 
 def() {
-    llm -s "Define the word "[WORD]" in simple English, providing a few common example sentence and a brief Russian translation of the definition. Also, include common synonyms and antonyms, output should fit in $(tput lines) lines and $(tput cols)." "$*"|glow
+    llm -s "Define the word "[WORD]" in simple English, providing a few common example sentence and a brief Russian translation of the definition. Also, include etymology information, common synonyms and antonyms, output should fit in $(tput lines) lines and $(tput cols)." "$*"|glow
+}
+
+def2() {
+    sdcv -nc "$@" | sed 's/<[^>]*>//g' | sed 's/0m.*\w\+\.wav.*/0m/g' | less -R
 }
 
 nullify() {
