@@ -1,6 +1,8 @@
 #!/bin/sh
 # source: https://sing-box.app/install.sh
 
+cd "$(dirname "$0")" || exit 1
+
 download_beta=false
 download_version=""
 
@@ -115,3 +117,10 @@ fi
 echo "$package_install $package_name"
 sh -c "$package_install \"$package_name\""
 rm -f "$package_name"
+
+if ! [ -f "/etc/sing-box/config.json" ]; then
+    echo "Copying universal_sys/etc/sing-box/config.json" to "/etc/sing-box/config.json and enable service"
+    sudo cp ../universal_sys/etc/sing-box/config.json /etc/sing-box/config.json
+    sudo systemctl enable sing-box
+    sudo systemctl start sing-box
+fi
