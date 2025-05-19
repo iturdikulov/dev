@@ -1,10 +1,13 @@
 [ActivityManager]
 _k_friendly_name=Activity Manager
-switch-to-activity-cf25779b-8922-425e-9e60-0d4526c3d5df=none,none,Switch to activity "Default"
+switch-to-activity-97321d43-aada-4b59-a9f8-d7f632ec0d58=none,none,Switch to activity "Default"
 
 [KDE Keyboard Layout Switcher]
-Switch to Last-Used Keyboard Layout=Meta+Alt+L,Meta+Alt+L,Switch to Last-Used Keyboard Layout
-Switch to Next Keyboard Layout=Alt+Shift,Meta+Alt+K,Switch to Next Keyboard Layout
+Switch keyboard layout to English (Colemak-DH)=none,none,Switch keyboard layout to English (Colemak-DH)
+Switch keyboard layout to English (US)=none,none,Switch keyboard layout to English (US)
+Switch keyboard layout to Russian=none,none,Switch keyboard layout to Russian
+Switch to Last-Used Keyboard Layout=Alt+Shift,Meta+Alt+L,Switch to Last-Used Keyboard Layout
+Switch to Next Keyboard Layout=none,Meta+Alt+K,Switch to Next Keyboard Layout
 _k_friendly_name=Keyboard Layout Switcher
 
 [kaccess]
@@ -12,9 +15,9 @@ Toggle Screen Reader On and Off=Meta+Alt+S,Meta+Alt+S,Toggle Screen Reader On an
 _k_friendly_name=Accessibility
 
 [kcm_touchpad]
-Disable Touchpad=Touchpad Off,Touchpad Off,
-Enable Touchpad=Touchpad On,Touchpad On,
-Toggle Touchpad=Touchpad Toggle\tMeta+Ctrl+Touchpad Toggle\tMeta+Ctrl+Zenkaku Hankaku,Touchpad Toggle\tTouchpad Toggle\tMeta+Ctrl+Touchpad Toggle\tMeta+Ctrl+Zenkaku Hankaku,
+Disable Touchpad=Touchpad Off,Touchpad Off,Disable Touchpad
+Enable Touchpad=Touchpad On,Touchpad On,Enable Touchpad
+Toggle Touchpad=Touchpad Toggle\tMeta+Ctrl+Touchpad Toggle\tMeta+Ctrl+Zenkaku Hankaku,Touchpad Toggle\tTouchpad Toggle\tMeta+Ctrl+Touchpad Toggle\tMeta+Ctrl+Zenkaku Hankaku,Toggle Touchpad
 _k_friendly_name=Touchpad
 
 [kmix]
@@ -62,6 +65,7 @@ MoveZoomUp=none,none,Move Zoomed Area Upwards
 Overview=Meta+W,Meta+W,Toggle Overview
 Setup Window Shortcut=none,,Setup Window Shortcut
 Show Desktop=Meta+D,Meta+D,Peek at Desktop
+Suspend Compositing=Alt+Shift+F12,Alt+Shift+F12,Suspend Compositing
 Switch One Desktop Down=Meta+Ctrl+Down,Meta+Ctrl+Down,Switch One Desktop Down
 Switch One Desktop Up=Meta+Ctrl+Up,Meta+Ctrl+Up,Switch One Desktop Up
 Switch One Desktop to the Left=Meta+Ctrl+Left,Meta+Ctrl+Left,Switch One Desktop to the Left
@@ -124,7 +128,7 @@ Window Custom Quick Tile Bottom=none,,Custom Quick Tile Window to the Bottom
 Window Custom Quick Tile Left=none,,Custom Quick Tile Window to the Left
 Window Custom Quick Tile Right=none,,Custom Quick Tile Window to the Right
 Window Custom Quick Tile Top=none,,Custom Quick Tile Window to the Top
-Window Fullscreen=none,,Make Window Fullscreen
+Window Fullscreen=Meta+F,,Make Window Fullscreen
 Window Grow Horizontal=none,,Expand Window Horizontally
 Window Grow Vertical=none,,Expand Window Vertically
 Window Lower=none,,Lower Window
@@ -196,8 +200,8 @@ Window to Screen 6=none,,Move Window to Screen 6
 Window to Screen 7=none,,Move Window to Screen 7
 _k_friendly_name=KWin
 disableInputCapture=Meta+Shift+Esc,Meta+Shift+Esc,Disable Active Input Capture
-view_actual_size=Meta++,Meta+0,Zoom to Actual Size
-view_zoom_in=Meta+=,Meta++\tMeta+=,Zoom In
+view_actual_size=Meta+_,Meta+0,Zoom to Actual Size
+view_zoom_in=Meta++,Meta++\tMeta+=,Zoom In
 view_zoom_out=Meta+-,Meta+-,Zoom Out
 
 [mediacontrol]
@@ -240,8 +244,16 @@ activate task manager entry 6=Meta+6,Meta+6,Activate Task Manager Entry 6
 activate task manager entry 7=Meta+7,Meta+7,Activate Task Manager Entry 7
 activate task manager entry 8=Meta+8,Meta+8,Activate Task Manager Entry 8
 activate task manager entry 9=Meta+9,Meta+9,Activate Task Manager Entry 9
+activate widget 14=Meta+N,none,Activate Notifications Widget
+activate widget 31=none,none,Activate Calculator Widget
+activate widget 32=Meta+C,none,Activate Calendar Widget
+activate widget 38=none,none,Activate System Monitor Sensor Widget
+activate widget 41=none,none,Activate Day Progress Widget
+activate widget 44=Meta+Shift+C,none,Activate Color Picker Widget
+activate widget 5=none,none,Activate Icons-Only Task Manager Widget
 activate widget 58=none,none,Activate System Tray Widget
-activate widget 64=Meta+N,none,Activate Notifications Widget
+activate widget 64=none,none,Activate Notifications Widget
+activate widget 8=Ctrl+Alt+T,none,Activate System Tray Widget
 clear-history=none,,Clear Clipboard History
 clipboard_action=Meta+Ctrl+X,Meta+Ctrl+X,Automatic Action Popup Menu
 cycle-panels=Meta+Alt+P,Meta+Alt+P,Move keyboard focus between panels
@@ -259,5 +271,20 @@ switch to next activity=none,,Switch to Next Activity
 switch to previous activity=none,,Switch to Previous Activity
 toggle do not disturb=none,,Toggle do not disturb
 
+[services][net.local.obs_record.sh.desktop]
+_launch=Meta+Shift+R
+
 [services][net.local.toggle_audio.sh.desktop]
 _launch=Meta+Media Play
+
+[services][org.kde.kcalc.desktop]
+_launch=Meta+=\tCalculator
+
+[services][org.kde.konsole.desktop]
+_launch=none
+
+[services][org.kde.krunner.desktop]
+_launch=Alt+F2\tMeta+Space
+
+[services][org.kde.spectacle.desktop]
+RecordRegion=Meta+R
