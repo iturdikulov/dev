@@ -1,6 +1,10 @@
-.gnupg/*.conf
-.gitconfig
-.local/scripts/kde_connect.sh
+.config/kwalletrc
+.config/environment.d/git_askpass.conf
 .config/io.datasette.llm/keys.json
 .config/environment.d/*.conf
 .config/yadm/sync.sh
+.config/yadm/universal_sys/etc/sing-box/config.json
+.config/singbox-rules.json
+.gnupg/*.conf
+.gitconfig
+.local/scripts/kde_connect.sh
