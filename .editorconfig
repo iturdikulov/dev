@@ -24,7 +24,7 @@ indent_style = space
 indent_size = 2
 
 # Go/makefiles/.gitmodules use tab
-[{Makefile,**.mk,go.mod,go.sum,*.go,.gitmodules}]
+[{Makefile,**.mk,go.mod,go.sum,*.go,.gitmodules,.gitconfig}]
 indent_style = tab
 indent_size = 4
 
