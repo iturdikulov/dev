@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 sudo apt -y update
-sudo apt -y install gpg pass webext-browserpass
+sudo apt -y install gpg pass webext-browserpass pinentry-qt

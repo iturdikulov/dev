@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 # Base dependencies
-sudo apt install nodejs npm shellcheck
+sudo apt install -y nodejs npm shellcheck
 
 npm config set prefix ~/.local/npm
 
@@ -13,4 +13,5 @@ npm i -g @olrtg/emmet-language-server@2.6.1
 npm i -g bash-language-server
 
 cd "$HOME/.local/npm/bin" || { echo "n binary not found!"; exit 1; }
+export N_PREFIX="$HOME/.local/n"
 ./n lts

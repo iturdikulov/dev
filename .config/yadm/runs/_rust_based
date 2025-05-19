@@ -9,9 +9,11 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 cd "$HOME/.cargo/bin" || { echo "cd failed"; exit 1; }
 
 ./cargo install atuin
+./cargo install tun2proxy
 
 ./cargo install stylua --features luajit
 ./cargo install asm-lsp
+./cargo install git-delta
 ./rustup component add rust-analyzer
 ./rustup component add rust-src
 

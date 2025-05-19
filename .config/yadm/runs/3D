@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sudo apt install -y blender f3d

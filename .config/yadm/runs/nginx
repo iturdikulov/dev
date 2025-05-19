@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#
+# Nginx - new server block
+
+sudo apt install -y nginx-light
+sudo ufw allow http
