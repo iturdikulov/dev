@@ -1,4 +1,7 @@
-[gd_resource type="EditorSettings" format=3]
+[gd_resource type="EditorSettings" load_steps=2 format=3]
+
+[sub_resource type="InputEventKey" id="InputEventKey_b7djr"]
+keycode = 4194326
 
 [resource]
 resource_local_to_scene = false
@@ -384,7 +387,7 @@ run/output/font_size = 13
 run/output/always_clear_output_on_play = true
 run/output/max_lines = 10000
 run/platforms/linuxbsd/prefer_wayland = false
-network/connection/network_mode = 0
+network/connection/network_mode = 1
 network/http_proxy/host = ""
 network/http_proxy/port = 8080
 network/tls/editor_tls_certificates = ""
@@ -405,10 +408,34 @@ version_control/ssh_private_key_path = ""
 input/buffering/agile_event_flushing = false
 input/buffering/use_accumulated_input = true
 project_manager/sorting_order = 0
-project_manager/directory_naming_convention = 1
+project_manager/directory_naming_convention = 2
 project_manager/default_renderer = "forward_plus"
+export/android/debug_keystore = "/home/inom/.local/share/godot/keystores/debug.keystore"
+export/android/debug_keystore_pass = "android"
+export/android/java_sdk_path = ""
+export/android/android_sdk_path = "/home/inom/Android/Sdk"
+export/macos/rcodesign = ""
+export/web/http_port = 8060
+export/web/tls_key = ""
+export/web/tls_certificate = ""
+export/windows/rcedit = ""
+export/windows/osslsigncode = ""
+export/windows/wine = ""
+_editor_settings_advanced_mode = false
+_project_settings_advanced_mode = false
+_export_template_download_directory = ""
+_default_feature_profile = ""
+_script_setup_templates_dictionary = {}
+_use_favorites_root_selection = false
+_script_setup_use_script_templates = false
 asset_library/available_urls = {
 "godotengine.org (Official)": "https://godotengine.org/asset-library/api"
 }
-shortcuts = []
+shortcuts = [{
+"name": "spatial_editor/viewport_zoom_modifier_1",
+"shortcuts": [SubResource("InputEventKey_b7djr")]
+}, {
+"name": "spatial_editor/viewport_zoom_modifier_2",
+"shortcuts": []
+}]
 builtin_action_overrides = []
