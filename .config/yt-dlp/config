@@ -3,7 +3,7 @@
 --embed-metadata
 --write-subs
 --write-auto-subs
---sub-langs "en.*,ru,ru.*"
+--sub-langs "en,ru"
 --embed-subs
 --embed-chapters
 --embed-thumbnail
