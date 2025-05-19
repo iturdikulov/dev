@@ -11,11 +11,12 @@ else
          echo ~/.local/share; \
          fdfind --type=directory --max-depth=1 \
                 --exclude='_*' \
+                --one-file-system \
                 --no-follow --full-path "$HOME" \
         ~/ \
+        ~/Media \
         ~/Videos \
-        ~/Desktop/web \
-        ~/Personal/)| fzf --tac)
+        ~/Desktop/* )| fzf --tac)
 fi
 
 if [[ -z $selected ]]; then
