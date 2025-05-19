@@ -1,6 +1,21 @@
+[3b96aea6-551f-4c65-9f4c-5f929ae9e0c8]
+Description=Hide OpenGL Renderer
+skippager=true
+skippagerrule=3
+skipswitcher=true
+skipswitcherrule=3
+skiptaskbar=true
+skiptaskbarrule=3
+title=OpenGL Renderer
+titlematch=1
+
+[5a830c73-cdb7-4220-ba83-bf9b30b81da8]
+Description=Orca Slicer No Titlebar and Frame
+noborderrule=3
+
 [General]
-count=1
-rules=c49b2837-e72e-4274-abc5-c8f796d58aed
+count=3
+rules=c49b2837-e72e-4274-abc5-c8f796d58aed,cd26447c-52ae-4eec-bc9d-0ec642c9020b,3b96aea6-551f-4c65-9f4c-5f929ae9e0c8
 
 [c49b2837-e72e-4274-abc5-c8f796d58aed]
 Description=Foot
@@ -8,4 +23,13 @@ noborder=true
 noborderrule=3
 types=1
 wmclass=foot_ext
+wmclassmatch=1
+
+[cd26447c-52ae-4eec-bc9d-0ec642c9020b]
+Description=Zathura
+maximizehoriz=true
+maximizehorizrule=3
+maximizevert=true
+maximizevertrule=3
+wmclass=org.pwmt.zathura
 wmclassmatch=1
