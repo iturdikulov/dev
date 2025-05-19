@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-sudo apt remove -y konqueror
+sudo apt remove konqueror
 sudo apt install -y firefox-esr

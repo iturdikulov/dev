@@ -2,6 +2,7 @@
 
 sudo apt install -y nnn coreutils sed archivemount sshfs atool zip unzip
 
+sudo apt install -y libgtk-3-dev
 git clone https://github.com/mwh/dragon.git /tmp/dragon
 cd /tmp/dragon
 git checkout 8e0004518cc1e31dc5190673ecf7290c1d27438b

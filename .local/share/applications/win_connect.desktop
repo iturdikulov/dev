@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=win
+GenericName=Connect to Win machine
+Exec=virsh --connect qemu:///system start win & virt-viewer --connect qemu:///system --full-screen --attach win
+Icon=kfind
+Terminal=false
+Type=Application
+Categories=Utility
+StartupNotify=true

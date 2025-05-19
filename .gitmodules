@@ -1,0 +1,3 @@
+[submodule "/home/inom/.config/nvim"]
+	path = /home/inom/.config/nvim
+	url = git@github.com:iturdikulov/nvim.git

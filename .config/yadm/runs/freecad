@@ -27,7 +27,7 @@ Version=$APP_VERSION
 Name=$APP_DESKTOP_NAME
 Comment=$APP_DESKTOP_DESCRIPTION
 GenericName=$APP_DESKTOP_NAME
-Exec=$HOME/.local/bin/$APP_NAME
+Exec=env QT_AUTO_SCREEN_SCALE_FACTOR=1 $HOME/.local/bin/$APP_NAME
 Icon=$HOME/.local/bin/icons/$APP_NAME.svg
 Terminal=false
 Type=Application

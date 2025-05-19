@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+
+sudo apt install -y openjdk-25-jdk
+
+mkdir -p "/tmp/eclipse"
+cd "/tmp/eclipse"
+
+APP_URL="https://eclipse.mirror.garr.it/technology/epp/downloads/release/2025-03/R/eclipse-java-2025-03-R-linux-gtk-x86_64.tar.gz"
+TMP_PATH="/tmp/eclipse/eclipse-java-2025-03-R-linux-gtk-x86_64.tar.gz"
+
+! [ -f "$TMP_PATH" ] && wget2 --progress=bar --output-document $TMP_PATH $APP_URL \
+|| echo "$TMP_PATH already exist, skip downloading"
+
+# Verify
+SHA_SUM=$(sha256sum "$TMP_PATH")
+echo "a80605d84b4c3f51f7fee99942ad281ca240e045056d82575a0487c3c5efa70f" "$TMP_PATH" | sha256sum -c || { echo "Invalid sha $SHA_SUM for $TMP_PATH, skip installing"; exit 1; }
+
+tar -xzf $TMP_PATH -C /tmp/eclipse
+mv /tmp/eclipse/eclipse ~/.local/
+
+mkdir -p $HOME/.local/share/applications
+cat > "$HOME/.local/share/applications/eclipse.desktop" << EOF
+[Desktop Entry]
+Name=Eclipse IDE
+Exec=$HOME/.local/eclipse/eclipse %u
+Icon=$HOME/.local/eclipse/icon.xpm
+NoDisplay=false
+Type=Application
+MimeType=x-scheme-handler/eclipse+command;
+EOF

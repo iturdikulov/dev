@@ -1,0 +1,13 @@
+--cookies-from-browser firefox
+--format bestvideo[ext=mp4]+bestaudio[ext=m4a]
+--embed-metadata
+--write-subs
+--write-auto-subs
+--sub-langs "en.*,ru,ru.*"
+--embed-subs
+--embed-chapters
+--embed-thumbnail
+--format-sort res:1080,ext:mp4:m4a
+# Save all videos under record directory
+-o ~/Videos/record/%(title)s/%(title)s.%(ext)s
+

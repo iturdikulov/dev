@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 sudo apt remove -y okular # will be used Firefox & Foliate as default
-sudo apt install -y foliate libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre
+sudo apt install -y libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre
 sudo apt install -y visidata python3-openpyxl

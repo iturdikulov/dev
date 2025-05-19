@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt -y purge neovim kate
+sudo apt remove neovim kate
 
 # Install Neovim from nightly release by downloading the precompiled binaries.
 backup=true

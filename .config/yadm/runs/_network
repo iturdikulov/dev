@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt remove -y firewalld
+sudo apt remove firewalld kmail akregator kaddressbook
 sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh
 
 # KDE automount script
@@ -27,16 +27,20 @@ sudo ufw allow nfs
 sudo ufw allow 1716:1764/tcp
 sudo ufw allow 1716:1764/udp
 
+# Custom
+sudo ufw allow 8080/tcp
+sudo ufw allow 9090/tcp
+
 sudo ufw enable
 sudo ufw status verbose
 
-for share in anime movie shows
+for share in anime movie shows software
 do
     # Add nfs share mount entry
     if ! grep -q "kama:/$share" /etc/fstab ; then
         echo "Mounting $share share"
         mkdir -p "$HOME/Media/$share"
-        echo "kama:/$share $HOME/Media/$share nfs noauto,nofail,noatime,nfsvers=4.2,x-systemd.automount,x-systemd.idle-timeout=120 0 0" | \
+        echo "kama:/$share $HOME/Media/$share nfs noauto,nofail,noatime,nfsvers=4.2,x-systemd.automount,x-systemd.idle-timeout=120,x-gvfs-trash 0 0" | \
     	    sudo tee --append /etc/fstab
         sudo mount "$HOME/Media/$share"
     fi

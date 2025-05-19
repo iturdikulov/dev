@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-sudo apt -y install pidgin pidgin-dev
-git clone https://github.com/dylex/slack-libpurple  /tmp/slack-libpurple # Check commits!
-cd /tmp/slack-libpurple
-sudo make install
-rm -rf "/tmp/slack-libpurple"
