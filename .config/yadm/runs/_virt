@@ -2,3 +2,6 @@
 
 sudo apt install -y qemu-system libvirt-daemon-system virt-manager virt-viewer virtiofsd
 sudo adduser `id -un` libvirt
+sudo virsh net-autostart default
+sudo virsh net-start default
+
