@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 sudo apt update
-sudo apt install zathura zathura-cb mupdf texlive-base texlive
+sudo apt install zathura zathura-cb zathura-djvu mupdf texlive-base texlive
 sudo apt install libmupdf-dev zathura-dev gcc meson ca-certificates binutils
 mkdir -p /tmp/zathura
 cd /tmp/zathura || exit 1

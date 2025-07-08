@@ -4,7 +4,7 @@
 
 # libwebkit2gtk-4.1-dev was required for Orca v2.3.0
 sudo apt install -y libwebkit2gtk-4.1-dev
-URL="https://github.com/SoftFever/OrcaSlicer/releases/download/v2.3.0/OrcaSlicer_Linux_AppImage_Ubuntu2404_V2.3.0.AppImage"
+URL="https://github.com/SoftFever/OrcaSlicer/releases/download/nightly-builds/OrcaSlicer_Linux_AppImage_Ubuntu2404_V2.3.1-dev.AppImage"
 wget2 --progress=bar --output-document $HOME/.local/bin/OrcaSlicer.AppImage $URL
 chmod a+x $HOME/.local/bin/OrcaSlicer.AppImage
 

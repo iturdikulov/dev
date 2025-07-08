@@ -1,3 +1,32 @@
 #!/usr/bin/env bash
 
 sudo apt -y install borgbackup
+
+# Service
+sudo tee /etc/systemd/system/borgbackup.service > /dev/null << EOF
+[Unit]
+Description=Borg Backup
+
+[Service]
+Type=oneshot
+ExecStart=$HOME/.local/scripts/backup.sh  $HOME/Media/archive/backup/file/inom
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Timer
+sudo tee /etc/systemd/system/borgbackup.timer > /dev/null << EOF
+[Unit]
+Description=Borg Backup Timer
+
+[Timer]
+Unit=borgbackup.service
+OnCalendar=daily
+Persistent=True
+
+[Install]
+WantedBy=timers.target
+EOF
+
+echo "Enable backup timer after verifying backup.sh script and verify with systemctl list-timers!"
