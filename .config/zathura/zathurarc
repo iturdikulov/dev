@@ -1,2 +1,3 @@
 set font "monospace normal 12"
 set adjust-open "best-fit"
+set selection-clipboard clipboard
