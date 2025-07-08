@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+
+set -e
+
+sudo apt install -y firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon hipcc
+sudo usermod -a -G render,video $LOGNAME # Add the current user to the render and video groups
+
+# Copy config if not exits
+if ! [ -e /etc/sensors.d/MS-7C95-B550M-PRO-VDH.conf ]; then
+    sudo ln pc_sys/etc/sensors.d/MS-7C95-B550M-PRO-VDH.conf /etc/sensors.d/
+    echo "Sensors config linked successfully."
+fi

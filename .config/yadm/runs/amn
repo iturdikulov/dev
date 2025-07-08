@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+sudo apt install libxcb-xinerama0 libxcb-cursor0 iptables
+cd "/tmp" || exit 1
+wget2 --progress=bar https://github.com/amnezia-vpn/amnezia-client/releases/download/4.8.7.2/AmneziaVPN_4.8.7.2_linux_x64.tar.zip
+tar zxf AmneziaVPN_4.8.7.2_linux_x64.tar.zip
+sudo ./AmneziaVPN_Linux_Installer.bin && rm -f AmneziaVPN_Linux_Installer.bin
+
+# Add ssh user into sudo group on server
+# sudo usermod -aG sudo yourname
+wget2 --progress=bar https://github.com/runetfreedom/russia-blocked-geoip/raw/release/text/ru.txt
+

@@ -1,0 +1,22 @@
+#!/bin/sh
+cd /tmp || exit 1
+
+wget2 --progress=bar https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt update
+rm -f cuda-keyring_1.1-1_all.deb
+sudo apt -y install cuda-toolkit
+sudo apt install -y cuda-drivers nvtop
+
+# Install LACCT
+wget2 --progress=bar https://github.com/ilya-zlobintsev/LACT/releases/download/v0.8.0/lact-0.8.0-0.amd64.debian-12.deb
+sudo dpkg -i lact-0.8.0-0.amd64.debian-12.deb && rm lact-0.8.0-0.amd64.debian-12.deb
+
+echo "Check after reboot cat /sys/module/nvidia_drm/parameters/modeset, should return Y"
+
+# Enable power-management services
+sudo systemctl enable nvidia-suspend.service
+sudo systemctl enable nvidia-hibernate.service
+sudo systemctl enable nvidia-resume.service
+
+echo "Check https://docs.coolercontrol.org/installation/debian.html for coolercontrol"
