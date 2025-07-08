@@ -1,8 +1,8 @@
 set aaa_mode=artist
-set altformat_current= %F 
+set altformat_current= %F
 set altformat_playlist= %f%= %d %{?X!=0?%3X ?    }
 set altformat_title=%f
-set altformat_trackwin= %f%= %d 
+set altformat_trackwin= %f%= %d
 set auto_expand_albums_follow=true
 set auto_expand_albums_search=true
 set auto_expand_albums_selcur=true
@@ -65,17 +65,17 @@ set dsp.jack.resampling_quality=2
 set dsp.jack.server_name=
 set follow=false
 set format_clipped_text=…
-set format_current= %a - %l%! - %n. %t%= %y 
+set format_current= %a - %l%! - %n. %t%= %y %g
 set format_heading_album=%a - %l%= %y %{duration}
 set format_heading_artist=%a%= %{duration}
-set format_heading_playlist=%{?!panel?Playlist - }%{title}%= %{duration}    
-set format_playlist= %-21%a %3n. %t%= %y %d %{?X!=0?%3X ?    }
-set format_playlist_va= %-21%A %3n. %t (%a)%= %y %d %{?X!=0?%3X ?    }
-set format_statusline= %{status} %{?show_playback_position?%{position} %{?duration?/ %{duration} }?%{?duration?%{duration} }}%{?bpm>0?at %{bpm} BPM }%{?stream?buf: %{buffer} }%{?show_current_bitrate & bitrate>=0? %{bitrate} kbps }%= %{?repeat_current?repeat current?%{?play_library?%{?playlist_mode!="all"?%{playlist_mode} from }%{?play_sorted?sorted }library?playlist}} | %{?volume>=0?%{?lvolume!=rvolume?%{lvolume}%% %{rvolume}?%{volume}}%% | }%1{continue}%1{follow}%1{repeat}%1{shuffle} 
+set format_heading_playlist=%{?!panel?Playlist - }%{genre}%{title}%= %{duration}
+set format_playlist= %-12%g %-21%a %3n. %t%= %y %d %{?X!=0?%3X ?    }
+set format_playlist_va= %-12%g %-21%A %3n. %t (%a)%= %y %d %{?X!=0?%3X ?    }
+set format_statusline= %{status} %{?show_playback_position?%{position} %{?duration?/ %{duration} }?%{?duration?%{duration} }}%{?bpm>0?at %{bpm} BPM }%{?stream?buf: %{buffer} }%{?show_current_bitrate & bitrate>=0? %{bitrate} kbps }%= %{?repeat_current?repeat current?%{?play_library?%{?playlist_mode!="all"?%{playlist_mode} from }%{?play_sorted?sorted }library?playlist}} | %{?volume>=0?%{?lvolume!=rvolume?%{lvolume}%% %{rvolume}?%{volume}}%% | }%1{continue}%1{follow}%1{repeat}%1{shuffle}
 set format_title=%a - %l - %t (%y)
-set format_trackwin=%3n. %t%= %d 
-set format_trackwin_album= %l %= %y %{duration} 
-set format_trackwin_va=%3n. %t (%a)%= %d 
+set format_trackwin=%3n. %t%= %d
+set format_trackwin_album= %l %= %y %{duration}
+set format_trackwin_va=%3n. %t (%a)%= %d
 set format_treewin=  %l
 set format_treewin_artist=%a
 set icecast_default_charset=ISO-8859-1
@@ -95,7 +95,7 @@ set input.vorbis.priority=50
 set input.wav.priority=50
 set input.wavpack.priority=50
 set lib_add_filter=
-set lib_sort=albumartist date album discnumber tracknumber title filename play_count
+set lib_sort=genre albumartist date album discnumber tracknumber title filename play_count
 set mixer.alsa.channel=
 set mixer.alsa.device=
 set mixer.pulse.restore_volume=1
@@ -141,7 +141,7 @@ bind browser backspace browser-up
 bind browser i toggle show_hidden
 bind browser space win-activate
 bind browser u win-update
-bind common ! push shell 
+bind common ! push shell
 bind common + vol +10%
 bind common , seek -1m
 bind common - vol -10%
@@ -160,10 +160,10 @@ bind common B player-next-album
 bind common C toggle continue
 bind common D win-remove
 bind common E win-add-Q
-bind common F push filter 
+bind common F push filter
 bind common G win-bottom
 bind common I echo {}
-bind common L push live-filter 
+bind common L push live-filter
 bind common M toggle play_library
 bind common N search-prev
 bind common P win-mv-before
