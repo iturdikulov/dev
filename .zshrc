@@ -1,3 +1,5 @@
+zstyle ':completion:*:*:make:*' tag-order 'targets'
+
 [ -f "$HOME/.config/slimzsh/slim.zsh" ] && source "$HOME/.config/slimzsh/slim.zsh"
 
 precmd() {
@@ -88,6 +90,8 @@ alias disk-usage='ncdu --exclude ~/Media --exclude /proc --exclude /sys --exclud
 
 alias y='wl-copy'
 alias p='wl-paste'
+# fix paste for some X11 apps
+alias w2x='wl-paste | xclip -i -selection clipboard'
 
 alias reboot='reboot || sudo reboot'
 
@@ -106,7 +110,6 @@ alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '
 alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
 alias mux='tmux attach || tmux new'
 alias fd='fdfind'
-alias trash='gio trash'
 alias f='$(fzf) && nvim -- "$f"'
 alias grep='grep --color'
 alias l='ls'
