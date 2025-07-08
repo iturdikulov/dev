@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+echo "deb http://linux-packages.resilio.com/resilio-sync/deb resilio-sync non-free" | sudo tee /etc/apt/sources.list.d/resilio-sync.list
+wget -qO- https://linux-packages.resilio.com/resilio-sync/key.asc | sudo tee /etc/apt/trusted.gpg.d/resilio-sync.asc > /dev/null 2>&1
+sudo apt-get update
+sudo apt-get install resilio-sync
+
+sudo usermod -aG $LOGNAME rslsync
+sudo usermod -aG rslsync $LOGNAME
+mkdir -p $HOME/Wiki/
+
+setfacl -d -m group:rslsync:rwx $HOME
+setfacl -m group:rslsync:rwx $HOME
+# Warning, this is recursive, so it will apply to all sub directories.
+sudo setfacl -R -d -m group:rslsync:rwx $HOME/Wiki
+sudo setfacl -R -m group:rslsync:rwx $HOME/Wiki
+
+sudo setfacl -R -d -m group:rslsync:rwx $HOME/Music
+sudo setfacl -R -m group:rslsync:rwx $HOME/Music
+
+# Any sub directories created will also belong to the rslsync group
+chmod g+s $HOME/Wiki
+
+sudo systemctl enable resilio-sync
+
