@@ -5,14 +5,16 @@ if [[ $# -eq 1 ]]; then
 else
     selected=$(
         (
-         echo ~/.config/yadm; \
-         echo ~/.config/nvim; \
-         echo ~/.local/scripts; \
-         echo ~/.local/share; \
+         echo $HOME/; \
+         echo $HOME/.config/yadm; \
+         echo $HOME/.config/nvim; \
+         echo $HOME/.local/scripts; \
+         echo $HOME/.local/share; \
          fdfind --type=directory --max-depth=1 \
                 --exclude='_*' \
+                --follow \
                 --one-file-system \
-                --no-follow --full-path "$HOME" \
+                --full-path "$HOME" \
         ~/ \
         ~/Media \
         ~/Videos \
@@ -32,7 +34,7 @@ if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
 fi
 
 if ! tmux has-session -t=$selected_name 2> /dev/null; then
-    tmux new-session -ds $selected_name -c $selected
+    tmux new-session -ds $selected_name -c $selected \; new-window -c "#{pane_current_path}" \; select-window -t:1
 fi
 
 tmux switch-client -t $selected_name
