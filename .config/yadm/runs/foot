@@ -19,4 +19,22 @@ Type=Application
 Categories=Utility
 StartupNotify=true
 EOF
+
+APP_NAME=cmus
+APP_DESKTOP_NAME=cmus
+
+mkdir -p $HOME/.local/share/applications
+cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
+[Desktop Entry]
+Version=$APP_VERSION
+Name=$APP_DESKTOP_NAME
+GenericName=$APP_DESKTOP_NAME
+Exec=foot --title=cmus --app-id=cmus --maximized cmus
+Icon=$HOME/.local/bin/icons/$APP_NAME.svg
+Terminal=false
+Type=Application
+Categories=Audio
+StartupNotify=true
+EOF
+
 sudo update-desktop-database

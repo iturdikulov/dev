@@ -1,3 +1,30 @@
 #!/usr/bin/env bash
 
-sudo apt install -y blender f3d
+sudo apt install -y f3d
+
+APP_MAIN_VERSION=4.4
+APP_VERSION=4.4.3
+APP_NAME=blender
+APP_DESKTOP_NAME=Blender
+APP_DESKTOP_DESCRIPTION="Free and open-source 3D creation suite"
+APP_DESKTOP_CATEGORIES="Graphics;Science"
+
+cd /tmp || { echo "cd failed"; exit 1; }
+wget2 --progress=bar https://ftp.nluug.nl/pub/graphics/blender/release/Blender$APP_MAIN_VERSION/blender-$APP_VERSION-linux-x64.tar.xz
+tar --extract --file blender-$APP_VERSION-linux-x64.tar.xz -av -C ~/.local/
+rm -f blender-$APP_VERSION-linux-x64.tar.xz
+
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
+[Desktop Entry]
+Version=$APP_VERSION
+Name=$APP_DESKTOP_NAME
+Comment=$APP_DESKTOP_DESCRIPTION
+GenericName=$APP_DESKTOP_NAME
+Exec=$HOME/.local/blender-$APP_VERSION-linux-x64/blender
+Icon=$HOME/.local/bin/icons/$APP_NAME.svg
+Terminal=false
+Type=Application
+Categories=$APP_DESKTOP_CATEGORIES
+StartupNotify=true
+EOF

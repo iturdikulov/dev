@@ -1,18 +1,7 @@
 #!/usr/bin/env bash
 
 sudo apt remove firewalld kmail akregator kaddressbook
-sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh
-
-# KDE automount script
-cat > "$HOME/.config/autostart/kde_connect.desktop" << EOF
-[Desktop Entry]
-Exec=$HOME/.local/scripts/kde_connect.sh
-Icon=dialog-scripts
-Name=kde_connect.sh
-Terminal=false
-X-MultipleArgs=false
-Type=Application
-EOF
+sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh msmtp msmtp-mta
 
 # WARN: Enable firewall for debian!
 sudo apt install -y ufw

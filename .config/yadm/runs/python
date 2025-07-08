@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Global Python
-sudo apt install -y python3
+sudo apt install -y python3-full
 
 # UV for virtual envs
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -9,7 +9,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 cd "$HOME/.local/bin" || { echo "Error: Failed to change directory to $HOME/.local/bin" >&2; exit 1; }
 
 # Install some tools
-for tool in ruff basedpyright debugpy mypy ipython pipdeptree sqlfluff llm obs-cli; do
+for tool in ruff basedpyright debugpy mypy ipython pipdeptree sqlfluff djlint llm obs-cli; do
     ./uv tool install $tool
 done
 

@@ -1,3 +1,30 @@
 #!/usr/bin/env bash
 
-sudo apt install -y telegram-desktop
+pkgver=5.16.1
+downloaded_file="/tmp/tsetup.${pkgver}.tar.xz"
+
+wget2 --progress=bar --output-document $downloaded_file \
+  https://github.com/telegramdesktop/tdesktop/releases/download/v${pkgver}/tsetup.${pkgver}.tar.xz
+
+tar --extract --file $downloaded_file -av -C ~/.local \
+&& rm "$downloaded_file"
+
+APP_NAME=telegram
+APP_DESKTOP_NAME=Telegram
+APP_DESKTOP_DESCRIPTION="A messaging application for fast and secure communication."
+APP_DESKTOP_CATEGORIES="InstantMessaging;Chat"
+
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
+[Desktop Entry]
+Version=$pkgver
+Name=$APP_DESKTOP_NAME
+Comment=$APP_DESKTOP_DESCRIPTION
+GenericName=$APP_DESKTOP_NAME
+Exec=$HOME/.local/Telegram/Telegram
+Icon=$HOME/.local/bin/icons/$APP_NAME.svg
+Terminal=false
+Type=Application
+Categories=$APP_DESKTOP_CATEGORIES
+StartupNotify=true
+EOF
