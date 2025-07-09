@@ -8,3 +8,8 @@ git submodule update --init --recursive
 sudo apt install -y zsh direnv
 sudo chsh -s $(which zsh)
 sudo chsh -s $(which zsh) $(whoami)
+
+# Fix insecure directories
+sudo chmod 755 $HOME/.config/
+sudo chmod 755 $HOME/.config/slimzsh
+sudo chmod 755 $HOME/.config/slimzsh/fast-syntax-highlighting/
