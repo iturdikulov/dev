@@ -9,3 +9,4 @@
 .gnupg/*.conf
 .gitconfig
 .local/scripts/kde_connect_watcher.py
+.leetcode/leetcode.toml
