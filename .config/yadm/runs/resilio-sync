@@ -4,22 +4,19 @@ echo "deb http://linux-packages.resilio.com/resilio-sync/deb resilio-sync non-fr
 wget -qO- https://linux-packages.resilio.com/resilio-sync/key.asc | sudo tee /etc/apt/trusted.gpg.d/resilio-sync.asc > /dev/null 2>&1
 sudo apt-get update
 sudo apt-get install resilio-sync
+sudo systemctl disable resilio-sync
+sudo systemctl stop resilio-sync
 
-sudo usermod -aG $LOGNAME rslsync
-sudo usermod -aG rslsync $LOGNAME
-mkdir -p $HOME/Wiki/
+# Fix /usr/lib/systemd/user/resilio-sync.service
+sudo sed -i 's/WantedBy=multi-user.target/WantedBy=default.target/w /dev/stdout' /usr/lib/systemd/user/resilio-sync.service|grep -q .
+if test $? = 0; then
+    echo "Updated resilio systemd service file";
+else
+    echo "Nothing updated, assuming service file was already corrected. OR SOME ISSUE DETECTED";
+fi;
 
-setfacl -d -m group:rslsync:rwx $HOME
-setfacl -m group:rslsync:rwx $HOME
-# Warning, this is recursive, so it will apply to all sub directories.
-sudo setfacl -R -d -m group:rslsync:rwx $HOME/Wiki
-sudo setfacl -R -m group:rslsync:rwx $HOME/Wiki
+systemctl --user daemon-reload
+systemctl --user enable --now resilio-sync
 
-sudo setfacl -R -d -m group:rslsync:rwx $HOME/Music
-sudo setfacl -R -m group:rslsync:rwx $HOME/Music
-
-# Any sub directories created will also belong to the rslsync group
-chmod g+s $HOME/Wiki
-
-sudo systemctl enable resilio-sync
-
+# Check status
+echo "Checking Resilio Sync service status:"
