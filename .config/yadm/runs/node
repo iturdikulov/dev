@@ -12,6 +12,7 @@ npm i -g deno
 npm i -g @biomejs/biome
 npm i -g @olrtg/emmet-language-server@2.6.1
 npm i -g bash-language-server
+npm i -g typescript-language-server typescript
 
 cd "$HOME/.local/npm/bin" || { echo "n binary not found!"; exit 1; }
 export N_PREFIX="$HOME/.local/n"

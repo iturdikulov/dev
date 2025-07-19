@@ -2,7 +2,7 @@
 
 sudo apt remove -y okular # will be used Firefox & Foliate as default
 sudo apt install -y libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre
-sudo apt install -y visidata python3-openpyxl crow-translate
+sudo apt install -y visidata python3-openpyxl crow-translate xournalpp
 
 # Tesseract data for crow-translate
 mkdir -p ~/.config/crow-translate/ && cd ~/.config/crow-translate/ || exit 1

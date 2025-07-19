@@ -13,7 +13,9 @@ cd "$HOME/.cargo/bin" || { echo "cd failed"; exit 1; }
 
 ./cargo install stylua --features luajit
 ./cargo install asm-lsp
+./cargo install cargo-eval
 ./cargo install git-delta
+./cargo install leetcode-cli
 ./cargo install --locked --git https://github.com/Feel-ix-343/markdown-oxide.git markdown-oxide
 ./rustup component add rust-analyzer
 ./rustup component add rust-src
