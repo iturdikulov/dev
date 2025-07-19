@@ -68,6 +68,7 @@ addToPathFront $HOME/.local/.npm-global/bin
 addToPathFront $HOME/.local/bin
 addToPathFront $HOME/.local/go/bin
 addToPathFront $HOME/.local/npm/bin
+addToPathFront $HOME/.local/cling/bin
 
 addToPath /usr/local/games
 addToPath /usr/games
@@ -85,6 +86,29 @@ if (( $+commands[nvim] )); then
     alias vi='nvim'
 fi
 
+alias ls='ls --color=auto'
+if (( $+commands[eza] )); then
+  IGNORE_GLOB="UnrealEngine"
+  alias eza="eza --group-directories-first --git";
+  alias l="eza -bl -I $IGNORE_GLOB";
+  alias ll="eza -abghilmu -I $IGNORE_GLOB";
+  alias la="LC_COLLATE=C eza -ablF -I $IGNORE_GLOB";
+  alias lm='ll --sort=modified'
+  alias tree='eza --tree'
+  alias treel='eza --color=always --tree|less'
+else
+  alias l='ls'
+  alias ll='ls -la'          # long listing format
+  alias la='ls -d .* --color=auto' # hidden files
+  alias lm='ls -lt'          # by modification date, newest first
+fi
+
+if (( $+commands[fdfind] )); then
+  alias fd='fdfind'
+  alias fd_non_ascii='fd "[^\u0000-\u007F]+"'  # find non-ascii filenames
+fi
+
+alias g='git'
 alias py='python3'
 alias disk-usage='ncdu --exclude ~/Media --exclude /proc --exclude /sys --exclude /mnt --exclude /media --exclude /dev/shm'
 
@@ -109,14 +133,8 @@ alias E="SUDO_EDITOR=nvim sudo -e"
 alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
 alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
 alias mux='tmux attach || tmux new'
-alias fd='fdfind'
 alias f='$(fzf) && nvim -- "$f"'
 alias grep='grep --color'
-alias l='ls'
-alias ls='ls --color=auto'
-alias ll='ls -la'          # long listing format
-alias l.='ls -d .* --color=auto' # hidden files
-alias g='git'
 
 alias jc='journalctl -xeu'
 alias sc=systemctl
@@ -134,6 +152,24 @@ if (( $+commands[apt] )); then
     alias chkboot='cat /var/run/reboot-required'
     alias pkgfiles='dpkg --listfiles'
 fi
+
+# Translate aliaes
+export ARGOS_DEVICE_TYPE=cuda
+toen() {
+    argos-translate --from ru --to en "$*"
+}
+
+toru() {
+    argos-translate --from en --to ru "$*"
+}
+
+# Generate HTML output for a command submit session with stdout highlighting.
+stdout2html() {
+    # Usage example: stdout2html output_name 'leetcode x 1'
+    output=$1
+    shift
+    script --quiet --command "$@"| ansi2html.sh > "$output.html"
+}
 
 # An rsync that respects gitignore
 rcp() {
@@ -172,7 +208,7 @@ def() {
     llm -s "Define the word "[WORD]" in simple English, providing a few common example sentence and a brief Russian translation of the definition. Also, include etymology information, common synonyms and antonyms, output should fit in $(tput lines) lines and $(tput cols)." "$*"|glow
 }
 
-def2() {
+d() {
     sdcv -nc "$@" | sed 's/<[^>]*>//g' | sed 's/0m.*\w\+\.wav.*/0m/g' | less -R
 }
 
