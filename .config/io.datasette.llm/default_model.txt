@@ -1,1 +1,1 @@
-openrouter/google/gemini-2.5-flash-preview
+openrouter/anthropic/claude-3.7-sonnet
