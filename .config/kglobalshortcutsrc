@@ -7,7 +7,7 @@ Switch keyboard layout to English (Colemak-DH)=none,none,Switch keyboard layout 
 Switch keyboard layout to English (US)=none,none,Switch keyboard layout to English (US)
 Switch keyboard layout to Russian=none,none,Switch keyboard layout to Russian
 Switch to Last-Used Keyboard Layout=Alt+Shift,Meta+Alt+L,Switch to Last-Used Keyboard Layout
-Switch to Next Keyboard Layout=none,Meta+Alt+K,Switch to Next Keyboard Layout
+Switch to Next Keyboard Layout=,Meta+Alt+K,Switch to Next Keyboard Layout
 _k_friendly_name=Keyboard Layout Switcher
 
 [kaccess]
@@ -121,8 +121,8 @@ Walk Through Windows of Current Application=Alt+`,Alt+`,Walk Through Windows of 
 Walk Through Windows of Current Application (Reverse)=Alt+~,Alt+~,Walk Through Windows of Current Application (Reverse)
 Walk Through Windows of Current Application Alternative=none,,Walk Through Windows of Current Application Alternative
 Walk Through Windows of Current Application Alternative (Reverse)=none,,Walk Through Windows of Current Application Alternative (Reverse)
-Window Above Other Windows=none,,Keep Window Above Others
-Window Below Other Windows=none,,Keep Window Below Others
+Window Above Other Windows=Meta+],,Keep Window Above Others
+Window Below Other Windows=Meta+[,,Keep Window Below Others
 Window Close=Alt+F4,Alt+F4,Close Window
 Window Custom Quick Tile Bottom=none,,Custom Quick Tile Window to the Bottom
 Window Custom Quick Tile Left=none,,Custom Quick Tile Window to the Left
@@ -232,7 +232,7 @@ _k_friendly_name=Power Management
 powerProfile=Battery\tMeta+B,Battery\tMeta+B,Switch Power Profile
 
 [plasmashell]
-_k_friendly_name=plasmashell
+_k_friendly_name=System Settings
 activate application launcher=Meta\tAlt+F1,Meta\tAlt+F1,Activate Application Launcher
 activate task manager entry 1=Meta+1,Meta+1,Activate Task Manager Entry 1
 activate task manager entry 10=Meta+0,,Activate Task Manager Entry 10
@@ -249,7 +249,7 @@ activate widget 31=none,none,Activate Calculator Widget
 activate widget 32=Meta+C,none,Activate Calendar Widget
 activate widget 38=none,none,Activate System Monitor Sensor Widget
 activate widget 41=none,none,Activate Day Progress Widget
-activate widget 44=Meta+Shift+C,none,Activate Color Picker Widget
+activate widget 44=Ctrl+Alt+C,none,Activate Color Picker Widget
 activate widget 5=none,none,Activate Icons-Only Task Manager Widget
 activate widget 58=none,none,Activate System Tray Widget
 activate widget 64=none,none,Activate Notifications Widget
@@ -274,18 +274,30 @@ toggle do not disturb=none,,Toggle do not disturb
 [services][io.crow_translate.CrowTranslate.desktop]
 Open=none
 SpeakSelection=none
-TranslateSelectedText=Meta+F3
+TranslateSelectedText=none
 
-[services][net.local.cmus_raise.sh.desktop]
-_launch=Meta+F1
+[services][net.local.for.desktop]
+_launch=Meta+Shift+N
 
-[services][net.local.crow.desktop]
+[services][net.local.jump_app.sh-2.desktop]
+_launch=Meta+F3
+
+[services][net.local.jump_app.sh-3.desktop]
 _launch=Meta+F2
 
-[services][net.local.obs_record.sh.desktop]
+[services][net.local.jump_app.sh.desktop]
+_launch=Meta+F1
+
+[services][net.local.krunner.desktop]
+_launch=Alt+F2
+
+[services][net.local.obs-record.py.desktop]
+_launch=Meta+R
+
+[services][net.local.obs-stop-record.py.desktop]
 _launch=Meta+Shift+R
 
-[services][net.local.toggle_audio.sh.desktop]
+[services][net.local.piper-speak.sh.desktop]
 _launch=Meta+Media Play
 
 [services][org.kde.kcalc.desktop]
@@ -295,9 +307,9 @@ _launch=Meta+=\tCalculator
 _launch=none
 
 [services][org.kde.krunner.desktop]
-_launch=Alt+F2\tMeta+Space
+_launch=Meta+Space
 
 [services][org.kde.spectacle.desktop]
-RecordRegion=Meta+R
+RecordRegion=none
 RectangularRegionScreenShot=Print\tMeta+Shift+Print
 _launch=Meta+Shift+S
