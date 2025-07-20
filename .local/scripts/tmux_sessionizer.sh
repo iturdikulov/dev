@@ -16,6 +16,7 @@ else
                 --one-file-system \
                 --full-path "$HOME" \
         ~/ \
+        ~/Pictures/personal/devices \
         ~/Media \
         ~/Videos \
         ~/Desktop/* )| fzf --tac)
