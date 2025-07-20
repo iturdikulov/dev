@@ -1,1 +1,2 @@
-openrouter/anthropic/claude-3.7-sonnet
+openrouter/anthropic/claude-sonnet-4
+
