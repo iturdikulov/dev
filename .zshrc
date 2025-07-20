@@ -204,6 +204,10 @@ q() {
     llm -s "Use a brief style for answer, limit output to 140-500 characters." "$*"|glow
 }
 
+qp() {
+    llm -s "You are a top programming expert who provides precise answers, avoiding ambiguous responses. “Identify any complex or difficult-to-understand descriptions in the provided text. Rewrite these descriptions to make them clearer and more accessible. Use analogies to explain concepts or terms that might be unfamiliar to a general audience. Ensure that the analogies are relatable, easy to understand.” “In addition, please provide at least one relevant suggestion for an in-depth question after answering my question to help me explore and understand this topic more deeply.” Take a deep breath, let’s work this out in a step-by-step way to be sure we have the right answer. If there’s a perfect solution, I’ll tip $200! Many thanks to these AI whisperers: Reply in English using professional tone for everyone." "$*"|glow
+}
+
 def() {
     llm -s "Define the word "[WORD]" in simple English, providing a few common example sentence and a brief Russian translation of the definition. Also, include etymology information, common synonyms and antonyms, output should fit in $(tput lines) lines and $(tput cols)." "$*"|glow
 }
