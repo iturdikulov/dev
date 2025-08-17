@@ -1,1 +1,0 @@
-export PATH=$HOME/.local/cling/bin:$HOME/.local/npm/bin:$HOME/.local/go/bin:$HOME/.local/bin:$HOME/.local/.npm-global/bin:$HOME/.config/nnn/plugins:$HOME/.local/scripts:$HOME/.local/tmux/bin:$HOME/.local/n/bin:/usr/local/go/bin:$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/games:/usr/local/games:$PATH
