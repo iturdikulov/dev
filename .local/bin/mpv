@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/bin/mpv --idle --force-window --osd-level=0 --loop=inf --input-ipc-server="/tmp/mpvsocket" "$@"
