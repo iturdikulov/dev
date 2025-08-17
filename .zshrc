@@ -69,6 +69,7 @@ addToPathFront $HOME/.local/bin
 addToPathFront $HOME/.local/go/bin
 addToPathFront $HOME/.local/npm/bin
 addToPathFront $HOME/.local/cling/bin
+addToPathFront $HOME/.local/scrcpy
 
 addToPath /usr/local/games
 addToPath /usr/games
@@ -110,6 +111,14 @@ fi
 
 alias g='git'
 alias py='python3'
+alias ipy='ipython'
+c() {
+local exp="$*"
+python3 -c "from math import *
+result = $exp
+print(f'$exp = {result}')"
+}
+
 alias disk-usage='ncdu --exclude ~/Media --exclude /proc --exclude /sys --exclude /mnt --exclude /media --exclude /dev/shm'
 
 alias y='wl-copy'
