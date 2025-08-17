@@ -632,3 +632,41 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# def mpv_command(command):
+#     """Send a JSON IPC command to mpv via socat"""
+#     payload = json.dumps({ "command": command })
+#     result = subprocess.run(
+#         ['socat', '-', SOCKET_PATH],
+#         input=payload.encode(),
+#         stdout=subprocess.PIPE,
+#         stderr=subprocess.PIPE,
+#     )
+#     if result.returncode != 0:
+#         print(f"Error: {result.stderr.decode()}", file=sys.stderr)
+#         sys.exit(1)
+#     return json.loads(result.stdout.decode())
+#
+# def insert_timestamp():
+#     # Pause the video
+#     mpv_command(["set_property", "pause", True])
+#
+#     # Get current playback time and file path
+#     time_pos = mpv_command(["get_property", "time-pos"]).get("data")
+#     file_path = mpv_command(["get_property", "path"]).get("data")
+#
+#     if time_pos is None or file_path is None:
+#         print("Could not fetch time or path from mpv.", file=sys.stderr)
+#         sys.exit(1)
+#
+#     time_pos = int(time_pos)
+#     hours = time_pos // 3600
+#     minutes = (time_pos % 3600) // 60
+#     seconds = time_pos % 60
+#
+#     timestamp = f"{hours:02}:{minutes:02}:{seconds:02}"
+#     file_path = os.path.abspath(os.path.expanduser(file_path))
+#
+#     markdown_link = f"- [{timestamp}](<file://{file_path}>)"
+#     print(markdown_link)
