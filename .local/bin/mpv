@@ -1,2 +1,11 @@
 #!/bin/sh
+cleanup() {
+  echo "kill mpv $PID"
+  killall -q $PID
+  exit
+}
+
+trap cleanup 1 2 3 6
+
 /usr/bin/mpv --idle --force-window --osd-level=0 --loop=inf --input-ipc-server="/tmp/mpvsocket" "$@"
+PID=$!
