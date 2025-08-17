@@ -23,4 +23,14 @@ sudo ufw allow 9090/tcp
 sudo ufw enable
 sudo ufw status verbose
 
+# Add samba share mount entry
+sudo apt install -y cifs-utils
+share=kama
+if ! grep -q "kama:/$share" /etc/fstab ; then
+    echo "Mounting $share share"
+    mkdir -p "$HOME/Media/$share"
+    echo "//kama/E $HOME/Media/$share cifs credentials=$HOME/.smbcredentials,noauto,nofail,noatime,x-systemd.automount,x-systemd.idle-timeout=120,x-gvfs-trash,uid=1000,gid=1000 0 0" | \
+    sudo tee --append /etc/fstab
+    sudo mount "$HOME/Media/$share"
+fi
 sudo systemctl daemon-reload
