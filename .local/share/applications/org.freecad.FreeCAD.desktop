@@ -1,0 +1,18 @@
+[Desktop Entry]
+Categories=Graphics;Science;Education;Engineering;X-CNC;
+Comment=Feature based Parametric Modeler
+Exec=env QT_AUTO_SCREEN_SCALE_FACTOR=1 /usr/bin/freecad - --single-instance %F
+GenericName=CAD Application
+Icon=org.freecad.FreeCAD
+MimeType=application/x-extension-fcstd;model/obj;image/vnd.dwg;image/vnd.dxf;model/vnd.collada+xml;application/iges;model/iges;model/step;model/step+zip;model/stl;application/vnd.shp;model/vrml;
+Name=FreeCAD
+NoDisplay=false
+Path=
+PrefersNonDefaultGPU=false
+StartupNotify=true
+StartupWMClass=FreeCAD
+Terminal=false
+TerminalOptions=
+Type=Application
+X-KDE-SubstituteUID=false
+X-KDE-Username=

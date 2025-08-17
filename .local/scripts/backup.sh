@@ -105,17 +105,10 @@ if [ ${global_exit} -eq 0 ]; then
    # ls -l /archive/backup/file/${name}
 elif [ ${global_exit} -eq 1 ]; then
     info "Backup, Prune, and/or Compact finished with warnings"
-          # ${pkgs.system-sendmail}/bin/sendmail -t <<ERRMAIL
-          # To: inom@iturdikulov.com
-          # Subject: Backup failed at $(date)
-          # From: inom@iturdikulov.com
-          #
-          # Borg backup job failed, here is borg log
-          #
-          # $(systemctl status --full "borgbackup-job-home-${config.user.name}.service")
-          # ERRMAIL
+    su - inom -c 'printf "To: inom@iturdikulov.com\nSubject: Backup warnings at %s\n\n%s\n" "$(date)" "$(systemctl status --full borgbackup.service)" | msmtp -a default inom@iturdikulov.com'
 else
     info "Backup, Prune, and/or Compact finished with errors"
+    su - inom -c 'printf "To: inom@iturdikulov.com\nSubject: Backup failed at %s\n\n%s\n" "$(date)" "$(systemctl status --full borgbackup.service)" | msmtp -a default inom@iturdikulov.com'
 fi
 
 exit ${global_exit}
