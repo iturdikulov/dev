@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 sudo apt remove firewalld kmail akregator kaddressbook
-sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh msmtp msmtp-mta
+sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh msmtp msmtp-mta filezilla
 
 # WARN: Enable firewall for debian!
 sudo apt install -y ufw
@@ -22,17 +22,5 @@ sudo ufw allow 9090/tcp
 
 sudo ufw enable
 sudo ufw status verbose
-
-for share in anime movie shows software
-do
-    # Add nfs share mount entry
-    if ! grep -q "kama:/$share" /etc/fstab ; then
-        echo "Mounting $share share"
-        mkdir -p "$HOME/Media/$share"
-        echo "kama:/$share $HOME/Media/$share nfs noauto,nofail,noatime,nfsvers=4.2,x-systemd.automount,x-systemd.idle-timeout=120,x-gvfs-trash 0 0" | \
-    	    sudo tee --append /etc/fstab
-        sudo mount "$HOME/Media/$share"
-    fi
-done
 
 sudo systemctl daemon-reload
