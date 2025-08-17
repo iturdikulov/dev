@@ -2,7 +2,7 @@
 
 set -u
 
-APP_VERSION=1.8.9
+APP_VERSION=1.8.10
 
 APP_NAME=obsidian
 APP_DESKTOP_NAME=Obsidian
@@ -12,7 +12,7 @@ APP_DESKTOP_CATEGORIES="Development;Education"
 APP_PATH="$HOME/.local/bin/$APP_NAME"
 TMP_PATH="/tmp/$APP_NAME"
 APP_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v$APP_VERSION/Obsidian-$APP_VERSION.AppImage"
-SHA_256_SUM="43dde3caac1c58e9fccbd1ff1a4305b53f784a5ebdef9c59d53851c87c615186"
+SHA_256_SUM="05d4bfb76ef409ace4f4e59ccafb49dbd5a537c1ec15e570b59db603ddaad715"
 
 wget2 --progress=bar --output-document $TMP_PATH $APP_URL
 echo "$SHA_256_SUM $TMP_PATH"
