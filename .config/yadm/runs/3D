@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-sudo apt install -y f3d
-
-APP_MAIN_VERSION=4.4
-APP_VERSION=4.4.3
+APP_MAIN_VERSION=4.5
+APP_VERSION=4.5.1
 APP_NAME=blender
 APP_DESKTOP_NAME=Blender
 APP_DESKTOP_DESCRIPTION="Free and open-source 3D creation suite"
@@ -28,3 +26,9 @@ Type=Application
 Categories=$APP_DESKTOP_CATEGORIES
 StartupNotify=true
 EOF
+
+echo "Remove old blender at $HOME/.local/ if exist"
+
+# Other
+sudo apt install -y f3d freecad
+
