@@ -2,3 +2,4 @@
 
 sudo apt remove vlc dragonplayer
 sudo apt install -y mpv obs-studio audacity kdenlive lmms ffmpeg yt-dlp cmus ani-cli picard
+sudo apt install -y krita inkscape imagemagick darktable qrencode gimp mypaint-brushes
