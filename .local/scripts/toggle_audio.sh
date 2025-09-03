@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 # pactl get-default-sink to determine sinks
 
-sink1=alsa_output.pci-0000_2d_00.1.hdmi-stereo-extra1
-sink2=alsa_output.pci-0000_2f_00.4.analog-stereo
+sinks=($(pactl list sinks short | awk '/hdmi|analog/ {print $2}'))
+current=$(pactl get-default-sink)
 
-sink_current=`pactl get-default-sink`
-case $sink_current in
-  $sink1) pactl set-default-sink $sink2 ;;
-  $sink2) pactl set-default-sink $sink1 ;;
-  *) pactl set-default-sink $sink1 ;;
-esac
+if [[ $current == "${sinks[0]}" ]]; then
+    pactl set-default-sink "${sinks[1]}"
+else
+    pactl set-default-sink "${sinks[0]}"
+fi
+
