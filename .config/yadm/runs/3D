@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
 
-APP_MAIN_VERSION=4.5
-APP_VERSION=4.5.1
+# F3D and freecad
+sudo apt install -y f3d freecad
+
+# Blender
+APP_RELEASE_TAG=alpha+main.f7c37b05e447
+APP_VERSION=5.0.0
 APP_NAME=blender
 APP_DESKTOP_NAME=Blender
 APP_DESKTOP_DESCRIPTION="Free and open-source 3D creation suite"
 APP_DESKTOP_CATEGORIES="Graphics;Science"
+APP_OUTPUT_NAME="blender-$APP_VERSION.tar.gz"
 
 cd /tmp || { echo "cd failed"; exit 1; }
-wget2 --progress=bar https://ftp.nluug.nl/pub/graphics/blender/release/Blender$APP_MAIN_VERSION/blender-$APP_VERSION-linux-x64.tar.xz
-tar --extract --file blender-$APP_VERSION-linux-x64.tar.xz -av -C ~/.local/
-rm -f blender-$APP_VERSION-linux-x64.tar.xz
+wget2 --progress=bar "https://cdn.builder.blender.org/download/daily/blender-$APP_VERSION-$APP_RELEASE_TAG-linux.x86_64-release.tar.xz" \
+    --output-document $APP_OUTPUT_NAME
+tar --extract --file $APP_OUTPUT_NAME -av -C ~/.local/
+rm -f $APP_OUTPUT_NAME
 
 mkdir -p "$HOME/.local/share/applications"
 cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
@@ -19,7 +25,7 @@ Version=$APP_VERSION
 Name=$APP_DESKTOP_NAME
 Comment=$APP_DESKTOP_DESCRIPTION
 GenericName=$APP_DESKTOP_NAME
-Exec=$HOME/.local/blender-$APP_VERSION-linux-x64/blender
+Exec=$HOME/.local/blender-$APP_VERSION-$APP_RELEASE_TAG-linux.x86_64-release/blender
 Icon=$HOME/.local/bin/icons/$APP_NAME.svg
 Terminal=false
 Type=Application
@@ -27,8 +33,6 @@ Categories=$APP_DESKTOP_CATEGORIES
 StartupNotify=true
 EOF
 
-echo "Remove old blender at $HOME/.local/ if exist"
-
-# Other
-sudo apt install -y f3d freecad
+# Find old version and suggest to remove
+find "$HOME/.local/" -maxdepth 1 -type d -name "blender-*" ! -name "blender-$APP_VERSION*" -exec echo found old version, please remove manually {} +
 
