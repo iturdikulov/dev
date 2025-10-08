@@ -33,8 +33,8 @@ mute=Volume Mute,Volume Mute,Mute
 
 [ksmserver]
 Halt Without Confirmation=none,,Shut Down Without Confirmation
-Lock Session=Screensaver\tMeta+L,Meta+L\tScreensaver,Lock Session
-Log Out=Ctrl+Alt+Del,Ctrl+Alt+Del,Show Logout Screen
+Lock Session=Ctrl+Alt+Del,Meta+L\tScreensaver,Lock Session
+Log Out=none,Ctrl+Alt+Del,Show Logout Screen
 Log Out Without Confirmation=none,,Log Out Without Confirmation
 LogOut=none,,Log Out
 Reboot=none,,Reboot
@@ -132,10 +132,10 @@ Window Fullscreen=Meta+F,,Make Window Fullscreen
 Window Grow Horizontal=none,,Expand Window Horizontally
 Window Grow Vertical=none,,Expand Window Vertically
 Window Lower=none,,Lower Window
-Window Maximize=Meta+PgUp,Meta+PgUp,Maximize Window
+Window Maximize=Meta+PgUp\tMeta+L,Meta+PgUp,Maximize Window
 Window Maximize Horizontal=none,,Maximize Window Horizontally
 Window Maximize Vertical=none,,Maximize Window Vertically
-Window Minimize=Meta+PgDown,Meta+PgDown,Minimize Window
+Window Minimize=Meta+Y\tMeta+PgDown,Meta+PgDown,Minimize Window
 Window Move=none,,Move Window
 Window Move Center=none,,Move Window to the Center
 Window No Border=none,,Toggle Window Titlebar and Frame
@@ -225,7 +225,7 @@ Increase Screen Brightness=Monitor Brightness Up,Monitor Brightness Up,Increase 
 Increase Screen Brightness Small=Shift+Monitor Brightness Up,Shift+Monitor Brightness Up,Increase Screen Brightness by 1%
 PowerDown=Power Down,Power Down,Power Down
 PowerOff=Power Off,Power Off,Power Off
-Sleep=Sleep,Sleep,Suspend
+Sleep=Ctrl+Alt+Shift+Del\tSleep,Sleep,Suspend
 Toggle Keyboard Backlight=Keyboard Light On/Off,Keyboard Light On/Off,Toggle Keyboard Backlight
 Turn Off Screen=none,none,Turn Off Screen
 _k_friendly_name=Power Management
@@ -268,8 +268,8 @@ show dashboard=Ctrl+F12,Ctrl+F12,Show Desktop
 show-barcode=none,,Show Barcode…
 show-on-mouse-pos=none,Meta+V,Show Clipboard Items at Mouse Position
 stop current activity=Meta+S,Meta+S,Stop Current Activity
-switch to next activity=none,,Switch to Next Activity
-switch to previous activity=none,,Switch to Previous Activity
+switch to next activity=Meta+Tab,,Switch to Next Activity
+switch to previous activity=Meta+Shift+Tab,,Switch to Previous Activity
 toggle do not disturb=none,,Toggle do not disturb
 
 [services][io.crow_translate.CrowTranslate.desktop]
@@ -295,12 +295,6 @@ _launch=Meta+F1
 [services][net.local.krunner.desktop]
 _launch=Alt+F2
 
-[services][net.local.notify-send-2.desktop]
-_launch=Ctrl+Alt+#
-
-[services][net.local.notify-send-3.desktop]
-_launch=Ctrl+Alt+$
-
 [services][net.local.obs-record.py.desktop]
 _launch=Meta+R
 
@@ -310,11 +304,11 @@ _launch=Meta+Shift+R
 [services][net.local.piper-speak.sh.desktop]
 _launch=Meta+Media Play
 
-[services][net.local.ssh-2.desktop]
-_launch=Ctrl+Alt+!
+[services][net.local.toggle_audio.sh.desktop]
+_launch=Ctrl+Alt+Media Play
 
-[services][net.local.ssh.desktop]
-_launch=Ctrl+Alt+@
+[services][net.local.ww.sh.desktop]
+_launch=Meta+`
 
 [services][org.kde.kcalc.desktop]
 _launch=Meta+=\tCalculator
@@ -329,3 +323,6 @@ _launch=Meta+Space
 RecordRegion=none
 RectangularRegionScreenShot=Print\tMeta+Shift+Print
 _launch=Meta+Shift+S
+
+[services][org.telegram.desktop._f5398c4b242994c49f72de073f07a8f6.desktop]
+_launch=Meta+F4

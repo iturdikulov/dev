@@ -8,6 +8,3 @@
 --embed-chapters
 --embed-thumbnail
 --format-sort res:1080,ext:mp4:m4a
-# Save all videos under record directory
--o ~/Videos/record/%(title)s/%(title)s.%(ext)s
-

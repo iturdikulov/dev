@@ -1,6 +1,6 @@
 [Added Associations]
 application/epub+zip=org.pwmt.zathura-pdf-mupdf.desktop;mupdf.desktop;calibre-ebook-viewer.desktop;calibre-gui.desktop;calibre-ebook-edit.desktop;org.kde.ark.desktop;
-application/pdf=org.pwmt.zathura-pdf-poppler.desktop;firefox-esr.desktop;calibre-ebook-viewer.desktop;gimp.desktop;calibre-gui.desktop;display-im7.q16.desktop;org.inkscape.Inkscape.desktop;krita_pdf.desktop;mupdf.desktop;
+application/pdf=sioyek.desktop;org.pwmt.zathura-pdf-poppler.desktop;firefox-esr.desktop;calibre-ebook-viewer.desktop;gimp.desktop;calibre-gui.desktop;display-im7.q16.desktop;org.inkscape.Inkscape.desktop;krita_pdf.desktop;mupdf.desktop;
 application/vnd.comicbook+zip=org.pwmt.zathura-cb.desktop;org.kde.ark.desktop;
 application/vnd.comicbook-rar=org.pwmt.zathura-cb.desktop;org.kde.ark.desktop;
 application/vnd.openxmlformats-officedocument.wordprocessingml.document=libreoffice-writer.desktop;calibre-ebook-viewer.desktop;calibre-ebook-edit.desktop;calibre-gui.desktop;org.kde.ark.desktop;org.pwmt.zathura-cb.desktop;
@@ -9,6 +9,7 @@ application/x-extension-html=firefox-esr.desktop;
 application/x-extension-shtml=firefox-esr.desktop;
 application/x-extension-xht=firefox-esr.desktop;
 application/x-extension-xhtml=firefox-esr.desktop;
+application/x-php=nvim.desktop;
 application/xhtml+xml=firefox-esr.desktop;calibre-ebook-edit.desktop;nvim.desktop;calibre-ebook-viewer.desktop;libreoffice-writer.desktop;calibre-gui.desktop;
 application/zip=org.kde.ark.desktop;
 audio/3gpp=mpv.desktop;
@@ -131,7 +132,7 @@ x-scheme-handler/tel=org.kde.kdeconnect.handler.desktop;
 application/epub+zip=org.pwmt.zathura-pdf-mupdf.desktop;
 application/javascript=nvim.desktop
 application/json=nvim.desktop
-application/pdf=org.pwmt.zathura-pdf-poppler.desktop;
+application/pdf=sioyek.desktop;
 application/toml=nvim.desktop
 application/vnd.coffeescript=nvim.desktop
 application/vnd.comicbook+zip=org.pwmt.zathura-cb.desktop;
@@ -139,8 +140,9 @@ application/vnd.comicbook-rar=org.pwmt.zathura-cb.desktop;
 application/vnd.oasis.opendocument.text=writer.desktop
 application/vnd.openxmlformats-officedocument.wordprocessingml.document=libreoffice-writer.desktop;
 application/x-awk=nvim.desktop
+application/x-blender=blender.desktop
 application/x-perl=nvim.desktop
-application/x-php=nvim.desktop
+application/x-php=nvim.desktop;
 application/x-ruby=nvim.desktop
 application/x-shellscript=nvim.desktop
 application/x-yaml=nvim.desktop
@@ -290,10 +292,10 @@ x-scheme-handler/mailto=thunderbird.desktop;
 x-scheme-handler/obsidian=obsidian.desktop
 x-scheme-handler/slack=slack.desktop
 x-scheme-handler/tel=org.kde.kdeconnect.handler.desktop;
-application/x-blender=blender.desktop
 
 [Removed Associations]
 application/vnd.comicbook+zip=calibre-gui.desktop;calibre-ebook-viewer.desktop;
 application/vnd.comicbook-rar=calibre-ebook-viewer.desktop;calibre-gui.desktop;
+application/x-php=calibre-ebook-viewer.desktop;libreoffice-writer.desktop;calibre-gui.desktop;
 image/jp2=org.kde.gwenview.desktop;
 text/markdown=obsidian.desktop;

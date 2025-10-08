@@ -20,9 +20,21 @@ titlematch=1
 Description=Orca Slicer No Titlebar and Frame
 noborderrule=3
 
+[6e9eb95c-e26b-4b6d-acd9-ce5d153fb54c]
+Description=QFoot
+maximizehoriz=true
+maximizehorizrule=3
+noborder=true
+noborderrule=3
+placement=6
+placementrule=2
+types=1
+wmclass=qfoot
+wmclassmatch=1
+
 [General]
-count=4
-rules=c49b2837-e72e-4274-abc5-c8f796d58aed,cd26447c-52ae-4eec-bc9d-0ec642c9020b,3b96aea6-551f-4c65-9f4c-5f929ae9e0c8,051ceab2-1c45-417f-8efa-648e6954bdcc
+count=5
+rules=c49b2837-e72e-4274-abc5-c8f796d58aed,6e9eb95c-e26b-4b6d-acd9-ce5d153fb54c,cd26447c-52ae-4eec-bc9d-0ec642c9020b,3b96aea6-551f-4c65-9f4c-5f929ae9e0c8,051ceab2-1c45-417f-8efa-648e6954bdcc
 
 [c49b2837-e72e-4274-abc5-c8f796d58aed]
 Description=Foot

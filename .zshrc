@@ -2,8 +2,8 @@ zstyle ':completion:*:*:make:*' tag-order 'targets'
 
 [ -f "$HOME/.config/slimzsh/slim.zsh" ] && source "$HOME/.config/slimzsh/slim.zsh"
 
-precmd() {
-    print -Pn "\e]133;A\e\\"
+preexec () {
+  echo -n "\\x1b]133;A\\x1b\\"
 }
 
 set -o vi
@@ -35,6 +35,9 @@ addToPathFront() {
 }
 
 # Init tools
+if (( $+commands[starship] )); then
+    eval "$(starship init zsh)"
+fi
 if (( $+commands[zoxide] )); then
     eval "$(zoxide init zsh)"
 fi
@@ -90,7 +93,7 @@ fi
 alias ls='ls --color=auto'
 if (( $+commands[eza] )); then
   IGNORE_GLOB="UnrealEngine"
-  alias eza="eza --group-directories-first --git";
+  alias eza="eza --group-directories-first --git --icons";
   alias l="eza -bl -I $IGNORE_GLOB";
   alias ll="eza -abghilmu -I $IGNORE_GLOB";
   alias la="LC_COLLATE=C eza -ablF -I $IGNORE_GLOB";
@@ -110,14 +113,20 @@ if (( $+commands[fdfind] )); then
 fi
 
 alias g='git'
+alias garchive='git archive --format=zip --output "git_archive_$(date +%s).zip" HEAD'
+alias git-recent='git diff --numstat | sort -k1 -nr'
+alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
+alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
 alias py='python3'
 alias ipy='ipython'
-c() {
-local exp="$*"
-python3 -c "from math import *
-result = $exp
-print(f'$exp = {result}')"
+
+c()
+{
+    local in="$(echo " $*" | sed -e 's/\[/(/g' -e 's/\]/)/g')";
+    gawk -M -v PREC=201 -M 'BEGIN {printf("%.60g\n",'"${in-0}"')}' < /dev/null
 }
+
+alias rga='rg --hidden --no-ignore'
 
 alias disk-usage='ncdu --exclude ~/Media --exclude /proc --exclude /sys --exclude /mnt --exclude /media --exclude /dev/shm'
 
@@ -139,14 +148,13 @@ alias chown="chown --preserve-root" # Do not do chown for root directory
 alias chmod="chmod --preserve-root"
 alias E="SUDO_EDITOR=nvim sudo -e"
 
-alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
-alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
 alias mux='tmux attach || tmux new'
 alias f='$(fzf) && nvim -- "$f"'
 alias grep='grep --color'
 
 alias jc='journalctl -xeu'
 alias sc=systemctl
+alias fpass='PASSWORD_STORE_ENABLE_EXTENSIONS=true pass fzf'
 
 if (( $+commands[apt] )); then
     alias apts='apt-cache search'
@@ -162,7 +170,7 @@ if (( $+commands[apt] )); then
     alias pkgfiles='dpkg --listfiles'
 fi
 
-# Translate aliaes
+# Translate aliases
 export ARGOS_DEVICE_TYPE=cuda
 toen() {
     argos-translate --from ru --to en "$*"
@@ -213,8 +221,8 @@ q() {
     llm -s "Use a brief style for answer, limit output to 140-500 characters." "$*"|glow
 }
 
-qp() {
-    llm -s "You are a top programming expert who provides precise answers, avoiding ambiguous responses. “Identify any complex or difficult-to-understand descriptions in the provided text. Rewrite these descriptions to make them clearer and more accessible. Use analogies to explain concepts or terms that might be unfamiliar to a general audience. Ensure that the analogies are relatable, easy to understand.” “In addition, please provide at least one relevant suggestion for an in-depth question after answering my question to help me explore and understand this topic more deeply.” Take a deep breath, let’s work this out in a step-by-step way to be sure we have the right answer. If there’s a perfect solution, I’ll tip $200! Many thanks to these AI whisperers: Reply in English using professional tone for everyone." "$*"|glow
+qq() {
+    llm -s "You are a top programming expert who provides precise answers, avoiding ambiguous responses. “Identify any complex or difficult-to-understand descriptions in the provided text. Rewrite these descriptions to make them clearer and more accessible. Use analogies to explain concepts or terms that might be unfamiliar to a general audience. Ensure that the analogies are relatable, easy to understand. Add related links for additional materials.” “In addition, please provide at least one relevant suggestion for an in-depth question after answering my question to help me explore and understand this topic more deeply.” Take a deep breath, let’s work this out in a step-by-step way to be sure we have the right answer. If there’s a perfect solution, I’ll tip $200! Many thanks to these AI whisperers: Reply in English using professional tone for everyone." "$*"|glow --pager
 }
 
 def() {
