@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
 sudo apt remove vlc dragonplayer
-sudo apt install -y mpv obs-studio audacity kdenlive lmms ffmpeg yt-dlp cmus ani-cli picard
+sudo apt install -y mpv obs-studio audacity kdenlive lmms ffmpeg cmus ani-cli picard
 sudo apt install -y krita inkscape imagemagick darktable qrencode gimp mypaint-brushes
+
+wget2 --progress=bar --output-document ~/.local/bin/yt-dlp \
+    "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux"
+chmod +x ~/.local/bin/yt-dlp
