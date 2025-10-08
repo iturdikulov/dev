@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+sudo apt update
+sudo apt install zathura zathura-cb zathura-djvu mupdf texlive-base texlive latexmk texlive-lang-cyrillic texlive-fonts-extra
+# texlive-latex-extra texlive-xetex
+sudo apt install libmupdf-dev zathura-dev gcc meson ca-certificates binutils
+mkdir -p /tmp/zathura
+cd /tmp/zathura || exit 1
+git clone https://github.com/pwmt/zathura-pdf-mupdf zathura-develop
+cd zathura-develop || exit 1
+meson build
+cd build || exit 1
+ninja
+ninja install
+
+# Install syoek
+mkdir -p /tmp/sioyek
+cd /tmp/sioyek || exit 1
+# Download and extract
+wget2 --progress=bar --output-document sioyek-release-linux.zip https://github.com/ahrm/sioyek/releases/download/sioyek3-alpha0/sioyek-release-linux.zip
+unzip -o sioyek-release-linux.zip -d .
+rm sioyek-release-linux.zip
+# Symlink the executable
+mkdir -p ~/.local/bin
+mv Sioyek-x86_64.AppImage ~/.local/bin/sioyek
+
+APP_NAME=sioyek
+APP_DESKTOP_NAME=sioyek
+APP_DESKTOP_DESCRIPTION="PDF viewer with a focus on textbooks and research papers"
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
+[Desktop Entry]
+Name=$APP_DESKTOP_NAME
+Comment=$APP_DESKTOP_DESCRIPTION
+GenericName=$APP_DESKTOP_NAME
+Exec=sioyek
+Icon=$HOME/.local/bin/icons/$APP_NAME.svg
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Office;Viewer;
+Keywords=PDF;PS;PostScript;DjVU;document;presentation;viewer;
+EOF
+
+# Texlab
+cd /tmp || exit 1
+wget2 https://github.com/latex-lsp/texlab/releases/download/v5.23.1/texlab-x86_64-linux.tar.gz -O texlab.tar.gz
+tar --extract --file texlab.tar.gz -av -C ~/.local/bin/
+rm texlab.tar.gz

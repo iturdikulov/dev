@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+sudo apt install -y build-essential
+
+cd /tmp || exit 1
+git clone https://github.com/v4l2loopback/v4l2loopback.git
+cd v4l2loopback || exit 1
+make && sudo make install
+sudo depmod -a && sudo modprobe v4l2loopback
+
+APP_VERSION=3.3.1
+cd "/tmp" || exit 1
+mkdir -p "$HOME/.local/scrcpy"
+wget2 --progress=bar -O - "https://github.com/Genymobile/scrcpy/releases/download/v$APP_VERSION/scrcpy-linux-x86_64-v3.3.1.tar.gz" | tar xz -C "$HOME/.local/scrcpy" --strip-components=1
+
+APP_NAME=scrcpy
+APP_DESKTOP_NAME=scrcpy
+APP_DESKTOP_DESCRIPTION="Display and control your Android device"
+APP_DESKTOP_CATEGORIES="Utility;Network"
+mkdir -p $HOME/.local/share/applications
+cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
+[Desktop Entry]
+Version=$APP_VERSION
+Name=$APP_DESKTOP_NAME
+Comment=$APP_DESKTOP_DESCRIPTION
+GenericName=$APP_DESKTOP_NAME
+Exec=$HOME/.local/scrcpy/$APP_NAME
+Icon=$HOME/.local/bin/icons/$APP_NAME.svg
+Terminal=false
+Type=Application
+Categories=$APP_DESKTOP_CATEGORIES
+StartupNotify=true
+EOF
