@@ -4,13 +4,33 @@
 sudo apt install -y python3-full
 
 # UV for virtual envs
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# if uv not installed
 
-cd "$HOME/.local/bin" || { echo "Error: Failed to change directory to $HOME/.local/bin" >&2; exit 1; }
+# Get uv version and extract version number
+UV_REQUIRED=0.7.2
+uv_version=$(uv --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+
+if [[ -n "$uv_version" ]]; then
+    # Compare versions using sort -V (version sort)
+    if printf '%s\n%s\n' "$UV_REQUIRED" "$uv_version" | sort -V -C; then
+        echo "uv $uv_version meets minimum requirement (≥0.7.2)"
+    else
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+    fi
+else
+    echo "uv not installed or version not found"
+fi
+
+
+cd "$HOME/.local/bin" || {
+    echo "Error: Failed to change directory to $HOME/.local/bin" >&2
+    exit 1
+}
 
 # Install some tools
 for tool in ruff basedpyright debugpy mypy ipython pipdeptree sqlfluff djlint llm obs-cli argostranslate piper-tts files-to-prompt tmuxp; do
     ./uv tool install $tool
 done
 
-./uv tool run llm install llm-openrouter
+./uv tool run llm install llm-openrouter llm-ollama
+
