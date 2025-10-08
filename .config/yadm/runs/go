@@ -21,3 +21,4 @@ cd /usr/local/go/bin/ || { echo "Failed"; exit 1; }
 ./go install mvdan.cc/sh/v3/cmd/shfmt@latest
 ./go install github.com/xjasonlyu/tun2socks/v2@latest
 ./go install github.com/antonmedv/countdown@latest
+./go install github.com/bootdotdev/bootdev@latest
