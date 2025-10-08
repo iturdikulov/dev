@@ -20,13 +20,8 @@ while (( "$#" )); do
   esac
 done
 
-NVIM_VERSION=0.11.0
-
 wget2 --progress=bar --output-document $downloaded_file \
-  https://github.com/neovim/neovim/releases/download/v$NVIM_VERSION/nvim-linux-x86_64.tar.gz
-
-echo "fe0a5bc79e64c5e4d9f844cd96157ebd3919ef1343b329e9ebc3f455924cc7d6  $downloaded_file" \
-  | sha256sum -c
+    "https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz"
 
 # Was the last command ok?
 if [ $? -ne 0 ]; then
