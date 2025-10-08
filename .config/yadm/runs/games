@@ -8,7 +8,7 @@ sudo apt -y install mesa-vulkan-drivers libglx-mesa0:i386 mesa-vulkan-drivers:i3
 
 # protontricks to tune proton prefixes and protontricks-launch to launch games
 # gamemode to tune hardware while playing games
-sudo apt -y install winetricks gamemode gamescope lutris antimicro
+sudo apt -y install winetricks gamemode gamescope lutris antimicro dolphin-emu
 sudo usermod -aG gamemode $USER
 
 # protonup-qt
