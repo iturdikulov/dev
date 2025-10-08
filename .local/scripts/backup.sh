@@ -44,7 +44,9 @@ borg create \
     --exclude "home/*/.steam" \
     --exclude "home/*/Media/" \
     --exclude "home/*/.thunderbird/*/calendar-data/cache.sqlite*" \
+    --exclude "/home/*/.config/Slack/Service Worker" \
     --exclude "var/tmp/*" \
+    --exclude "var/backups/*" \
     --exclude "var/log/*" \
     --exclude "var/cache/*" \
     --exclude "*/Cache" \
