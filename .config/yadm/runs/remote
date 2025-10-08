@@ -1,0 +1,90 @@
+#!/bin/bash
+
+# --- Parsec
+#
+# Define the download directory
+DOWNLOAD_DIR="/tmp"
+
+# Ensure wget is installed
+if ! command -v wget &> /dev/null; then
+    sudo apt-get update
+    sudo apt-get install wget
+fi
+
+# Declare an associative array with package names as keys and URLs as values
+declare -A DEB_FILES=(
+    ["parsec-linux.deb"]="https://builds.parsec.app/package/parsec-linux.deb"
+
+)
+
+# Download and install .deb packages
+for deb_file in "${!DEB_FILES[@]}"; do
+    if [ ! -f "$DOWNLOAD_DIR/$deb_file" ]; then
+        wget -P "$DOWNLOAD_DIR" "${DEB_FILES[$deb_file]}"
+    fi
+    dpkg-deb -x $DOWNLOAD_DIR/parsec-linux.deb ~/.local/parsec
+done
+
+# Fix libjpeg dependencies issue
+sudo apt install -y libjpeg62-turbo libjpeg62-turbo-dev
+ln -s /usr/lib/x86_64-linux-gnu/libjpeg.so.62 /usr/lib/x86_64-linux-gnu/libjpeg.so.8
+# sudo apt-mark hold parsec
+# sudo apt-get install -f
+
+# Fix for PulseAudio config bug in some versions of Ubuntu
+[ ! -f /etc/alsa/conf.d/99-pulseaudio-default.conf ] && { [ -f /etc/alsa/conf.d/99-pulseaudio-default.conf.example ] && sudo mv /etc/alsa/conf.d/99-pulseaudio-default.conf.example /etc/alsa/conf.d/99-pulseaudio-default.conf || sudo tee /etc/alsa/conf.d/99-pulseaudio-default.conf.example > /dev/null <<'EOF'
+# Default to PulseAudio
+
+pcm.!default {
+    type pulse
+    hint {
+        show on
+        description "Default ALSA Output (currently PulseAudio Sound Server)"
+    }
+}
+
+ctl.!default {
+    type pulse
+}
+EOF
+}
+
+
+APP_NAME=parsec
+APP_DESKTOP_NAME=Parsec
+APP_DESKTOP_DESCRIPTION="Remote desktop client and server"
+
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
+[Desktop Entry]
+Version=$pkgver
+Name=$APP_DESKTOP_NAME
+Comment=$APP_DESKTOP_DESCRIPTION
+GenericName=$APP_DESKTOP_NAME
+Exec=LD_PRELOAD=$HOME/.local/parsec/usr/share/parsec/skel/parsecd-150-97c.so $HOME/.local/parsec/usr/bin/parsecd peer_id=$PARSEC_PEER_ID
+Icon=$HOME/.local/bin/icons/$APP_NAME.svg
+Terminal=false
+Type=Application
+StartupNotify=true
+EOF
+
+# --- Anydesk
+#
+# Add the AnyDesk GPG key
+sudo apt update
+sudo apt install ca-certificates curl apt-transport-https
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://keys.anydesk.com/repos/DEB-GPG-KEY -o /etc/apt/keyrings/keys.anydesk.com.asc
+sudo chmod a+r /etc/apt/keyrings/keys.anydesk.com.asc
+
+# Add the AnyDesk apt repository
+echo "deb [signed-by=/etc/apt/keyrings/keys.anydesk.com.asc] https://deb.anydesk.com all main" | sudo tee /etc/apt/sources.list.d/anydesk-stable.list > /dev/null
+
+# Update apt caches and install the AnyDesk client
+sudo apt update
+sudo apt install anydesk
+sudo systemctl disable anydesk
+
+# --- Remmina
+#
+sudo apt install -y remmina
