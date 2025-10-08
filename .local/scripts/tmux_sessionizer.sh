@@ -19,6 +19,7 @@ else
         ~/Pictures/personal/devices \
         ~/Media \
         ~/Videos \
+        ~/Documents/personal \
         ~/Desktop/programming/bootdev \
         ~/Desktop/* )| fzf --tac)
 fi
@@ -36,7 +37,11 @@ if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
 fi
 
 if ! tmux has-session -t=$selected_name 2> /dev/null; then
-    tmux new-session -ds $selected_name -c $selected \; new-window -c "#{pane_current_path}" \; select-window -t:1
+    if [[ -f "$selected/.tmuxp.yaml" ]]; then
+        tmuxp load -d "$selected/.tmuxp.yaml"
+    else
+        tmux new-session -ds $selected_name -c $selected
+    fi
 fi
 
 tmux switch-client -t $selected_name

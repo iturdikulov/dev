@@ -9,7 +9,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 cd "$HOME/.local/bin" || { echo "Error: Failed to change directory to $HOME/.local/bin" >&2; exit 1; }
 
 # Install some tools
-for tool in ruff basedpyright debugpy mypy ipython pipdeptree sqlfluff djlint llm obs-cli argostranslate piper-tts; do
+for tool in ruff basedpyright debugpy mypy ipython pipdeptree sqlfluff djlint llm obs-cli argostranslate piper-tts files-to-prompt tmuxp; do
     ./uv tool install $tool
 done
 
