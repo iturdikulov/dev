@@ -5,16 +5,27 @@ sudo apt install -y nodejs npm shellcheck
 
 npm config set prefix ~/.local/npm
 
-npm i -g n
-npm i -g pnpm
-npm i -g deno
+packages=(
+    n
+    pnpm
+    deno
+    browser-sync
+    single-file-cli
+    @biomejs/biome
+    @olrtg/emmet-language-server@2.6.1
+    bash-language-server
+    critical
+    typescript-language-server
+    typescript
+    vscode-langservers-extracted
+    dockerfile-language-server-nodejs
+    yaml-language-server
+    vscode-langservers-extracted
+)
 
-npm i -g "single-file-cli"
-npm i -g @biomejs/biome
-npm i -g @olrtg/emmet-language-server@2.6.1
-npm i -g bash-language-server
-npm i -g critical
-npm i -g typescript-language-server typescript
+for package in "${packages[@]}"; do
+    npm install --global "$package"
+done
 
 cd "$HOME/.local/npm/bin" || { echo "n binary not found!"; exit 1; }
 export N_PREFIX="$HOME/.local/n"
