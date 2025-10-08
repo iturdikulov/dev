@@ -19,6 +19,7 @@ else
         ~/Pictures/personal/devices \
         ~/Media \
         ~/Videos \
+        ~/Desktop/programming/bootdev \
         ~/Desktop/* )| fzf --tac)
 fi
 

@@ -1,0 +1,6 @@
+#!/bin/sh
+# Wrapper to launch Krita with specific Qt environment variables for tablet
+# and high-dpi support
+
+KRITA_FULL_PATH=/usr/bin/krita
+QT_XCB_TABLET_LEGACY_COORDINATES=1 QT_AUTO_SCREEN_SCALE_FACTOR=1 $KRITA_FULL_PATH "$@"

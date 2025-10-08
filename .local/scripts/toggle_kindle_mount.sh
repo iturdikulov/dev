@@ -6,9 +6,7 @@ if [ -z "$DEVICE" ]; then
 fi
 
 if gio mount -l | grep -q "$DEVICE"; then
-    gio mount -u "$DEVICE"
-    echo "Unmounted $DEVICE"
+    gio mount -u "$DEVICE" && echo "Unmounted $DEVICE"
 else
-    gio mount "$DEVICE"
-    echo "Mounted $DEVICE"
+    gio mount "$DEVICE" && echo "Mounted $DEVICE"
 fi
