@@ -5,6 +5,7 @@ trash ~/.local/share/applications/freecad.desktop
 trash ~/.local/bin/freecad
 
 sudo apt remove -y cuda-keyring cuda-drivers
+sudo apt remove -y cuda-drivers cuda-toolkit
 sudo apt remove --purge nvidia-installer-cleanup \
       nvidia-persistenced
 sudo apt purge nvidia-*
@@ -14,4 +15,5 @@ sudo apt autoclean
 sudo apt autoremove --purge
 
 sudo apt remove -y v4l2loopback-dkms v4l-utils yt-dlp
+
 
