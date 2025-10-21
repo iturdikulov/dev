@@ -21,6 +21,8 @@ packages=(
     dockerfile-language-server-nodejs
     yaml-language-server
     vscode-langservers-extracted
+    @google/gemini-cli
+    @google/clasp
 )
 
 for package in "${packages[@]}"; do
@@ -30,3 +32,4 @@ done
 cd "$HOME/.local/npm/bin" || { echo "n binary not found!"; exit 1; }
 export N_PREFIX="$HOME/.local/n"
 ./n lts
+./npm config set prefix ~/.local/npm

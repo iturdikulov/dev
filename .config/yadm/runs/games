@@ -12,8 +12,7 @@ sudo apt -y install winetricks gamemode gamescope lutris antimicro dolphin-emu
 sudo usermod -aG gamemode $USER
 
 # protonup-qt
-URL="https://github.com/DavidoTek/ProtonUp-Qt/releases/download/v2.12.0/ProtonUp-Qt-2.12.0-x86_64.AppImage"
-wget2 --progress=bar --output-document $HOME/.local/bin/ProtonUp-Qt.AppImage $URL
+wget2 --progress=bar --output-document "$HOME/.local/bin/ProtonUp-Qt.AppImage" "https://github.com/DavidoTek/ProtonUp-Qt/releases/download/v2.12.0/ProtonUp-Qt-2.12.0-x86_64.AppImage"
 chmod a+x $HOME/.local/bin/ProtonUp-Qt.AppImage
 
 mkdir -p $HOME/.local/share/applications
@@ -30,3 +29,32 @@ Type=Application
 Categories=GTK;Game
 StartupNotify=true
 EOF
+
+# citron
+wget2 --progress=bar --output-document "$HOME/.local/bin/citron.AppImage" "https://git.citron-emu.org/api/v4/projects/1/packages/generic/Citron/0.8.0/citron_0.8.0-x86_64_v3.AppImage"
+chmod a+x $HOME/.local/bin/citron.AppImage
+cat> $HOME/.local/share/applications/citron.desktop << EOF
+[Desktop Entry]
+Version=0.8.0
+Name=Citron
+Comment=Nintendo Switch Emulator
+GenericName=Citron Emulator
+Exec=$HOME/.local/bin/citron.AppImage
+Icon=applications-games
+Terminal=false
+Type=Application
+Categories=Game;Emulator;
+StartupNotify=true
+EOF
+
+cd /tmp || exit 1
+wget --progress=bar --output-document ProdKeys.zip https://files.prodkeys.net/ProdKeys.NET-v20.4.0.zip
+wget --progress=bar --output-document Frimware.zip  https://github.com/THZoria/NX_Firmware/releases/download/20.4.0/Firmware.20.4.0.zip
+
+# Extract the downloaded zip files
+unzip "ProdKeys.zip" -d "ProdKeys" && rm "ProdKeys.zip"
+unzip "Frimware.zip" -d "Frimware" && rm "Frimware.zip"
+
+# Copy files to their respective directories
+cp -r ProdKeys/*/*.keys "$HOME/.local/share/citron/keys"
+cp -r Frimware/* "$HOME/.local/share/citron/nand/system/Contents/registered"

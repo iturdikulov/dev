@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Download required binaries for development
+# Run this after cloning the repository
+
+echo "Downloading required binaries..."
+
+INSTALL_DIR="$HOME/.local/whisper"
+
+# Create resources directory if it doesn't exist
+mkdir -p "$INSTALL_DIR"
+
+# Ensure Whisper binary exists, or offer to build from source
+if [ ! -x "$INSTALL_DIR/whisper-cli" ]; then
+  echo "Whisper binary not found at $INSTALL_DIR/whisper-cli"
+  read -r -p "Do you want to clone and build whisper.cpp now? [y/N]: " reply
+  case $reply in
+    [Yy]*)
+      if ! command -v git >/dev/null 2>&1; then
+        echo "Error: git is required to build whisper.cpp"; exit 1
+      fi
+      if ! command -v make >/dev/null 2>&1; then
+        echo "Error: make is required to build whisper.cpp (install Xcode Command Line Tools)"; exit 1
+      fi
+      TMP_DIR="$(mktemp -d)"
+      echo "Building whisper.cpp (this may take a few minutes)..."
+      (
+        cd "$TMP_DIR" || exit 1
+        git clone --depth=1 https://github.com/ggml-org/whisper.cpp.git
+        cd whisper.cpp || exit 1
+        sh ./models/download-ggml-model.sh large-v3-turbo-q5_0
+
+        export CUDA_HOME=/usr/local/cuda
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64
+        export PATH=$PATH:$CUDA_HOME/bin
+
+        cmake -B build -DGGML_CUDA=1
+        cmake --build build -j --config Release
+
+        mkdir -p "$INSTALL_DIR"
+        cp -r ./build/* "$INSTALL_DIR"
+        cp -r ./models "$INSTALL_DIR"
+      )
+      RC=$?
+      rm -rf "$TMP_DIR"
+      if [ $RC -ne 0 ]; then
+        echo "Failed to build whisper.cpp automatically."
+        exit 1
+      fi
+      ;;
+    *)
+      echo "Skipping whisper.cpp build. The app build will fail until $INSTALL_DIR/whisper exists."
+      ;;
+  esac
+else
+  echo "Whisper binary already present."
+fi
+
+echo "Done! Binaries are in $INSTALL_DIR"

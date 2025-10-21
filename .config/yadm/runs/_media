@@ -7,3 +7,7 @@ sudo apt install -y krita inkscape imagemagick darktable qrencode gimp mypaint-b
 wget2 --progress=bar --output-document ~/.local/bin/yt-dlp \
     "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux"
 chmod +x ~/.local/bin/yt-dlp
+
+wget2 --progress=bar --output-document ~/.local/bin/lossless-cut \
+    "https://github.com/mifi/lossless-cut/releases/latest/download/LosslessCut-linux-x86_64.AppImage"
+chmod +x ~/.local/bin/lossless-cut

@@ -45,6 +45,7 @@ borg create \
     --exclude "home/*/Media/" \
     --exclude "home/*/.thunderbird/*/calendar-data/cache.sqlite*" \
     --exclude "/home/*/.config/Slack/Service Worker" \
+    --exclude "var/lib/docker/overlay*" \
     --exclude "var/tmp/*" \
     --exclude "var/backups/*" \
     --exclude "var/log/*" \
@@ -74,6 +75,7 @@ info "Pruning repository"
 # other machines' archives also:
 
 borg prune                          \
+    --info                          \
     --list                          \
     --glob-archives '{hostname}-*'  \
     --show-rc                       \
@@ -87,7 +89,7 @@ prune_exit=$?
 
 info "Compacting repository"
 
-borg compact
+borg compact --info
 
 compact_exit=$?
 
