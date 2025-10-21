@@ -6,7 +6,9 @@
 .config/yadm/universal_sys/etc/sing-box/config.json
 .config/singbox-direct-rules.json
 .config/singbox-rules.json
+.config/sqls/config.yml
 .config/msmtp/config
+.config/plasma-workspace/env/env.sh
 .gnupg/*.conf
 .gitconfig
 .local/scripts/kde_connect_watcher.py
