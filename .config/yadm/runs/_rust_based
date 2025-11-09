@@ -3,7 +3,10 @@
 # Base dependencies
 sudo apt install -y nasm
 
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Get cargo & rust toolchain
+if ! command -v cargo &> /dev/null || ! command -v rustup &> /dev/null; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+fi
 
 # Installing additional tools
 cd "$HOME/.cargo/bin" || { echo "cd failed"; exit 1; }
@@ -16,11 +19,15 @@ cd "$HOME/.cargo/bin" || { echo "cd failed"; exit 1; }
 ./cargo install cargo-eval
 ./cargo install git-delta
 ./cargo install leetcode-cli
+./cargo install tex-fmt
 ./cargo install --locked --git https://github.com/Feel-ix-343/markdown-oxide.git markdown-oxide
+./cargo install --locked --git https://github.com/j178/prek
+./cargo install mago && mago self-update
+
 ./rustup component add rust-analyzer
 ./rustup component add rust-src
 
-if [ -n "$(lspci|grep VGA|grep AMD)" ]; then
+if lspci | grep VGA | grep -q AMD; then
     echo "Installing amdgpu_top"
     sudo apt install -y libdrm-dev
     ./cargo install amdgpu_top
