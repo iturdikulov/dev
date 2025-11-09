@@ -7,7 +7,7 @@ Switch keyboard layout to English (Colemak-DH)=none,none,Switch keyboard layout 
 Switch keyboard layout to English (US)=none,none,Switch keyboard layout to English (US)
 Switch keyboard layout to Russian=none,none,Switch keyboard layout to Russian
 Switch to Last-Used Keyboard Layout=Alt+Shift,Meta+Alt+L,Switch to Last-Used Keyboard Layout
-Switch to Next Keyboard Layout=,Meta+Alt+K,Switch to Next Keyboard Layout
+Switch to Next Keyboard Layout=none,Meta+Alt+K,Switch to Next Keyboard Layout
 _k_friendly_name=Keyboard Layout Switcher
 
 [kaccess]
@@ -254,7 +254,7 @@ activate widget 44=Ctrl+Alt+C,none,Activate Color Picker Widget
 activate widget 5=none,none,Activate Icons-Only Task Manager Widget
 activate widget 58=none,none,Activate System Tray Widget
 activate widget 64=none,none,Activate Notifications Widget
-activate widget 8=Ctrl+Alt+T,none,Activate System Tray Widget
+activate widget 8=none,none,Activate System Tray Widget
 clear-history=none,,Clear Clipboard History
 clipboard_action=Meta+Ctrl+X,Meta+Ctrl+X,Automatic Action Popup Menu
 cycle-panels=Meta+Alt+P,Meta+Alt+P,Move keyboard focus between panels
@@ -275,7 +275,7 @@ toggle do not disturb=none,,Toggle do not disturb
 [services][io.crow_translate.CrowTranslate.desktop]
 Open=none
 SpeakSelection=none
-TranslateSelectedText=none
+TranslateSelectedText=Ctrl+Alt+T
 
 [services][net.local.copyq.desktop]
 _launch=Meta+V
@@ -290,7 +290,7 @@ _launch=Meta+F3
 _launch=Meta+F2
 
 [services][net.local.jump_app.sh.desktop]
-_launch=Meta+F1
+_launch=Ctrl+Alt+S
 
 [services][net.local.krunner.desktop]
 _launch=Alt+F2
