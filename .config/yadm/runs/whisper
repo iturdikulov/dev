@@ -34,6 +34,9 @@ if [ ! -x "$INSTALL_DIR/whisper-cli" ]; then
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/local/cuda/extras/CUPTI/lib64
         export PATH=$PATH:$CUDA_HOME/bin
 
+        # Enable static linking
+        sed -i 's/set(BUILD_SHARED_LIBS_DEFAULT ON)/set(BUILD_SHARED_LIBS_DEFAULT OFF)/' CMakeLists.txt
+
         cmake -B build -DGGML_CUDA=1
         cmake --build build -j --config Release
 
