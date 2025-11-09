@@ -21,7 +21,7 @@ speak(){
         local model="$HOME/.local/share/piper_model/en_US-lessac-medium.onnx"
     fi
 
-    "$HOME/.local/bin/piper" --length_scale 1.2 --model $model --output-raw | ffplay -i -f s16le -ar 22050 -autoexit -nodisp -
+    "$HOME/.local/bin/piper" --length_scale 1.2 --model $model --output-raw | ffplay -hide_banner -loglevel panic -i -f s16le -ar 22050 -autoexit -nodisp -
 }
 
 if [ $# -eq 0 ]
