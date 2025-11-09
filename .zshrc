@@ -64,6 +64,7 @@ addToPathFront /usr/local/go/bin
 export N_PREFIX="$HOME/.local/n"
 addToPathFront $HOME/.local/n/bin
 
+addToPathFront $HOME/.local/whisper/bin
 addToPathFront $HOME/.local/tmux/bin
 addToPathFront $HOME/.local/scripts
 addToPathFront $HOME/.config/nnn/plugins
@@ -230,6 +231,7 @@ def() {
 }
 
 d() {
+    piper-speak.sh "$@" &> /dev/null & disown
     sdcv -nc "$@" | sed 's/<[^>]*>//g' | sed 's/0m.*\w\+\.wav.*/0m/g' | less -R
 }
 
