@@ -5,7 +5,8 @@ mkdir -p "$HOME/Music/record"
 
 OUTPUT="$HOME/Music/record/$(date +"%m%d%Y_%H%M%S")_record.wav"
 MODEL="$HOME/.local/whisper/models/ggml-large-v3-turbo-q5_0.bin"
-transcribtion=$(ffmpeg -f pulse -i default "$OUTPUT" && whisper-cli --model "$MODEL" --translate --no-prints "$OUTPUT")
+echo "[🔴 REC]"
+transcribtion=$(ffmpeg -hide_banner -loglevel panic -f pulse -i default -tune zerolatency "$OUTPUT" && whisper-cli --model "$MODEL" --translate --no-prints "$OUTPUT")
 
 # Save in ~/Wiki
 echo "$transcribtion" >> "$HOME/Wiki/TODO_record.md"
