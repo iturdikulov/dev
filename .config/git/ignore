@@ -17,6 +17,7 @@ Icon?
 
 # Code stuffs #
 ###############
+.tmp/
 .ccls-cache/
 .sass-cache/
 __pycache__/
@@ -70,3 +71,6 @@ dmypy.json
 
 # node
 node_modules/
+
+# Personal files
+/TODO.md
