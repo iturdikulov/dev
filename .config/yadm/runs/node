@@ -23,6 +23,7 @@ packages=(
     vscode-langservers-extracted
     @google/gemini-cli
     @google/clasp
+    @343dev/optimizt
 )
 
 for package in "${packages[@]}"; do
