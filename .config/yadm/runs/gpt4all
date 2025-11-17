@@ -1,0 +1,19 @@
+#!/bin/bash
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+cd /tmp || exit 1
+wget2 --continue --progress=bar --output-document=/tmp/gpt4all-installer-linux.run https://gpt4all.io/installers/gpt4all-installer-linux.run
+chmod +x gpt4all-installer-linux.run
+./gpt4all-installer-linux.run -q install && rm gpt4all-installer-linux.run
+
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/GPT4All.desktop" << EOF
+[Desktop Entry]
+Type=Application
+Terminal=false
+Exec="/home/inom/Desktop/software/gpt4all/bin/chat"
+Name=GPT4All
+Icon=/home/inom/Desktop/software/gpt4all/gpt4all-48.png
+Name[en_US]=GPT4All
+EOF
