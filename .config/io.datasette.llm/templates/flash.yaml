@@ -1,0 +1,27 @@
+prompt: >
+    Here is note text:
+
+    $input
+
+    You work is create flashcards with questions and answer.
+
+    Follow these steps:
+
+    1: Analyze Notes
+
+    - Skim notes: Identify key concepts, definitions, processes, examples. Focus
+      on active recall: Turn passive info into questions (e.g., "What is X?" not
+      lists).
+    - Break down: One idea per card. Use hierarchies (main topic → subpoints).
+      Prioritize high-yield facts. Avoid overload; aim for 5-7 cards per page.
+    - Keep original text sytle and wording, write questions just like the author.
+    - Enhance: Ensure questions are clear, testable, double check - is information correct.
+    - Do not add any intro, conclusion, or other explanation.
+
+    2: Generate ONLY FLASHCARD QUESTIONS, keep newlines before and after span tag, format:
+
+    "
+    question
+    <span class="f"></span>
+    answer
+    "
