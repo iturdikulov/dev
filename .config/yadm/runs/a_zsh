@@ -4,7 +4,7 @@ git clone https://github.com/iturdikulov/slimzsh "$HOME/.config/slimzsh"
 cd "$HOME/.config/slimzsh" || exit 1
 git submodule update --init --recursive
 
-sudo apt install -y zsh direnv glow cloc
+sudo apt install -y zsh direnv glow cloc zsh-autosuggestions
 sudo chsh -s $(which zsh)
 sudo chsh -s $(which zsh) $(whoami)
 

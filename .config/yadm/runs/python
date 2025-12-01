@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # Global Python
-sudo apt install -y python3-full
+sudo apt install -y python3-full python3-debugpy patchelf
 
 # Get uv
-if ! command -v uv &> /dev/null; then
+if ! command -v uv &>/dev/null; then
     curl -LsSf https://astral.sh/uv/install.sh | sh
 else
     uv self update
@@ -16,7 +16,7 @@ cd "$HOME/.local/bin" || {
 }
 
 # Install tools
-for tool in ruff basedpyright debugpy "python-lsp-server --with pylsp-rope" mypy ipython pipdeptree sqlfluff djlint llm obs-cli files-to-prompt tmuxp; do
+for tool in ruff basedpyright "python-lsp-server --with pylsp-rope" mypy ipython pipdeptree sqlfluff djlint llm obs-cli files-to-prompt tmuxp nuitka; do
     ./uv tool install --upgrade $tool
 done
 
@@ -25,4 +25,4 @@ for tool in argostranslate piper-tts; do
     ./uv tool install $tool
 done
 
-./uv tool run llm install llm-openrouter llm-ollama
+./uv tool run llm install llm-openrouter llm-ollama llm-gemini

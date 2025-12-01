@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 sudo apt remove firewalld kmail akregator kaddressbook
-sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh msmtp msmtp-mta filezilla whois
+sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh msmtp msmtp-mta filezilla whois qbittorrent-nox
 
 # WARN: Enable firewall for debian!
 sudo apt install -y ufw
@@ -26,14 +26,5 @@ sudo ufw allow 9090/tcp
 sudo ufw enable
 sudo ufw status verbose
 
-# Add samba share mount entry
-sudo apt install -y cifs-utils
-share=kama
-if ! grep -q "kama:/$share" /etc/fstab ; then
-    echo "Mounting $share share"
-    mkdir -p "$HOME/Media/$share"
-    echo "//kama/E $HOME/Media/$share cifs credentials=$HOME/.smbcredentials,noauto,nofail,noatime,x-systemd.automount,x-systemd.idle-timeout=120,x-gvfs-trash,uid=1000,gid=1000 0 0" | \
-    sudo tee --append /etc/fstab
-    sudo mount "$HOME/Media/$share"
-fi
-sudo systemctl daemon-reload
+# Add qbittorrent-nox
+sudo systemctl enable --now "qbittorrent-nox@$USER"

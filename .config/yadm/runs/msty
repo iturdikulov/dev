@@ -1,0 +1,9 @@
+#!/bin/sh
+
+sudo apt install -y libvips-dev
+
+PKGURL="https://next-assets.msty.studio/app/latest/linux/MstyStudio_amd64.deb"
+cd /tmp || exit 1
+wget2 --progress=bar --continue  --output-document msty.deb $PKGURL
+sudo apt install -f ./msty.deb && rm ./msty.deb
+

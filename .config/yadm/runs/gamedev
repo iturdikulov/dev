@@ -5,7 +5,7 @@ sudo apt install -y libsdl2-dev
 # TODO: parametrize!
 
 mkdir -p ~/.local/bin
-cd ~/.local/bin
+cd ~/.local/bin || exit 1
 
 APP=Godot_v4.4.1-stable_linux.x86_64
 URL=https://github.com/godotengine/godot/releases/download/4.4.1-stable/$APP.zip

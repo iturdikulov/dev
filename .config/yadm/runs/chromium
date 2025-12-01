@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-sudo apt install -y chromium chromium-l10n
+cd /tmp || exit 1
+wget2 https://dl.google.com/linux/linux_signing_key.pub -O- | sudo tee /etc/apt/keyrings/linux_signing_key.pub.asc > /dev/null
+echo "deb [signed-by=/etc/apt/keyrings/linux_signing_key.pub.asc] https://dl.google.com/linux/chrome/deb/ stable main" | sudo tee -a /etc/apt/sources.list.d/google-chrome.list > /dev/null
+sudo apt update
+sudo apt install --yes google-chrome-stable

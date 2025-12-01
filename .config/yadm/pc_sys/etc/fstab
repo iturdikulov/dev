@@ -1,0 +1,21 @@
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# systemd generates mount units based on this file, see systemd.mount(5).
+# Please run 'systemctl daemon-reload' after making changes here.
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+# / was on /dev/nvme1n1p3 during installation
+UUID=ca54a700-1344-4051-a511-5a5dea4e0102 /               btrfs   compress,subvol=@rootfs 0       0
+# /boot/efi was on /dev/nvme1n1p1 during installation
+UUID=325E-3887  /boot/efi       vfat    umask=0077      0       1
+# swap was on /dev/nvme1n1p4 during installation
+UUID=6e628ee3-395f-45ae-b0d2-440328445b0e none            swap    sw              0       0
+
+UUID=ff1ddb67-6528-49b3-8159-3d26eb97d431 /home/inom/Media/archive btrfs subvol=root,compress=zstd,nofail,x-gvfs-trash 0 0
+UUID=be3fc6b1-d2d0-4c37-ab40-53567d54e67d /home/inom/Media/games btrfs subvol=games,compress=zstd,x-gvfs-trash 0 0
+UUID=AEC0F993C0F961CF /media/inom/seed ntfs3 defaults,uid=1000,gid=1000,x-systemd.mount-timeout=120 0 0
+

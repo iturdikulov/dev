@@ -1,4 +1,31 @@
 #!/usr/bin/env bash
 
 sudo apt -y update
-sudo apt -y install gpg pass webext-browserpass pinentry-qt
+sudo apt -y install gpg pass pinentry-qt
+
+# browserpass
+cd /tmp || exit 1
+
+if ! [ -x "$(command -v pass)" ]; then
+    echo 'Pass is not installed, please install it before adding extensions.'
+    exit 1
+fi
+
+if ! [ -x "$(command -v go)" ]; then
+    echo 'Golang compiler not installed, please install it before building browswerpass-native.' >&2
+    exit 1
+fi
+
+# import the GPG key for working with the files.
+curl https://maximbaz.com/pgp_keys.asc | gpg --import || \
+    curl https://keybase.io/maximbaz/pgp_keys.asc | gpg --import || \
+    gpg --recv-keys EB4F9E5A60D32232BB52150C12C87A28FEAC6B20;
+
+git clone https://github.com/browserpass/browserpass-native
+cd "browserpass-native" || exit 1
+make browserpass-linux64
+make BIN=browserpass-linux64 configure
+sudo make BIN=browserpass-linux64 install
+cd "/usr/lib/browserpass/" || exit 1
+make hosts-edge-user
+# make policies-edge-user

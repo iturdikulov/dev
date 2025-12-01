@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 sudo apt remove -y okular # will be used Firefox & Foliate as default
-sudo apt install -y libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre pandoc
+sudo apt install -y libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre pandoc ghostwriter
 sudo apt install -y visidata python3-openpyxl crow-translate xournalpp
 
 # Tesseract data for crow-translate

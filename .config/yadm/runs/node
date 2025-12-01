@@ -3,7 +3,9 @@
 # Base dependencies
 sudo apt install -y nodejs npm shellcheck
 
-npm config set prefix ~/.local/npm
+sys_npm=/usr/bin/npm
+
+$sys_npm config set prefix ~/.local/npm
 
 packages=(
     n
@@ -12,7 +14,7 @@ packages=(
     browser-sync
     single-file-cli
     @biomejs/biome
-    @olrtg/emmet-language-server@2.6.1
+    @olrtg/emmet-language-server
     bash-language-server
     critical
     typescript-language-server
@@ -24,13 +26,16 @@ packages=(
     @google/gemini-cli
     @google/clasp
     @343dev/optimizt
+    postcss
+    postcss-cli
+    autoprefixer
 )
 
 for package in "${packages[@]}"; do
-    npm install --global "$package"
+    $sys_npm install --global "$package"
 done
 
-cd "$HOME/.local/npm/bin" || { echo "n binary not found!"; exit 1; }
 export N_PREFIX="$HOME/.local/n"
-./n lts
-./npm config set prefix ~/.local/npm
+export PATH=$N_PREFIX/bin:$PATH
+
+n lts

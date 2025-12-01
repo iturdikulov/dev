@@ -2,6 +2,6 @@
 
 sudo apt -y update
 sudo apt -y install git lazygit ripgrep fd-find zoxide jq tealdeer shutter python3-pip 7zip wl-clipboard wget2 xxd gh
-sudo apt -y install htop libsensors5 ncdu apt-show-versions detox entr eza
+sudo apt -y install htop libsensors5 ncdu apt-show-versions detox entr eza fdupes gitleaks
 
 tldr --update
