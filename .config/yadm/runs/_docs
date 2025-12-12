@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
-sudo apt remove -y okular # will be used Firefox & Foliate as default
-sudo apt install -y libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre pandoc ghostwriter
-sudo apt install -y visidata python3-openpyxl crow-translate xournalpp
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
+
+remove_packages okular # will be used Firefox & Foliate as default
+install_packages libreoffice-calc libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre pandoc ghostwriter
+install_packages visidata python3-openpyxl crow-translate xournalpp
 
 # Tesseract data for crow-translate
 mkdir -p ~/.config/crow-translate/ && cd ~/.config/crow-translate/ || exit 1
-wget2 --continue --progress=bar https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/eng.traineddata
-wget2 --continue --progress=bar https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/rus.traineddata
+download_file https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/eng.traineddata
+download_file https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/rus.traineddata
