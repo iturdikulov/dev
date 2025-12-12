@@ -6,14 +6,9 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils.sh"
 
-# Check prerequisites
-check_not_root
-check_home_set
-
 # F3D and freecad
 log_info "Setting up 3D tools..."
-install_package freecad
-install_package f3d
+install_packages f3d freecad
 
 # Function to install Blender
 BLENDER_VERSION="5.0.1"
