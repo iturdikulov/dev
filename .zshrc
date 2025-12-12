@@ -1,6 +1,11 @@
 zstyle ':completion:*:*:make:*' tag-order 'targets'
 
 [ -f "$HOME/.config/slimzsh/slim.zsh" ] && source "$HOME/.config/slimzsh/slim.zsh"
+[ -f "$HOME/.config/plasma-workspace/env/env.sh" ] && source "$HOME/.config/plasma-workspace/env/env.sh"
+
+
+ZSH_AUTO_SUGGESTION_SCRIPT=/usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+[ -f $ZSH_AUTO_SUGGESTION_SCRIPT ] && source $ZSH_AUTO_SUGGESTION_SCRIPT
 
 preexec () {
   echo -n "\\x1b]133;A\\x1b\\"
@@ -34,21 +39,23 @@ addToPathFront() {
     fi
 }
 
-# Init tools
-if (( $+commands[starship] )); then
-    eval "$(starship init zsh)"
-fi
-if (( $+commands[zoxide] )); then
-    eval "$(zoxide init zsh)"
-fi
-if (( $+commands[fzf] )); then
-    source <(fzf --zsh)
-fi
-if (( $+commands[atuin] )); then
-    eval "$(atuin init zsh)"
-fi
-if (( $+commands[direnv] )); then
-    eval "$(direnv hook zsh)"
+# Init tools, if shell isn't executed from nvim
+if [[ ! ${MYVIMRC} ]]; then
+    if (( $+commands[fzf] )); then
+        source <(fzf --zsh)
+    fi
+    if (( $+commands[starship] )); then
+        eval "$(starship init zsh)"
+    fi
+    if (( $+commands[zoxide] )); then
+        eval "$(zoxide init zsh)"
+    fi
+    if (( $+commands[atuin] )); then
+        eval "$(atuin init zsh)"
+    fi
+    if (( $+commands[direnv] )); then
+        eval "$(direnv hook zsh)"
+    fi
 fi
 
 export NNN_PLUG="d:dragdrop;D:dups;c:chksum;f:fzcd;F:fixname;m:mymount;o:oldbigfile;R:rsync;s:suedit";
@@ -56,6 +63,7 @@ export NNN_TRASH="2"
 
 export STARDICT_DATA_DIR="$HOME/Documents/dictionary"
 export EDITOR=nvim
+export SUDO_EDITOR=nvim
 export PASSWORD_STORE_ENABLE_EXTENSIONS=true
 
 export GOPATH=$HOME/.local/go
@@ -94,13 +102,14 @@ fi
 alias ls='ls --color=auto'
 if (( $+commands[eza] )); then
   IGNORE_GLOB="UnrealEngine"
-  alias eza="eza --group-directories-first --git --icons";
-  alias l="eza -bl -I $IGNORE_GLOB";
-  alias ll="eza -abghilmu -I $IGNORE_GLOB";
-  alias la="LC_COLLATE=C eza -ablF -I $IGNORE_GLOB";
+  alias eza_ls="eza --group-directories-first --git";
+  alias l="eza_ls -bl -I $IGNORE_GLOB";
+  alias ls="eza"
+  alias ll="eza_ls -abghilmu -I $IGNORE_GLOB";
+  alias la="LC_COLLATE=C eza_ls -ablF -I $IGNORE_GLOB";
   alias lm='ll --sort=modified'
-  alias tree='eza --tree'
-  alias treel='eza --color=always --tree|less'
+  alias tree='eza_ls --tree'
+  alias treel='eza_ls --color=always --tree|less'
 else
   alias l='ls'
   alias ll='ls -la'          # long listing format
@@ -113,12 +122,18 @@ if (( $+commands[fdfind] )); then
   alias fd_non_ascii='fd "[^\u0000-\u007F]+"'  # find non-ascii filenames
 fi
 
+alias term_colors='for code in {000..255}; do print -P -- "$code: %F{$code}Color%f"; done'
+alias o='xdg-open'
+
 alias g='git'
+alias gsummary='git shortlog --summary --numbered --all --no-merges'
 alias garchive='git archive --format=zip --output "git_archive_$(date +%s).zip" HEAD'
 alias git-recent='git diff --numstat | sort -k1 -nr'
 alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
 alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
+alias gh_init="git init && gh repo create --public --source=. --remote=upstream"
 alias py='python3'
+alias python='python3'
 alias ipy='ipython'
 
 c()
@@ -127,15 +142,15 @@ c()
     gawk -M -v PREC=201 -M 'BEGIN {printf("%.60g\n",'"${in-0}"')}' < /dev/null
 }
 
-alias rga='rg --hidden --no-ignore'
-
-alias disk-usage='ncdu --exclude ~/Media --exclude /proc --exclude /sys --exclude /mnt --exclude /media --exclude /dev/shm'
+alias rg_all='rg --hidden --no-ignore'
+alias rga='rga --follow'
+alias disk-usage='ncdu --exclude ~/Media --exclude /proc --exclude /sys --exclude /mnt --exclude /media --exclude /dev/shm /'
 
 alias y='wl-copy'
 alias p='wl-paste'
-# fix paste for some X11 apps
-alias w2x='wl-paste | xclip -i -selection clipboard'
+alias w2x='wl-paste | xclip -i -selection clipboard'  # fix paste for X11 apps
 
+alias plasma_restart='kquitapp6 plasmashell || killall plasmashell && kstart plasmashell'
 alias reboot='reboot || sudo reboot'
 
 alias free='free -m' # show sizes in MB
@@ -157,15 +172,18 @@ alias jc='journalctl -xeu'
 alias sc=systemctl
 alias fpass='PASSWORD_STORE_ENABLE_EXTENSIONS=true pass fzf'
 
+alias m4b='docker run -it --rm -u $(id -u):$(id -g) -v "$(pwd)":/mnt sandreas/m4b-tool:latest merge -v --jobs=3 --output-file="output/" --batch-pattern="input/%g/%a/%n/" "input/"'
+
+
 if (( $+commands[apt] )); then
     alias apts='apt-cache search'
     alias aptshow='apt-cache show'
-    alias aptinst='sudo apt-get install -V'
-    alias aptupd='sudo apt-get update'
-    alias aptupg='sudo apt-get dist-upgrade -V && sudo apt-get autoremove'
-    alias aptupgd='sudo apt-get update && sudo apt-get dist-upgrade -V && sudo apt-get autoremove'
-    alias aptrm='sudo apt-get remove'
-    alias aptpurge='sudo apt-get remove --purge'
+    alias aptinst='sudo apt install -V'
+    alias aptupd='sudo apt update'
+    alias aptupg='sudo apt update && sudo apt dist-upgrade -V && sudo apt autoremove'
+    alias aptupgd='sudo apt dist-upgrade -V && sudo apt autoremove'
+    alias aptrm='sudo apt remove'
+    alias aptpurge='sudo apt remove --purge'
     alias chkup='/usr/lib/update-notifier/apt-check -p --human-readable'
     alias chkboot='cat /var/run/reboot-required'
     alias pkgfiles='dpkg --listfiles'
@@ -219,11 +237,32 @@ qcode (){
 }
 
 q() {
-    llm -s "Use a brief style for answer, limit output to 140-500 characters." "$*"|glow
+    local system=$(cat ~/Templates/system.md)
+    local prompt="Use a brief style for answer, limit output to 140-500 characters if possible. Put links as list in the end of answer."
+
+    # if passed -c as first arg continue
+    if [[ "$1" == "-c" ]]; then
+        shift
+        llm -c -s "$prompt" --system "$system" "$*"|glow
+    else
+        llm -s "$prompt" --system "$system" "$*"|glow
+    fi
 }
 
 qq() {
     llm -s "You are a top programming expert who provides precise answers, avoiding ambiguous responses. “Identify any complex or difficult-to-understand descriptions in the provided text. Rewrite these descriptions to make them clearer and more accessible. Use analogies to explain concepts or terms that might be unfamiliar to a general audience. Ensure that the analogies are relatable, easy to understand. Add related links for additional materials.” “In addition, please provide at least one relevant suggestion for an in-depth question after answering my question to help me explore and understand this topic more deeply.” Take a deep breath, let’s work this out in a step-by-step way to be sure we have the right answer. If there’s a perfect solution, I’ll tip $200! Many thanks to these AI whisperers: Reply in English using professional tone for everyone." "$*"|glow --pager
+}
+
+llm_t() {
+    local template
+    template=$(llm templates | fzf | xargs | cut -d' ' -f1)
+    if [ $# -eq 0 ]; then
+        # No arguments, read from stdin
+        p|llm -t "$template"
+    else
+        # Arguments provided, pass them as is
+        llm -t "$template" "$*"
+    fi
 }
 
 def() {
@@ -295,3 +334,8 @@ if (( $+commands[mpv] )); then
         mpv --loop-file=yes "$RECORDING"
     }
 fi
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/inom/.lmstudio/bin"
+# End of LM Studio CLI section
+
