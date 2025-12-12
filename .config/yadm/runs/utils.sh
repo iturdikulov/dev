@@ -35,17 +35,19 @@ check_home_set() {
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
 # Check if a package is installed (Debian/Ubuntu)
-package_installed() { dpkg -l "$1" >/dev/null 2>&1; }
+package_installed() { dpkg -l "$1" | grep -q '^ii' >/dev/null 2>&1; }
 
 # Install package if not already installed
-install_package() {
-    local pkg_name="$1"
-    if ! package_installed "$pkg_name"; then
-        log_info "Installing $pkg_name..."
-        sudo apt install -y "$pkg_name"
-    else
-        log_info "$pkg_name is already installed"
-    fi
+install_packages() {
+    local pkg_names=("$@")
+    for pkg_name in "${pkg_names[@]}"; do
+        if ! package_installed "$pkg_name"; then
+            log_info "Installing $pkg_name..."
+            sudo apt install -y "$pkg_name"
+        else
+            log_info "$pkg_name is already installed"
+        fi
+    done
 }
 
 # Download file if it doesn't exist
@@ -183,3 +185,6 @@ install_archive() {
     return 0
 }
 
+# Check prerequisites
+check_not_root
+check_home_set
