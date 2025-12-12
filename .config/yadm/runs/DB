@@ -1,7 +1,24 @@
 #!/usr/bin/env bash
 
-sudo apt install -y postgresql-client mariadb-client
+set -euo pipefail
 
-sudo  wget -O /usr/share/keyrings/dbeaver.gpg.key https://dbeaver.io/debs/dbeaver.gpg.key
-echo "deb [signed-by=/usr/share/keyrings/dbeaver.gpg.key] https://dbeaver.io/debs/dbeaver-ce /" | sudo tee /etc/apt/sources.list.d/dbeaver.list
-sudo apt-get update && sudo apt-get install -y dbeaver-ce
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
+
+# DB clients
+install_packages postgresql-client mariadb-client
+
+if [ ! -f /etc/apt/sources.list.d/dbeaver.list ]; then
+    log_info "Installing DBeaver"
+    sudo  wget -O /usr/share/keyrings/dbeaver.gpg.key https://dbeaver.io/debs/dbeaver.gpg.key
+    echo "deb [signed-by=/usr/share/keyrings/dbeaver.gpg.key] https://dbeaver.io/debs/dbeaver-ce /" | sudo tee /etc/apt/sources.list.d/dbeaver.list
+    sudo apt-get update && sudo apt-get install -y dbeaver-ce
+fi
+
+# Postgresql 18
+install_packages postgresql-common
+if [ ! -f /etc/apt/sources.list.d/pgdg.sources ]; then
+    sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+fi
+install_packages postgresql-18
