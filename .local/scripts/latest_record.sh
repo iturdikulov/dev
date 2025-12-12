@@ -5,4 +5,5 @@ RECORDINGS_DIR="$HOME/Videos/record"
 RECORDING="$RECORDINGS_DIR/$(ls -Art $RECORDINGS_DIR | tail -n 1)"
 echo "Opening $RECORDING and copying to clipboard"
 echo "$RECORDING" | wl-copy
+du -h "$RECORDING"
 mpv --loop-file=yes "$RECORDING"

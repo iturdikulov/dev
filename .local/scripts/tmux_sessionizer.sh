@@ -3,6 +3,7 @@
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
+    backend=$(cd $HOME && fdfind --absolute-path --type=directory ".*backend|.*frontend" --maxdepth=5)
     selected=$(
         (
          echo $HOME/; \
@@ -10,8 +11,12 @@ else
          echo $HOME/.config/nvim; \
          echo $HOME/.local/scripts; \
          echo $HOME/.local/share; \
+         printf "%s\\n" "$backend"; \
          fdfind --type=directory --max-depth=1 \
                 --exclude='_*' \
+                --exclude='.git' \
+                --exclude='node_modules' \
+                --exclude='.venv' \
                 --follow \
                 --one-file-system \
                 --full-path "$HOME" \
