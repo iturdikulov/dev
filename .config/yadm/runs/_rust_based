@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
+
 # Base dependencies
-sudo apt install -y nasm
+install_packages nasm
 
 # Get cargo & rust toolchain
 if ! command -v cargo &> /dev/null || ! command -v rustup &> /dev/null; then
@@ -9,26 +13,27 @@ if ! command -v cargo &> /dev/null || ! command -v rustup &> /dev/null; then
 fi
 
 # Installing additional tools
-cd "$HOME/.cargo/bin" || { echo "cd failed"; exit 1; }
+export PATH="$PATH:$HOME/.cargo/bin"
 
-./cargo install atuin
-./cargo install tun2proxy
+cargo install atuin \
+tun2proxy \
+asm-lsp \
+cargo-eval \
+git-delta \
+leetcode-cli \
+tex-fmt
 
-./cargo install stylua --features luajit
-./cargo install asm-lsp
-./cargo install cargo-eval
-./cargo install git-delta
-./cargo install leetcode-cli
-./cargo install tex-fmt
-./cargo install --locked --git https://github.com/Feel-ix-343/markdown-oxide.git markdown-oxide
-./cargo install --locked --git https://github.com/j178/prek
-./cargo install mago && mago self-update
+cargo install stylua --features luajit
+cargo install --locked --git https://github.com/Feel-ix-343/markdown-oxide.git markdown-oxide
+cargo install --locked --git https://github.com/j178/prek
 
-./rustup component add rust-analyzer
-./rustup component add rust-src
+cargo install mago && mago self-update
+
+rustup component add rust-analyzer
+rustup component add rust-src
 
 if lspci | grep VGA | grep -q AMD; then
-    echo "Installing amdgpu_top"
-    sudo apt install -y libdrm-dev
-    ./cargo install amdgpu_top
+    log_info "Installing amdgpu_top"
+    install_packages libdrm-dev
+    cargo install amdgpu_top
 fi

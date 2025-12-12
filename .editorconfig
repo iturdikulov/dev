@@ -21,7 +21,7 @@ quote_type = double
 # Web files
 [*.{js,json,yml,html,css,scss,less,Gemfile}]
 indent_style = space
-indent_size = 2
+indent_size = 4
 
 # Go/makefiles/.gitmodules use tab
 [{Makefile,**.mk,go.mod,go.sum,*.go,.gitmodules,.gitconfig}]
@@ -35,6 +35,7 @@ indent_size = 4
 # Instead of a hard line break, start a new paragraph by inserting a blank line.
 [*.md]
 trim_trailing_whitespace = false
+max_line_length = 0
 
 # Ignore diffs/patches
 [*.{diff,patch}]
