@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-sudo apt -y update
-sudo apt -y install git lazygit ripgrep fd-find zoxide jq tealdeer shutter python3-pip 7zip wl-clipboard wget2 xxd gh
-sudo apt -y install htop libsensors5 ncdu apt-show-versions detox entr eza fdupes gitleaks
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
 
-tldr --update
+install_packages git lazygit ripgrep fd-find zoxide jq tealdeer shutter python3-pip 7zip wl-clipboard wget2 xxd gh
+install_packages htop libsensors5 ncdu apt-show-versions detox entr eza fdupes gitleaks
