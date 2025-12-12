@@ -1,38 +1,44 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
+
+# Check prerequisites
+check_not_root
+check_home_set
+
 # F3D and freecad
-sudo apt install -y f3d freecad
+log_info "Setting up 3D tools..."
+install_package freecad
+install_package f3d
 
-# Blender
-APP_RELEASE_TAG=alpha+main.f7c37b05e447
-APP_VERSION=5.0.0
-APP_NAME=blender
-APP_DESKTOP_NAME=Blender
-APP_DESKTOP_DESCRIPTION="Free and open-source 3D creation suite"
-APP_DESKTOP_CATEGORIES="Graphics;Science"
-APP_OUTPUT_NAME="blender-$APP_VERSION.tar.gz"
+# Function to install Blender
+BLENDER_VERSION="5.0.1"
+BLENDER_RELEASE_TAG="candidate+v50.0616cc718a03"
+BLENDER_URL="https://cdn.builder.blender.org/download/daily/blender-$BLENDER_VERSION-$BLENDER_RELEASE_TAG-linux.x86_64-release.tar.xz"
+BLENDER_ARCHIVE_FORMAT="tar.xz"
+BLENDER_INSTALL_DIR="$HOME/.local/blender-$BLENDER_VERSION-$BLENDER_RELEASE_TAG-linux.x86_64-release"
 
-cd /tmp || { echo "cd failed"; exit 1; }
-wget2 --progress=bar "https://cdn.builder.blender.org/download/daily/blender-$APP_VERSION-$APP_RELEASE_TAG-linux.x86_64-release.tar.xz" \
-    --output-document $APP_OUTPUT_NAME
-tar --extract --file $APP_OUTPUT_NAME -av -C ~/.local/
-rm -f $APP_OUTPUT_NAME
+# Find and suggest removal of old versions
+find_old_versions "$HOME/.local/" "blender-*" "blender-$BLENDER_VERSION*"
 
-mkdir -p "$HOME/.local/share/applications"
-cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
-[Desktop Entry]
-Version=$APP_VERSION
-Name=$APP_DESKTOP_NAME
-Comment=$APP_DESKTOP_DESCRIPTION
-GenericName=$APP_DESKTOP_NAME
-Exec=$HOME/.local/blender-$APP_VERSION-$APP_RELEASE_TAG-linux.x86_64-release/blender
-Icon=$HOME/.local/bin/icons/$APP_NAME.svg
+# Install Blender
+DESKTOP_CONTENT="[Desktop Entry]
+Version=$BLENDER_VERSION
+Name=Blender
+Comment=Free and open-source 3D creation suite
+GenericName=Blender
+Exec=$BLENDER_INSTALL_DIR/blender
+Icon=$HOME/.local/bin/icons/blender.svg
 Terminal=false
 Type=Application
-Categories=$APP_DESKTOP_CATEGORIES
-StartupNotify=true
-EOF
+Categories=Graphics;Science
+StartupNotify=true"
 
-# Find old version and suggest to remove
-find "$HOME/.local/" -maxdepth 1 -type d -name "blender-*" ! -name "blender-$APP_VERSION*" -exec echo found old version, please remove manually {} +
+install_archive "blender" "$BLENDER_URL" "$BLENDER_VERSION" "$BLENDER_INSTALL_DIR" "$BLENDER_ARCHIVE_FORMAT" &&
+    create_desktop_entry "blender" "$DESKTOP_CONTENT"
 
+log_info "3D setup completed successfully!"
