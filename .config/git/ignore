@@ -71,6 +71,3 @@ dmypy.json
 
 # node
 node_modules/
-
-# Personal files
-/TODO.md
