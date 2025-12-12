@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+install_packages ripgrep pandoc poppler-utils ffmpeg
+
+# Source common utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils.sh"
+
+# Function to install ripgrep-all (rga)
+RGA_VERSION="0.10.10"
+RGA_URL="https://github.com/phiresky/ripgrep-all/releases/download/v$RGA_VERSION/ripgrep_all-v$RGA_VERSION-x86_64-unknown-linux-musl.tar.gz"
+RGA_ARCHIVE_FORMAT="tar.gz"
+RGA_INSTALL_DIR="$HOME/.local/bin"
+
+install_archive "rga" "$RGA_URL" "$RGA_VERSION" "$RGA_INSTALL_DIR" "$RGA_ARCHIVE_FORMAT"
+
+# For rga I need to move binary file
+RGA_FULL_INSTALL_PATH="$RGA_INSTALL_DIR/ripgrep_all-v$RGA_VERSION-x86_64-unknown-linux-musl"
+if [ ! -d "$RGA_FULL_INSTALL_PATH" ]; then
+    log_error "rga installation directory not found: $RGA_FULL_INSTALL_PATH"
+    exit 1
+fi
+
+mv "$RGA_INSTALL_DIR/ripgrep_all-v$RGA_VERSION-x86_64-unknown-linux-musl/"rga* "$RGA_INSTALL_DIR"
+
+gio trash "$RGA_FULL_INSTALL_PATH"
+
+log_info "rga setup completed successfully!"
