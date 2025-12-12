@@ -50,15 +50,35 @@ install_packages() {
     done
 }
 
+# Remove package if installed
+remove_packages() {
+    local pkg_names=("$@")
+    for pkg_name in "${pkg_names[@]}"; do
+        if package_installed "$pkg_name"; then
+            log_info "Removing $pkg_name..."
+            sudo apt remove -y "$pkg_name"
+        else
+            log_info "$pkg_name is not installed"
+        fi
+    done
+}
+
 # Download file if it doesn't exist
 download_file() {
     local url="$1"
     local output="$2"
 
+    # If output set
+    if [ -n "$output" ]; then
+        local wget_args="--progress=bar --continue --output-document $output"
+    else
+        local wget_args="--progress=bar --continue"
+    fi
+
     if [ ! -f "$output" ]; then
         log_info "Downloading $url..."
         if command_exists wget2; then
-            if ! wget2 --progress=bar --continue "$url" --output-document "$output"; then
+            if ! wget2 $wget_args "$url"; then
                 log_error "Failed to download file: $url"
                 return 1
             fi
@@ -142,25 +162,22 @@ install_archive() {
     local relative_install_dir="$install_dir"
 
     if [[ $install_dir != "$HOME/.local/bin" ]]; then
+        if directory_exists "$install_dir"; then
+            log_info "$app_name $version is already installed at $install_dir"
+            return 1
+        fi
+
         relative_install_dir="$HOME/.local"
     fi
 
-    # Check if Blender is already installed
-    if directory_exists "$install_dir"; then
-        log_info "Blender $version is already installed at $install_dir"
-        return 1
-    fi
-
-    log_info "Installing Blender $version..."
+    log_info "Installing $app_name $version..."
 
     # Change to temp directory
     cd /tmp || { log_error "Failed to change to /tmp directory"; exit 1; }
 
-    # Download Blender
     download_file "$url" "$output_name"
 
-    # Extract Blender
-    log_info "Extracting Blender to $install_dir"
+    log_info "Extracting $app_name to $install_dir"
 
     if [[ "$output_name" == *.tar.gz ]] || [[ "$output_name" == *.tgz ]]; then
         tar -xzf "$output_name" -C "$relative_install_dir"
@@ -180,7 +197,7 @@ install_archive() {
 
     # Clean up download
     rm -f "$output_name"
-    log_info "Blender installation completed"
+    log_info "$app_name installation completed"
 
     return 0
 }
