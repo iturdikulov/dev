@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-CONF="$TMUX_PLUGINS_PATH/lastpane"
 swap() { tmux swap-pane -s"$1" -t"$2"; }
 
 target=

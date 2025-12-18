@@ -43,11 +43,13 @@ if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
 fi
 
 if ! tmux has-session -t=$selected_name 2> /dev/null; then
-    if [[ -f "$selected/.tmuxp.yaml" ]]; then
-        tmuxp load -d "$selected/.tmuxp.yaml"
+    if [[ -f "$HOME/.config/tmuxinator/$selected_name.yml" ]]; then
+        cd "$selected" && tmuxinator start $selected_name
     else
         tmux new-session -ds $selected_name -c $selected
+        tmux switch-client -t $selected_name
     fi
+else
+    tmux switch-client -t $selected_name
 fi
 
-tmux switch-client -t $selected_name
