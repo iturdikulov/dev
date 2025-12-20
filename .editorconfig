@@ -18,11 +18,6 @@ max_line_length = 80
 [*.py]
 quote_type = double
 
-# Web files
-[*.{js,json,yml,html,css,scss,less,Gemfile}]
-indent_style = space
-indent_size = 4
-
 # Go/makefiles/.gitmodules use tab
 [{Makefile,**.mk,go.mod,go.sum,*.go,.gitmodules,.gitconfig}]
 indent_style = tab
