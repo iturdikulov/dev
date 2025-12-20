@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+if [ "$#" -lt 1 ]; then
     echo "Usage: ./playlist_generator.sh [playlist_name] [optional: directory] [optional: new_base_path]"
     exit 1
 fi
