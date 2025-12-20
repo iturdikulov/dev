@@ -141,6 +141,7 @@ c()
     local in="$(echo " $*" | sed -e 's/\[/(/g' -e 's/\]/)/g')";
     gawk -M -v PREC=201 -M 'BEGIN {printf("%.60g\n",'"${in-0}"')}' < /dev/null
 }
+mkfile() { mkdir --parents "$(dirname "$1")" && touch "$1" ; }
 
 alias rg_all='rg --hidden --no-ignore'
 alias rga='rga --follow'
@@ -322,7 +323,13 @@ print(json.dumps(j, indent=2))' > compile_commands.json
 
 if (( $+commands[mpv] )); then
     play() {
-        mpv "$@" > /dev/null 2>&1 & disown
+        # TODO: path issues
+        local history_f=$(atuin search --cmd-only "\.m3u8" "\.m3u")
+        local playlists=$(fd --follow --type f --extension m3u8 --extension m3u --maxdepth 4 . $HOME/Media/seed)
+        local playlists=$(printf "%q" "$playlists")
+        local selected=$(echo "$history_f"$'\n'"$playlists" | fzf | sed "s/mpv //g")
+        [[ -z "$selected" ]] && return
+        eval mpv --loop-file=yes "$selected" &> /dev/null & disown
     }
 
     play_lr() {
@@ -335,7 +342,9 @@ if (( $+commands[mpv] )); then
     }
 fi
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/home/inom/.lmstudio/bin"
-# End of LM Studio CLI section
-
+pomo() {
+    local countdown_time=$1
+    countdown $1
+    ffplay -nodisp -autoexit ~/Templates/assets/sound/effects/l2_critical_hit_soundeffect.mp3
+    notify-send "Countdown finished after $countdown_time"
+}
