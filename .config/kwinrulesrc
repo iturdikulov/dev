@@ -1,8 +1,36 @@
+[04f2be5b-83a7-4c41-8fe2-3027b0b9e220]
+Description=PIP
+above=true
+aboverule=4
+title=Picture in picture
+wmclass=msedge msedge
+wmclasscomplete=true
+wmclassmatch=1
+
 [051ceab2-1c45-417f-8efa-648e6954bdcc]
 Description=OrcaSlicer Native Window Frame
 noborder=true
 noborderrule=3
 wmclass=OrcaSlicer
+wmclassmatch=1
+
+[230decd2-383f-4b04-9260-5e3ca2118178]
+Description=Crow Translate
+position=698,479
+positionrule=3
+size=1192,601
+sizerule=3
+wmclass=io.crow_translate.CrowTranslate
+wmclassmatch=1
+
+[314c9cfa-c069-427e-af4e-6cb0e566066e]
+Description=Maximize Obsidian
+maximizehoriz=true
+maximizehorizrule=3
+maximizevert=true
+maximizevertrule=3
+wmclass=obsidian obsidian
+wmclasscomplete=true
 wmclassmatch=1
 
 [3b96aea6-551f-4c65-9f4c-5f929ae9e0c8]
@@ -16,23 +44,62 @@ skiptaskbarrule=3
 title=OpenGL Renderer
 titlematch=1
 
+[42e49a57-3636-4e0a-81c1-8cbbd35d3c8b]
+Description=Foot
+maximizehoriz=true
+maximizehorizrule=3
+maximizevert=true
+maximizevertrule=3
+wmclass=foot
+wmclassmatch=1
+
 [5a830c73-cdb7-4220-ba83-bf9b30b81da8]
 Description=Orca Slicer No Titlebar and Frame
 noborderrule=3
 
+[5d09b2c5-b719-46fb-ba00-dec1458fc1c3]
+Description=Global QuickNote
+noborder=true
+noborderrule=3
+position=892,0
+positionrule=3
+size=1000,1080
+sizerule=3
+skiptaskbar=true
+skiptaskbarrule=3
+types=1
+wmclass=gl_foot_note
+wmclassmatch=1
+
 [6e9eb95c-e26b-4b6d-acd9-ce5d153fb54c]
-Description=QFoot
+Description=Foot Music
 placement=6
 placementrule=2
 size=1897,600
 sizerule=3
+skiptaskbar=true
+skiptaskbarrule=3
 types=1
 wmclass=qfoot
 wmclassmatch=1
 
+[9860fe82-cf3b-4764-9b96-d08bff567412]
+Description=Global Shortcuts
+noborder=true
+noborderrule=3
+position=0,0
+positionrule=3
+size=1000,1080
+sizerule=3
+skiptaskbar=true
+skiptaskbarrule=3
+types=1
+wmclass=gl_foot_shortcut
+wmclassmatch=1
+
 [General]
-count=5
-rules=6e9eb95c-e26b-4b6d-acd9-ce5d153fb54c,cd26447c-52ae-4eec-bc9d-0ec642c9020b,3b96aea6-551f-4c65-9f4c-5f929ae9e0c8,051ceab2-1c45-417f-8efa-648e6954bdcc,dfc6ba1f-f9d7-4a0d-97ed-7e4bccb68372
+count=11
+rules=6e9eb95c-e26b-4b6d-acd9-ce5d153fb54c,9860fe82-cf3b-4764-9b96-d08bff567412,5d09b2c5-b719-46fb-ba00-dec1458fc1c3,cd26447c-52ae-4eec-bc9d-0ec642c9020b,3b96aea6-551f-4c65-9f4c-5f929ae9e0c8,051ceab2-1c45-417f-8efa-648e6954bdcc,dfc6ba1f-f9d7-4a0d-97ed-7e4bccb68372,04f2be5b-83a7-4c41-8fe2-3027b0b9e220,230decd2-383f-4b04-9260-5e3ca2118178,42e49a57-3636-4e0a-81c1-8cbbd35d3c8b,314c9cfa-c069-427e-af4e-6cb0e566066e
 
 [c49b2837-e72e-4274-abc5-c8f796d58aed]
 noborder=true
@@ -48,7 +115,7 @@ wmclass=org.pwmt.zathura
 wmclassmatch=1
 
 [dfc6ba1f-f9d7-4a0d-97ed-7e4bccb68372]
-Description=Foot
+Description=Foot eXt
 maximizehoriz=true
 maximizehorizrule=3
 maximizevert=true
