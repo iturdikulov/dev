@@ -5,9 +5,12 @@ mkdir -p "$HOME/Music/record"
 
 OUTPUT="$HOME/Music/record/$(date +"%m%d%Y_%H%M%S")_record.wav"
 MODEL="$HOME/.local/whisper/models/ggml-large-v3-turbo-q5_0.bin"
-echo "[🔴 REC]"
+echo "[🔴 recording... | press q to stop]"
 transcribtion=$(ffmpeg -hide_banner -loglevel panic -f pulse -i default -tune zerolatency "$OUTPUT" && whisper-cli --model "$MODEL" --translate --no-prints "$OUTPUT")
 
 # Save in ~/Wiki
 echo "$transcribtion" >> "$HOME/Wiki/TODO_record.md"
 echo "$transcribtion, saved in ~/Wiki/TODO_record.md"
+
+# Send transcribtion to "q"
+echo "$transcribtion" | llm -s "This is a transcription, correct grammatical errors, answer questions or provide facts if necessary" | glow --pager
