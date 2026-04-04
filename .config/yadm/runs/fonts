@@ -2,12 +2,6 @@
 
 sudo apt install -y fonts-firacode fonts-terminus
 
-if [[ $(hostname) == "volga" ]]; then
-    echo 'font=Monospace:size=18' > "$HOME/.config/foot/foot.local.ini"
-else
-    echo 'font=Terminess Nerd Font Mono:size=16.5,Monospace:size=16' > "$HOME/.config/foot/foot.local.ini"
-fi
-
 # Download Terminus Nerd Font (tar.xz)
 OUTPUT_FILE=/tmp/terminus.tar.xz
 
@@ -42,3 +36,20 @@ mkdir -p "$HOME/.local/share/fonts/CommitMono"
 tar -xf /tmp/commit_mono.tar.xz -C "$HOME/.local/share/fonts/CommitMono" && rm "$OUTPUT_FILE"
 fc-cache -fv
 echo "Commit Mono Font installed."
+
+# Iosevka
+# Download Iosevka Nerd Font (tar.xz)
+OUTPUT_FILE=/tmp/iosevka.tar.xz
+
+! [ -f "$OUTPUT_FILE" ] && wget2 -O $OUTPUT_FILE "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/IosevkaTerm.tar.xz" \
+|| echo "$OUTPUT_FILE already exist, skip downloading"
+
+# Verify
+SHA_SUM=$(sha256sum "$OUTPUT_FILE")
+echo "cad9da572d25e3413f7a15a319d2f3c9e7e915ee016baa99e0d88fc08cf5b781" "$OUTPUT_FILE" | sha256sum -c || { echo "Invalid sha $SHA_SUM for $OUTPUT_FILE, skip installing font"; exit 1; }
+
+# Create font directory
+mkdir -p "$HOME/.local/share/fonts/Iosevka"
+tar -xf /tmp/iosevka.tar.xz -C "$HOME/.local/share/fonts/Iosevka" && rm "$OUTPUT_FILE"
+fc-cache -fv
+echo "Iosevka Nerd Font installed."
