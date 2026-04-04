@@ -6,17 +6,11 @@ switch-to-activity-97321d43-aada-4b59-a9f8-d7f632ec0d58=none,none,Switch to acti
 Switch keyboard layout to English (Colemak-DH)=none,none,Switch keyboard layout to English (Colemak-DH)
 Switch keyboard layout to English (US)=none,none,Switch keyboard layout to English (US)
 Switch keyboard layout to Russian=none,none,Switch keyboard layout to Russian
-Switch to Last-Used Keyboard Layout=,Meta+Alt+L,Switch to Last-Used Keyboard Layout
-Switch to Next Keyboard Layout=Ctrl+Alt+Shift+S,Meta+Alt+K,Switch to Next Keyboard Layout
+Switch keyboard layout to Russian (typewriter)=none,none,Switch keyboard layout to Russian (typewriter)
+Switch keyboard layout to Russian (with US punctuation)=none,none,Switch keyboard layout to Russian (with US punctuation)
+Switch to Last-Used Keyboard Layout=none,Meta+Alt+L,Switch to Last-Used Keyboard Layout
+Switch to Next Keyboard Layout=Alt+Shift,Meta+Alt+K,Switch to Next Keyboard Layout
 _k_friendly_name=Keyboard Layout Switcher
-
-[com.google.Chrome]
-097064A1931BA2712A41024108B63012-enter-picker-mode=none,none,Create a custom filter
-097064A1931BA2712A41024108B63012-enter-zapper-mode=none,none,Remove an element
-BD0394BD4A5B26F5F8C086DDA4172A8C-addSite=none,none,Toggle current site
-BD0394BD4A5B26F5F8C086DDA4172A8C-switchEngine=none,none,Theme generation mode
-BD0394BD4A5B26F5F8C086DDA4172A8C-toggle=none,none,Toggle extension
-_k_friendly_name=com.google.Chrome
 
 [kaccess]
 Toggle Screen Reader On and Off=none,Meta+Alt+S,Toggle Screen Reader On and Off
@@ -70,7 +64,7 @@ MoveZoomDown=none,none,Move Zoomed Area Downwards
 MoveZoomLeft=none,none,Move Zoomed Area to Left
 MoveZoomRight=none,none,Move Zoomed Area to Right
 MoveZoomUp=none,none,Move Zoomed Area Upwards
-Overview=Meta+W,Meta+W,Toggle Overview
+Overview=none,Meta+W,Toggle Overview
 Remember Window Positions: Show Config=Meta+Ctrl+W,none,Remember Window Positions: Show Config
 Setup Window Shortcut=Ctrl+Alt+Shift+K,,Setup Window Shortcut
 Show Desktop=Meta+D,Meta+D,Peek at Desktop
@@ -132,7 +126,7 @@ Walk Through Windows of Current Application Alternative=none,,Walk Through Windo
 Walk Through Windows of Current Application Alternative (Reverse)=none,,Walk Through Windows of Current Application Alternative (Reverse)
 Window Above Other Windows=Meta+],,Keep Window Above Others
 Window Below Other Windows=Meta+[,,Keep Window Below Others
-Window Close=Alt+F4,Alt+F4,Close Window
+Window Close=Alt+$\tAlt+F4,Alt+F4,Close Window
 Window Custom Quick Tile Bottom=none,,Custom Quick Tile Window to the Bottom
 Window Custom Quick Tile Left=none,,Custom Quick Tile Window to the Left
 Window Custom Quick Tile Right=none,,Custom Quick Tile Window to the Right
@@ -141,10 +135,10 @@ Window Fullscreen=Meta+F,,Make Window Fullscreen
 Window Grow Horizontal=none,,Expand Window Horizontally
 Window Grow Vertical=none,,Expand Window Vertically
 Window Lower=none,,Lower Window
-Window Maximize=Meta+L,Meta+PgUp,Maximize Window
+Window Maximize=Meta+PgUp,Meta+PgUp,Maximize Window
 Window Maximize Horizontal=none,,Maximize Window Horizontally
 Window Maximize Vertical=none,,Maximize Window Vertically
-Window Minimize=Meta+PgDown\tMeta+Y,Meta+PgDown,Minimize Window
+Window Minimize=Meta+PgDown,Meta+PgDown,Minimize Window
 Window Move=none,,Move Window
 Window Move Center=none,,Move Window to the Center
 Window No Border=none,,Toggle Window Titlebar and Frame
@@ -224,64 +218,6 @@ playpausemedia=Media Play,Media Play,Play/Pause media playback
 previousmedia=Media Previous,Media Previous,Media playback previous
 stopmedia=Media Stop,Media Stop,Stop media playback
 
-[org.chromium.Chromium]
-1A6980EFE088173149B7377A929ACBF0-launch-element-picker=none,none,Enter element picker mode
-1A6980EFE088173149B7377A929ACBF0-launch-element-zapper=none,none,Enter element zapper mode
-1A6980EFE088173149B7377A929ACBF0-launch-logger=none,none,Open the logger
-1A6980EFE088173149B7377A929ACBF0-open-dashboard=none,none,Open the dashboard
-1A6980EFE088173149B7377A929ACBF0-relax-blocking-mode=none,none,Relax blocking mode
-1A6980EFE088173149B7377A929ACBF0-toggle-cosmetic-filtering=none,none,Toggle cosmetic filtering
-1A6980EFE088173149B7377A929ACBF0-toggle-javascript=none,none,Toggle JavaScript
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-0=none,none,Custom shortcut #1
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-1=none,none,Custom shortcut #2
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-2=none,none,Custom shortcut #3
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-3=none,none,Custom shortcut #4
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-4=none,none,Custom shortcut #5
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-5=none,none,Custom shortcut #6
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-6=none,none,Custom shortcut #7
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-7=none,none,Custom shortcut #8
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-8=none,none,Custom shortcut #9
-71C25665DE2AC82F3062C7D594ED01ED-custom-command-9=none,none,Custom shortcut #10
-71C25665DE2AC82F3062C7D594ED01ED-save-all-tabs=none,none,Save all tabs
-71C25665DE2AC82F3062C7D594ED01ED-save-selected-tabs=none,none,Save the selected tabs or their selected contents
-A97A8B63C600BDBAA6639D7E75FE61E5-launch-element-picker=none,none,Enter element picker mode
-A97A8B63C600BDBAA6639D7E75FE61E5-launch-element-zapper=none,none,Enter element zapper mode
-A97A8B63C600BDBAA6639D7E75FE61E5-launch-logger=none,none,Open the logger
-A97A8B63C600BDBAA6639D7E75FE61E5-open-dashboard=none,none,Open the dashboard
-A97A8B63C600BDBAA6639D7E75FE61E5-relax-blocking-mode=none,none,Relax blocking mode
-A97A8B63C600BDBAA6639D7E75FE61E5-toggle-cosmetic-filtering=none,none,Toggle cosmetic filtering
-A97A8B63C600BDBAA6639D7E75FE61E5-toggle-javascript=none,none,Toggle JavaScript
-B1541299CE208CD47C9D2196BC8777AF-fillBest=none,none,Fill form with the best matching credentials
-E6AE25E674539112E147DC507A210FA1-all-tabs-custom-format-1=none,none,all tabs: custom format 1
-E6AE25E674539112E147DC507A210FA1-all-tabs-custom-format-2=none,none,all tabs: custom format 2
-E6AE25E674539112E147DC507A210FA1-all-tabs-custom-format-3=none,none,all tabs: custom format 3
-E6AE25E674539112E147DC507A210FA1-all-tabs-custom-format-4=none,none,all tabs: custom format 4
-E6AE25E674539112E147DC507A210FA1-all-tabs-custom-format-5=none,none,all tabs: custom format 5
-E6AE25E674539112E147DC507A210FA1-all-tabs-link-as-list=none,none,all tabs: - [title](url)
-E6AE25E674539112E147DC507A210FA1-all-tabs-link-as-task-list=none,none,all tabs: - [ ] [title](url)
-E6AE25E674539112E147DC507A210FA1-all-tabs-title-as-list=none,none,all tabs: - title
-E6AE25E674539112E147DC507A210FA1-all-tabs-url-as-list=none,none,all tabs: - url
-E6AE25E674539112E147DC507A210FA1-current-tab-custom-format-1=none,none,current tab: custom format 1
-E6AE25E674539112E147DC507A210FA1-current-tab-custom-format-2=none,none,current tab: custom format 2
-E6AE25E674539112E147DC507A210FA1-current-tab-custom-format-3=none,none,current tab: custom format 3
-E6AE25E674539112E147DC507A210FA1-current-tab-custom-format-4=none,none,current tab: custom format 4
-E6AE25E674539112E147DC507A210FA1-current-tab-custom-format-5=none,none,current tab: custom format 5
-E6AE25E674539112E147DC507A210FA1-current-tab-link=none,none,current tab: [title](url)
-E6AE25E674539112E147DC507A210FA1-highlighted-tabs-custom-format-1=none,none,selected tabs: custom format 1
-E6AE25E674539112E147DC507A210FA1-highlighted-tabs-custom-format-2=none,none,selected tabs: custom format 2
-E6AE25E674539112E147DC507A210FA1-highlighted-tabs-custom-format-3=none,none,selected tabs: custom format 3
-E6AE25E674539112E147DC507A210FA1-highlighted-tabs-custom-format-4=none,none,selected tabs: custom format 4
-E6AE25E674539112E147DC507A210FA1-highlighted-tabs-custom-format-5=none,none,selected tabs: custom format 5
-E6AE25E674539112E147DC507A210FA1-highlighted-tabs-link-as-list=none,none,selected tabs: - [title](url)
-E6AE25E674539112E147DC507A210FA1-highlighted-tabs-link-as-task-list=none,none,selected tabs: - [ ] [title](url)
-E6AE25E674539112E147DC507A210FA1-highlighted-tabs-title-as-list=none,none,selected tabs: - title
-E6AE25E674539112E147DC507A210FA1-highlighted-tabs-url-as-list=none,none,selected tabs: - url
-E6AE25E674539112E147DC507A210FA1-selection-as-markdown=none,none,Copy Selection as Markdown
-ED220D5AC0225FD295641FA86B646D4E-addSite=none,none,Toggle current site
-ED220D5AC0225FD295641FA86B646D4E-switchEngine=none,none,Theme generation mode
-ED220D5AC0225FD295641FA86B646D4E-toggle=none,none,Toggle extension
-_k_friendly_name=org.chromium.Chromium
-
 [org_kde_powerdevil]
 Decrease Keyboard Brightness=Keyboard Brightness Down,Keyboard Brightness Down,Decrease Keyboard Brightness
 Decrease Screen Brightness=Monitor Brightness Down,Monitor Brightness Down,Decrease Screen Brightness
@@ -311,14 +247,15 @@ activate task manager entry 6=Meta+6,Meta+6,Activate Task Manager Entry 6
 activate task manager entry 7=Meta+7,Meta+7,Activate Task Manager Entry 7
 activate task manager entry 8=Meta+8,Meta+8,Activate Task Manager Entry 8
 activate task manager entry 9=Meta+9,Meta+9,Activate Task Manager Entry 9
-activate widget 12=Meta+M,none,Activate Disks  Devices Widget
-activate widget 14=Meta+N,none,Activate Notifications Widget
+activate widget 12=none,none,Activate Disks  Devices Widget
+activate widget 14=none,none,Activate Notifications Widget
 activate widget 31=none,none,Activate Calculator Widget
 activate widget 38=none,none,Activate System Monitor Sensor Widget
 activate widget 41=none,none,Activate Day Progress Widget
-activate widget 5=none,none,Activate Icons-Only Task Manager Widget
 activate widget 58=none,none,Activate System Tray Widget
+activate widget 59=Meta+N,none,Activate Notifications Widget
 activate widget 64=none,none,Activate Notifications Widget
+activate widget 75=none,none,Activate Icons-Only Task Manager Widget
 activate widget 8=none,none,Activate System Tray Widget
 clear-history=none,,Clear Clipboard History
 clipboard_action=Meta+Ctrl+X,Meta+Ctrl+X,Automatic Action Popup Menu
@@ -331,7 +268,7 @@ previous activity=Ctrl+Shift+F10,none,Walk through activities (Reverse)
 repeat_action=none,,Manually Invoke Action on Current Clipboard
 show dashboard=Ctrl+F12,Ctrl+F12,Show Desktop
 show-barcode=none,,Show Barcode…
-show-on-mouse-pos=none,Meta+V,Show Clipboard Items at Mouse Position
+show-on-mouse-pos=Meta+V,Meta+V,Show Clipboard Items at Mouse Position
 stop current activity=Meta+S,Meta+S,Stop Current Activity
 switch to next activity=Meta+Tab,,Switch to Next Activity
 switch to previous activity=Meta+Shift+Tab,,Switch to Previous Activity
@@ -348,9 +285,6 @@ _launch=Meta+Shift+R
 [services][net.local.cd.desktop]
 _launch=Meta+R
 
-[services][net.local.copyq.desktop]
-_launch=Meta+V
-
 [services][net.local.crow.sh.desktop]
 _launch=Meta+F1
 
@@ -366,11 +300,11 @@ _launch=Ctrl+Alt+Media Play
 [services][net.local.ww.sh-10.desktop]
 _launch=Meta+H
 
+[services][net.local.ww.sh-11.desktop]
+_launch=Meta+W
+
 [services][net.local.ww.sh-2.desktop]
 _launch=Meta+Shift+E
-
-[services][net.local.ww.sh-3.desktop]
-_launch=Meta+F2
 
 [services][net.local.ww.sh-4.desktop]
 _launch=Meta+X
@@ -379,13 +313,13 @@ _launch=Meta+X
 _launch=Meta+K
 
 [services][net.local.ww.sh-6.desktop]
-_launch=Meta+F4
+_launch=Meta+F3
 
 [services][net.local.ww.sh-7.desktop]
-_launch=Meta+?
+_launch=Meta+Shift+M
 
 [services][net.local.ww.sh-8.desktop]
-_launch=Meta+/
+_launch=Meta+M
 
 [services][net.local.ww.sh-9.desktop]
 _launch=Meta+E
@@ -412,7 +346,7 @@ RectangularRegionScreenShot=Print\tMeta+Shift+Print
 _launch=none
 
 [services][org.telegram.desktop._f5398c4b242994c49f72de073f07a8f6.desktop]
-_launch=Meta+F3
+_launch=Meta+F2
 
 [services][systemsettings.desktop]
 _launch=Meta+,\tTools
