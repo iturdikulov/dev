@@ -11,11 +11,6 @@ preexec () {
   echo -n "\\x1b]133;A\\x1b\\"
 }
 
-set -o vi
-
-# Make Vi mode transitions faster (KEYTIMEOUT is in hundredths of a second)
-export KEYTIMEOUT=1
-
 # Beginning search in insert mode, redundant with the up/down arrows above
 # but a little easier to press.
 bindkey "^P" history-search-backward
@@ -60,8 +55,9 @@ fi
 
 export NNN_PLUG="d:dragdrop;D:dups;c:chksum;f:fzcd;F:fixname;m:mymount;o:oldbigfile;R:rsync;s:suedit";
 export NNN_TRASH="2"
+export TERM="xterm-ghostty"
 
-export STARDICT_DATA_DIR="$HOME/Documents/dictionary"
+export STARDICT_DATA_DIR="$HOME/Library/dictionary"
 export EDITOR=nvim
 export SUDO_EDITOR=nvim
 export PASSWORD_STORE_ENABLE_EXTENSIONS=true
@@ -69,11 +65,9 @@ export PASSWORD_STORE_ENABLE_EXTENSIONS=true
 export GOPATH=$HOME/.local/go
 addToPathFront /usr/local/go/bin
 
-export N_PREFIX="$HOME/.local/n"
-addToPathFront $HOME/.local/n/bin
-
 addToPathFront $HOME/.local/whisper/bin
 addToPathFront $HOME/.local/tmux/bin
+addToPathFront $HOME/scripts
 addToPathFront $HOME/.local/scripts
 addToPathFront $HOME/.config/nnn/plugins
 addToPathFront $HOME/.local/.npm-global/bin
@@ -127,14 +121,25 @@ alias o='xdg-open'
 
 alias g='git'
 alias gsummary='git shortlog --summary --numbered --all --no-merges'
+alias gtodo='git grep "TODO:" $(git diff HEAD --name-only)'
 alias garchive='git archive --format=zip --output "git_archive_$(date +%s).zip" HEAD'
 alias git-recent='git diff --numstat | sort -k1 -nr'
 alias git2ssh='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^https://([^/]*)/(.*)$,git@\1:\2,'\'')"'
 alias git2https='git remote set-url origin "$(git remote get-url origin | sed -E '\''s,^git@([^:]*):/*(.*)$,https://\1/\2,'\'')"'
 alias gh_init="git init && gh repo create --public --source=. --remote=upstream"
+alias vue_init="pnpm create vue@latest"
 alias py='python3'
 alias python='python3'
 alias ipy='ipython'
+
+# Package managers aliases
+alias uva="uv add"
+alias uvda="uv add --dev"
+alias pna="pnpm add --save"
+alias pnda="pnpm add --save-dev"
+
+# Npx utils
+alias skills="npx skills"
 
 c()
 {
@@ -147,8 +152,15 @@ alias rg_all='rg --hidden --no-ignore'
 alias rga='rga --follow'
 alias disk-usage='ncdu --exclude ~/Media --exclude /proc --exclude /sys --exclude /mnt --exclude /media --exclude /dev/shm /'
 
-alias y='wl-copy'
-alias p='wl-paste'
+# Clipboard Wrapper: Handles Wayland (wl-copy) and X11 (xclip)
+if [[ -n "$WAYLAND_DISPLAY" ]]; then
+    alias y='wl-copy'
+    alias p='wl-paste'
+elif [[ -n "$DISPLAY" ]]; then
+    alias y='xclip -selection clipboard'
+    alias p='xclip -selection clipboard -o'
+fi
+
 alias w2x='wl-paste | xclip -i -selection clipboard'  # fix paste for X11 apps
 
 alias plasma_restart='kquitapp6 plasmashell || killall plasmashell && kstart plasmashell'
@@ -172,9 +184,15 @@ alias grep='grep --color'
 alias jc='journalctl -xeu'
 alias sc=systemctl
 alias fpass='PASSWORD_STORE_ENABLE_EXTENSIONS=true pass fzf'
+alias dweb='chromium --remote-debugging-port=9222 --no-first-run --no-default-browser-check &> /dev/null & disown'
+alias dvite='node ./node_modules/vite/bin/vite.js --host'
 
-alias m4b='docker run -it --rm -u $(id -u):$(id -g) -v "$(pwd)":/mnt sandreas/m4b-tool:latest merge -v --jobs=3 --output-file="output/" --batch-pattern="input/%g/%a/%n/" "input/"'
-
+if (( $+commands[docker] )); then
+    alias m4b='docker run -it --rm -u $(id -u):$(id -g) -v "$(pwd)":/mnt sandreas/m4b-tool:latest merge -v --jobs=3 --output-file="output/" --batch-pattern="input/%g/%a/%n/" "input/"'
+    alias d=docker
+    alias dc='docker compose'
+    alias azc='cd ~/Desktop/atd/az-containers/ && docker compose exec -e TERM=xterm-256color -e COLORTERM=truecolor -w /workspace devcontainer zsh -c "overmind connect rtms-flask"'
+fi
 
 if (( $+commands[apt] )); then
     alias apts='apt-cache search'
@@ -238,15 +256,14 @@ qcode (){
 }
 
 q() {
-    local system=$(cat ~/Templates/system.md)
-    local prompt="Use a brief style for answer, limit output to 140-500 characters if possible. Put links as list in the end of answer."
+    local prompt="Use a **brief style** for answer. Put links as list in the end of answer."
 
     # if passed -c as first arg continue
     if [[ "$1" == "-c" ]]; then
         shift
-        llm -c -s "$prompt" --system "$system" "$*"|glow
+        llm -c --system "$prompt" "$*"|glow --pager
     else
-        llm -s "$prompt" --system "$system" "$*"|glow
+        llm --system "$prompt" "$*"|glow --pager
     fi
 }
 
@@ -270,7 +287,7 @@ def() {
     llm -s "Define the word "[WORD]" in simple English, providing a few common example sentence and a brief Russian translation of the definition. Also, include etymology information, common synonyms and antonyms, output should fit in $(tput lines) lines and $(tput cols)." "$*"|glow
 }
 
-d() {
+di() {
     piper-speak.sh "$@" &> /dev/null & disown
     sdcv -nc "$@" | sed 's/<[^>]*>//g' | sed 's/0m.*\w\+\.wav.*/0m/g' | less -R
 }
@@ -329,7 +346,7 @@ if (( $+commands[mpv] )); then
         local playlists=$(printf "%q" "$playlists")
         local selected=$(echo "$history_f"$'\n'"$playlists" | fzf | sed "s/mpv //g")
         [[ -z "$selected" ]] && return
-        eval mpv --loop-file=yes "$selected" &> /dev/null & disown
+        eval mpv --loop-file=no "$selected" &> /dev/null & disown
     }
 
     play_lr() {
@@ -348,3 +365,21 @@ pomo() {
     ffplay -nodisp -autoexit ~/Templates/assets/sound/effects/l2_critical_hit_soundeffect.mp3
     notify-send "Countdown finished after $countdown_time"
 }
+
+pomo_bg() {
+    sh -c "sleep $1 && \
+    ffplay -nodisp -autoexit ~/Templates/assets/sound/effects/l2_critical_hit_soundeffect.mp3 2>/dev/null && \
+    notify-send \"Countdown finished after $1\"" > /dev/null 2>&1 &
+    disown
+}
+
+alias tun2proxy='sudo /home/inom/.cargo/bin/tun2proxy-bin --setup --proxy "socks5://192.168.1.1:10808" --dns-addr 77.88.88.8 --dns virtual'
+
+# bun completions
+[ -s "/home/dev/.bun/_bun" ] && source "/home/dev/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
