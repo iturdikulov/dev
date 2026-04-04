@@ -22,3 +22,6 @@ if [ ! -f /etc/apt/sources.list.d/pgdg.sources ]; then
     sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
 fi
 install_packages postgresql-18
+
+cd /usr/local/go/bin/ || { echo "Failed"; exit 1; }
+./go install github.com/jorgerojas26/lazysql@latest

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
 
-sudo apt install -y tmux
+sudo apt install -y tmux tmuxinator

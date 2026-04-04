@@ -7,6 +7,7 @@ git clone https://github.com/v4l2loopback/v4l2loopback.git
 cd v4l2loopback || exit 1
 make && sudo make install
 sudo depmod -a && sudo modprobe v4l2loopback
+sudo apt-get install v4l-utils
 
 APP_VERSION=3.3.1
 cd "/tmp" || exit 1

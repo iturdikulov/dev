@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt install -y clang clangd build-essential cmake gcc git
+sudo apt install -y clang clangd build-essential cmake gcc git strace
 
 # Install cling
 cd /tmp || exit 1
