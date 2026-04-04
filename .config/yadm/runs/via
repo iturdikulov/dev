@@ -1,0 +1,6 @@
+#!/bin/sh
+
+PKGURL="https://github.com/the-via/releases/releases/download/v3.0.0/via-3.0.0-linux.deb"
+cd /tmp || exit 1
+wget2 --progress=bar --output-document via.deb $PKGURL
+sudo dpkg -i ./via.deb && rm ./via.deb

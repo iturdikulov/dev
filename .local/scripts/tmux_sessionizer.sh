@@ -4,6 +4,8 @@ if [[ $# -eq 1 ]]; then
     selected=$1
 else
     backend=$(cd $HOME && fdfind --absolute-path --type=directory ".*backend|.*frontend" --maxdepth=5)
+    workspace=$(cd /workspace && fdfind --absolute-path --type=directory --maxdepth=1)
+    workspace_packages=$(cd /workspace/packages/ && fdfind --absolute-path --type=directory --maxdepth=1)
     selected=$(
         (
          echo $HOME/; \
@@ -12,6 +14,8 @@ else
          echo $HOME/.local/scripts; \
          echo $HOME/.local/share; \
          printf "%s\\n" "$backend"; \
+         printf "%s\\n" "$workspace_packages"; \
+         printf "%s\\n" "$workspace"; \
          fdfind --type=directory --max-depth=1 \
                 --exclude='_*' \
                 --exclude='.git' \

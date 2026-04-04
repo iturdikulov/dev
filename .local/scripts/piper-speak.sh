@@ -21,6 +21,7 @@ speak(){
         local model="$HOME/.local/share/piper_model/en_US-lessac-medium.onnx"
     fi
 
+    ffplay -autoexit -nodisp -hide_banner -loglevel panic "$HOME/Templates/assets/sound/250-milliseconds-of-silence.mp3" &
     "$HOME/.local/bin/piper" --length_scale 1.2 --model $model --output-raw | ffplay -hide_banner -loglevel panic -i -f s16le -ar 22050 -autoexit -nodisp -
 }
 

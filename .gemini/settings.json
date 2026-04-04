@@ -1,0 +1,22 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "general": {
+    "vimMode": false,
+    "previewFeatures": true,
+    "enablePromptCompletion": true,
+    "sessionRetention": {
+      "warningAcknowledged": true,
+      "enabled": true,
+      "maxAge": "30d"
+    },
+    "enableAutoUpdate": false
+  },
+  "ui": {
+    "showModelInfoInChat": true,
+    "theme": "ANSI"
+  }
+}
