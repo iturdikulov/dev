@@ -4,6 +4,18 @@ ShowInHistory=false
 [Applications][chromium]
 Seen=true
 
+[Applications][com.mitchellh.ghostty]
+Seen=true
+
+[Applications][cursor]
+Seen=true
+
+[Applications][google-chrome]
+Seen=true
+
+[Applications][microsoft-edge]
+Seen=true
+
 [Applications][net.lutris.Lutris]
 Seen=true
 
@@ -23,5 +35,4 @@ Seen=true
 Seen=true
 
 [DoNotDisturb]
-WhenScreenSharing=false
 WhenScreensMirrored=false
