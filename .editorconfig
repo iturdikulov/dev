@@ -9,19 +9,9 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-indent_size = 4
-indent_style = space
-insert_final_newline = true
-trim_trailing_whitespace = true
+insert_final_newline = unset
+trim_trailing_whitespace = unset
 max_line_length = 80
-
-[*.py]
-quote_type = double
-
-# Go/makefiles/.gitmodules use tab
-[{Makefile,**.mk,go.mod,go.sum,*.go,.gitmodules,.gitconfig}]
-indent_style = tab
-indent_size = 4
 
 # Although Markdown/CommonMark allows using two trailing spaces to denote
 # a hard line break, I do not use that feature since
@@ -36,26 +26,19 @@ max_line_length = 0
 [*.{diff,patch}]
 end_of_line = unset
 insert_final_newline = unset
-trim_trailing_whitespace = unset
 
 # Ignore c/headers, some of them can have own indentation style
 # we use auto-detection for these
 [*.{c,h}]
 insert_final_newline = unset
-trim_trailing_whitespace = unset
 
 # Same for confi/encrypted files/etc.
 [*.{asc,key,ovpn,cfg,config,lock}]
 insert_final_newline = unset
 end_of_line = unset
-trim_trailing_whitespace = unset
 
 # Binaries
 [*.nib]
 end_of_line = unset
 insert_final_newline = unset
-trim_trailing_whitespace = unset
 charset = unset
-
-[eggs.nix]
-trim_trailing_whitespace = unset
