@@ -12,4 +12,3 @@ shell-integration-features = no-cursor
 command = tmux new-session -A -s inomoz; zsh
 theme = kanso-zen
 gtk-custom-css = tab-style.css
-keybind = ctrl+shift+n=ignore

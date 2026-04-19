@@ -2,7 +2,8 @@
   "security": {
     "auth": {
       "selectedType": "oauth-personal"
-    }
+    },
+    "toolSandboxing": true
   },
   "general": {
     "vimMode": false,
@@ -13,10 +14,13 @@
       "enabled": true,
       "maxAge": "30d"
     },
-    "enableAutoUpdate": false
+    "enableAutoUpdate": false,
+    "defaultApprovalMode": "default"
   },
   "ui": {
     "showModelInfoInChat": true,
-    "theme": "ANSI"
+    "theme": "ANSI",
+    "hideTips": true,
+    "hideBanner": true
   }
 }

@@ -43,9 +43,9 @@ titlematch=1
 Description=PIP
 above=true
 aboverule=3
-position=1920,234
+position=1920,941
 positionrule=3
-size=593,332
+size=1080,611
 sizerule=3
 skiptaskbar=true
 skiptaskbarrule=3
@@ -69,44 +69,16 @@ wmclassmatch=1
 Description=Orca Slicer No Titlebar and Frame
 noborderrule=3
 
-[5d09b2c5-b719-46fb-ba00-dec1458fc1c3]
-Description=Global QuickNote
-position=1020,0
-positionrule=3
-size=900,1050
-sizerule=3
-skiptaskbar=true
-skiptaskbarrule=3
-types=1
-wmclass=gl_foot_note
-wmclassmatch=1
-
-[9860fe82-cf3b-4764-9b96-d08bff567412]
-Description=Global Shortcuts
-position=0,0
-positionrule=3
-size=900,1050
-sizerule=3
-skiptaskbar=true
-skiptaskbarrule=3
-types=1
-wmclass=gl_foot_shortcut
-wmclassmatch=1
-
-[9ef2b9d8-ae96-4ceb-90d4-ffdbd20b396d]
-Description=Cmus
-position=301,0
-positionrule=3
-size=1233,884
-sizerule=3
+[6728f00c-c1f6-4edb-970f-f0479d1bc309]
+Description=cmus
 skiptaskbar=true
 skiptaskbarrule=3
 wmclass=cmus
 wmclassmatch=1
 
 [General]
-count=13
-rules=9860fe82-cf3b-4764-9b96-d08bff567412,5d09b2c5-b719-46fb-ba00-dec1458fc1c3,cd26447c-52ae-4eec-bc9d-0ec642c9020b,3b96aea6-551f-4c65-9f4c-5f929ae9e0c8,051ceab2-1c45-417f-8efa-648e6954bdcc,dfc6ba1f-f9d7-4a0d-97ed-7e4bccb68372,bebd4a15-adea-46ca-af76-eeed724ee634,a591d008-f7ac-4074-89a4-110d7f6dc4c1,230decd2-383f-4b04-9260-5e3ca2118178,314c9cfa-c069-427e-af4e-6cb0e566066e,4d57f5f7-b5fb-46e9-abbe-fbf729547dd2,9ef2b9d8-ae96-4ceb-90d4-ffdbd20b396d,3fe49d4c-b2e5-4290-bfea-93f8ab447f30
+count=12
+rules=cd26447c-52ae-4eec-bc9d-0ec642c9020b,3b96aea6-551f-4c65-9f4c-5f929ae9e0c8,051ceab2-1c45-417f-8efa-648e6954bdcc,bebd4a15-adea-46ca-af76-eeed724ee634,a591d008-f7ac-4074-89a4-110d7f6dc4c1,230decd2-383f-4b04-9260-5e3ca2118178,314c9cfa-c069-427e-af4e-6cb0e566066e,4d57f5f7-b5fb-46e9-abbe-fbf729547dd2,3fe49d4c-b2e5-4290-bfea-93f8ab447f30,ed1b6def-9763-49e4-8ef3-0b32219f56a0,aa538ca5-31e6-4ae3-be5d-f6846302e2b2,6728f00c-c1f6-4edb-970f-f0479d1bc309
 
 [a591d008-f7ac-4074-89a4-110d7f6dc4c1]
 Description=Copy of ghostty
@@ -117,6 +89,16 @@ maximizevertrule=3
 noborder=true
 noborderrule=3
 wmclass=main.app
+wmclassmatch=1
+
+[aa538ca5-31e6-4ae3-be5d-f6846302e2b2]
+Description=QuickNotes
+positionrule=3
+size=1083,599
+sizerule=3
+skiptaskbar=true
+skiptaskbarrule=3
+wmclass=gl_foot_note
 wmclassmatch=1
 
 [bebd4a15-adea-46ca-af76-eeed724ee634]
@@ -143,13 +125,13 @@ maximizevertrule=3
 wmclass=org.pwmt.zathura
 wmclassmatch=1
 
-[dfc6ba1f-f9d7-4a0d-97ed-7e4bccb68372]
-Description=Foot eXt
-maximizehoriz=true
-maximizehorizrule=3
-maximizevert=true
-maximizevertrule=3
-noborder=true
-noborderrule=3
-wmclass=foot_ext
+[ed1b6def-9763-49e4-8ef3-0b32219f56a0]
+Description=Shortcuts
+position=386,840
+positionrule=3
+size=1072,1027
+sizerule=3
+skiptaskbar=true
+skiptaskbarrule=3
+wmclass=gl_foot_shortcut
 wmclassmatch=1

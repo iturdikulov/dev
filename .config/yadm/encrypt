@@ -8,6 +8,7 @@
 .config/singbox-rules.json
 .config/sqls/config.yml
 .config/msmtp/config
+.config/usql/config.yaml
 .config/plasma-workspace/env/env.sh
 .gnupg/*.conf
 .git/config

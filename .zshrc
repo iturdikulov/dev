@@ -53,8 +53,6 @@ if [[ ! ${MYVIMRC} ]]; then
     fi
 fi
 
-export NNN_PLUG="d:dragdrop;D:dups;c:chksum;f:fzcd;F:fixname;m:mymount;o:oldbigfile;R:rsync;s:suedit";
-export NNN_TRASH="2"
 export TERM="xterm-ghostty"
 
 export STARDICT_DATA_DIR="$HOME/Library/dictionary"

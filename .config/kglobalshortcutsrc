@@ -54,7 +54,7 @@ Expose=Ctrl+F9,Ctrl+F9,Toggle Present Windows (Current desktop)
 ExposeAll=Launch (C)\tMeta+A,Ctrl+F10\tLaunch (C),Toggle Present Windows (All desktops)
 ExposeClass=Ctrl+F7,Ctrl+F7,Toggle Present Windows (Window class)
 ExposeClassCurrentDesktop=none,none,Toggle Present Windows (Window class on current desktop)
-Grid View=Meta+G,Meta+G,Toggle Grid View
+Grid View=none,Meta+G,Toggle Grid View
 Increase Opacity=none,,Increase Opacity of Active Window by 5%
 Kill Window=Meta+Ctrl+Esc,Meta+Ctrl+Esc,Kill Window
 Move Tablet to Next Output=none,none,Move the tablet to the next output
@@ -67,7 +67,7 @@ MoveZoomUp=none,none,Move Zoomed Area Upwards
 Overview=none,Meta+W,Toggle Overview
 Remember Window Positions: Show Config=Meta+Ctrl+W,none,Remember Window Positions: Show Config
 Setup Window Shortcut=Ctrl+Alt+Shift+K,,Setup Window Shortcut
-Show Desktop=Meta+D,Meta+D,Peek at Desktop
+Show Desktop=none,Meta+D,Peek at Desktop
 Suspend Compositing=Alt+Shift+F12,Alt+Shift+F12,Suspend Compositing
 Switch One Desktop Down=Meta+Ctrl+Down,Meta+Ctrl+Down,Switch One Desktop Down
 Switch One Desktop Up=Meta+Ctrl+Up,Meta+Ctrl+Up,Switch One Desktop Up
@@ -131,7 +131,7 @@ Window Custom Quick Tile Bottom=none,,Custom Quick Tile Window to the Bottom
 Window Custom Quick Tile Left=none,,Custom Quick Tile Window to the Left
 Window Custom Quick Tile Right=none,,Custom Quick Tile Window to the Right
 Window Custom Quick Tile Top=none,,Custom Quick Tile Window to the Top
-Window Fullscreen=Meta+F,,Make Window Fullscreen
+Window Fullscreen=Meta+F11,,Make Window Fullscreen
 Window Grow Horizontal=none,,Expand Window Horizontally
 Window Grow Vertical=none,,Expand Window Vertically
 Window Lower=none,,Lower Window
@@ -235,7 +235,7 @@ _k_friendly_name=Power Management
 powerProfile=Battery\tMeta+B,Battery\tMeta+B,Switch Power Profile
 
 [plasmashell]
-_k_friendly_name=plasmashell
+_k_friendly_name=System Settings
 activate application launcher=Meta+Space,Meta\tAlt+F1,Activate Application Launcher
 activate task manager entry 1=Meta+1,Meta+1,Activate Task Manager Entry 1
 activate task manager entry 10=Meta+0,,Activate Task Manager Entry 10
@@ -252,27 +252,29 @@ activate widget 14=none,none,Activate Notifications Widget
 activate widget 31=none,none,Activate Calculator Widget
 activate widget 38=none,none,Activate System Monitor Sensor Widget
 activate widget 41=none,none,Activate Day Progress Widget
+activate widget 46=Meta+C,none,Activate Digital Clock Widget
 activate widget 58=none,none,Activate System Tray Widget
-activate widget 59=Meta+N,none,Activate Notifications Widget
+activate widget 59=,none,Activate Notifications Widget
 activate widget 64=none,none,Activate Notifications Widget
 activate widget 75=none,none,Activate Icons-Only Task Manager Widget
 activate widget 8=none,none,Activate System Tray Widget
+activate widget 9=Meta+N,none,Activate System Tray Widget
 clear-history=none,,Clear Clipboard History
 clipboard_action=Meta+Ctrl+X,Meta+Ctrl+X,Automatic Action Popup Menu
 cycle-panels=Meta+Alt+P,Meta+Alt+P,Move keyboard focus between panels
 cycleNextAction=none,,Next History Item
 cyclePrevAction=none,,Previous History Item
-manage activities=Meta+Q,Meta+Q,Show Activity Switcher
+manage activities=none,Meta+Q,Show Activity Switcher
 next activity=Ctrl+F10,none,Walk through activities
 previous activity=Ctrl+Shift+F10,none,Walk through activities (Reverse)
 repeat_action=none,,Manually Invoke Action on Current Clipboard
 show dashboard=Ctrl+F12,Ctrl+F12,Show Desktop
 show-barcode=none,,Show Barcode…
-show-on-mouse-pos=Meta+V,Meta+V,Show Clipboard Items at Mouse Position
-stop current activity=Meta+S,Meta+S,Stop Current Activity
+show-on-mouse-pos=none,Meta+V,Show Clipboard Items at Mouse Position
+stop current activity=none,Meta+S,Stop Current Activity
 switch to next activity=Meta+Tab,,Switch to Next Activity
 switch to previous activity=Meta+Shift+Tab,,Switch to Previous Activity
-toggle do not disturb=none,,Toggle do not disturb
+toggle do not disturb=,,Toggle do not disturb
 
 [services][io.crow_translate.CrowTranslate.desktop]
 Open=Ctrl+Alt+Shift+T
@@ -285,8 +287,11 @@ _launch=Meta+Shift+R
 [services][net.local.cd.desktop]
 _launch=Meta+R
 
+[services][net.local.copyq-2.desktop]
+_launch=Meta+V
+
 [services][net.local.crow.sh.desktop]
-_launch=Meta+F1
+_launch=Meta+K
 
 [services][net.local.for.desktop]
 _launch=Meta+Shift+N
@@ -298,31 +303,43 @@ _launch=Meta+Media Play
 _launch=Ctrl+Alt+Media Play
 
 [services][net.local.ww.sh-10.desktop]
-_launch=Meta+H
+_launch=Meta+S
 
 [services][net.local.ww.sh-11.desktop]
-_launch=Meta+W
+_launch=Meta+D
+
+[services][net.local.ww.sh-12.desktop]
+_launch=Meta+G
+
+[services][net.local.ww.sh-13.desktop]
+_launch=Meta+M
+
+[services][net.local.ww.sh-14.desktop]
+_launch=Meta+Q
+
+[services][net.local.ww.sh-15.desktop]
+_launch=Meta+F2
+
+[services][net.local.ww.sh-16.desktop]
+_launch=Meta+F3
 
 [services][net.local.ww.sh-2.desktop]
-_launch=Meta+Shift+E
+_launch=Meta+F4
 
 [services][net.local.ww.sh-4.desktop]
-_launch=Meta+X
+_launch=Meta+F
 
 [services][net.local.ww.sh-5.desktop]
-_launch=Meta+K
+_launch=Meta+W
 
 [services][net.local.ww.sh-6.desktop]
-_launch=Meta+F3
+_launch=Meta+F1
 
 [services][net.local.ww.sh-7.desktop]
 _launch=Meta+Shift+M
 
-[services][net.local.ww.sh-8.desktop]
-_launch=Meta+M
-
 [services][net.local.ww.sh-9.desktop]
-_launch=Meta+E
+_launch=Meta+J
 
 [services][net.local.ww.sh.desktop]
 _launch=Meta+`
@@ -346,7 +363,8 @@ RectangularRegionScreenShot=Print\tMeta+Shift+Print
 _launch=none
 
 [services][org.telegram.desktop._f5398c4b242994c49f72de073f07a8f6.desktop]
-_launch=Meta+F2
+_launch=Meta+L
 
 [services][systemsettings.desktop]
 _launch=Meta+,\tTools
+kcm-kscreen=Ctrl+Alt+Shift+S
