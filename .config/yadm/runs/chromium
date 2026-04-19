@@ -1,7 +1,27 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 cd /tmp || exit 1
 wget2 https://dl.google.com/linux/linux_signing_key.pub -O- | sudo tee /etc/apt/keyrings/linux_signing_key.pub.asc > /dev/null
 echo "deb [signed-by=/etc/apt/keyrings/linux_signing_key.pub.asc] https://dl.google.com/linux/chrome/deb/ stable main" | sudo tee -a /etc/apt/sources.list.d/google-chrome.list > /dev/null
 sudo apt update
 sudo apt install --yes google-chrome-stable
+
+sudo apt install --yes chromium
+
+mkdir -p $HOME/.local/share/applications
+cat > $HOME/.local/share/applications/chromium-debug.desktop << EOF
+[Desktop Entry]
+Version=1.0
+Name=Chromium (Remote Debug)
+GenericName=Web Browser
+Comment=Access the Internet with remote debugging enabled
+Exec=/usr/bin/chromium --remote-debugging-port=9222 --user-data-dir=$HOME/.config/chromium-debug --no-default-browser-check %U
+Terminal=false
+Type=Application
+Icon=chromium
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml_xml;application/x-mimearchive;x-scheme-handler/http;x-scheme-handler/https;
+Keywords=browser;debug;devtools;
+EOF

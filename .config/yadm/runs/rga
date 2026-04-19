@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-install_packages ripgrep pandoc poppler-utils ffmpeg
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-# Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/utils.sh"
+install_packages ripgrep pandoc poppler-utils ffmpeg
 
 # Function to install ripgrep-all (rga)
 RGA_VERSION="0.10.10"

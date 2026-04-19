@@ -45,7 +45,9 @@ borg create \
     --exclude "home/*/Media/" \
     --exclude "home/*/.thunderbird/*/calendar-data/cache.sqlite*" \
     --exclude "/home/*/.config/Slack/Service Worker" \
-    --exclude "var/lib/docker/overlay*" \
+    --exclude "/home/*/Desktop/atd/az-containers/runtime" \
+    --exclude "var/lib/docker" \
+    --exclude "var/lib/libvirt/images" \
     --exclude "var/tmp/*" \
     --exclude "var/backups/*" \
     --exclude "var/log/*" \

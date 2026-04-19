@@ -34,12 +34,43 @@ check_home_set() {
 # Check if a command exists
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
+# Change directory or exit 1 after logging the failure.
+cd_or_exit() {
+    local dir=$1
+    if ! cd -- "$dir"; then
+        log_error "Failed to change directory to: $dir"
+        exit 1
+    fi
+}
+
 # Check if a package is installed (Debian/Ubuntu)
 package_installed() { dpkg -l "$1" | grep -q '^ii' >/dev/null 2>&1; }
+
+# True if apt package lists should be refreshed (missing cache or older than ~7 days).
+apt_cache_is_stale() {
+    local cache=/var/cache/apt/pkgcache.bin
+    local week_sec=$((7 * 24 * 60 * 60))
+    local now mtime age
+
+    if [[ ! -f "$cache" ]]; then
+        return 0
+    fi
+
+    now=$(date +%s)
+    mtime=$(stat -c %Y -- "$cache" 2>/dev/null) || return 0
+    age=$((now - mtime))
+    ((age > week_sec))
+}
 
 # Install package if not already installed
 install_packages() {
     local pkg_names=("$@")
+
+    if apt_cache_is_stale; then
+        log_info "Package index is missing or older than 7 days; running apt update..."
+        sudo apt-get update
+    fi
+
     for pkg_name in "${pkg_names[@]}"; do
         if ! package_installed "$pkg_name"; then
             log_info "Installing $pkg_name..."
@@ -122,6 +153,7 @@ create_desktop_entry() {
 
     log_info "Creating desktop entry: $desktop_dir/$filename"
     echo "$content" > "$desktop_dir/$filename.desktop"
+    update-desktop-database $desktop_dir
 }
 
 # Find old versions of a software and suggest cleanup
@@ -137,18 +169,6 @@ find_old_versions() {
         log_warn "Found old versions that can be removed manually:"
         echo "$old_versions"
     fi
-}
-
-# Update apt package list
-update_apt() {
-    log_info "Updating apt package list..."
-    sudo apt update
-}
-
-# Upgrade system
-upgrade_system() {
-    log_info "Upgrading system packages..."
-    sudo apt upgrade -y
 }
 
 install_archive() {

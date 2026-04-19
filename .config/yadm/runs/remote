@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 # --- Parsec
 #
 # Define the download directory
@@ -83,7 +85,9 @@ echo "deb [signed-by=/etc/apt/keyrings/keys.anydesk.com.asc] https://deb.anydesk
 # Update apt caches and install the AnyDesk client
 sudo apt update
 sudo apt install anydesk
-sudo systemctl disable anydesk
+sudo systemctl mask anydesk
+sudo rm -f /etc/xdg/autostart/anydesk_global_tray.desktop
+sudo dpkg-divert --add --rename --divert /etc/systemd/system/anydesk.service.unused /etc/systemd/system/anydesk.service
 
 # --- Remmina
 #

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-sudo apt -y update
-sudo apt -y install gpg pass pinentry-qt
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+install_packages gpg pass pinentry-qt
 
 # browserpass
 cd /tmp || exit 1
@@ -27,5 +28,7 @@ make browserpass-linux64
 make BIN=browserpass-linux64 configure
 sudo make BIN=browserpass-linux64 install
 cd "/usr/lib/browserpass/" || exit 1
-make hosts-edge-user
-# make policies-edge-user
+sudo make hosts-edge-user
+sudo make hosts-firefox-user
+sudo make hosts-chrome
+sudo make hosts-brave

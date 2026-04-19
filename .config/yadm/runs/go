@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 VERSION=1.24.2
 echo "Downloading GO"
 wget2 --progress=bar --output-document /tmp/go_$VERSION.tar.gz "https://go.dev/dl/go$VERSION.linux-amd64.tar.gz"
@@ -23,3 +25,17 @@ cd /usr/local/go/bin/ || { echo "Failed"; exit 1; }
 ./go install github.com/antonmedv/countdown@latest
 ./go install github.com/bootdotdev/bootdev@latest
 ./go install github.com/sqls-server/sqls@latest
+./go install github.com/xo/usql@latest
+./go install github.com/charmbracelet/vhs@latest  # terminal recorder
+./go install github.com/snowie2000/geoview@0.1.11
+./go install github.com/joshmedeski/sesh/v2@latest
+
+# Cursor for opencode
+echo "This will run external bash script, do you want to continue? (y/n)"
+read -r answer
+if [ "$answer" != "${answer#[Yy]}" ]; then
+    echo "Continuing..."
+else
+    echo "Exiting..."
+    exit 1
+fi

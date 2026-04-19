@@ -11,6 +11,11 @@ sudo ufw default allow outgoing
 
 sudo ufw allow ssh
 sudo ufw allow nfs
+sudo ufw allow samba
+
+# Proxy
+sudo ufw allow 2080/tcp
+sudo ufw allow 2080/udp
 
 # KDE connect rules
 sudo ufw allow 1716:1764/tcp

@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
-set -e
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-sudo apt -y update
-sudo apt-get install -y dkms "linux-headers-$(uname -r)"
+install_packages dkms "linux-headers-$(uname -r)"
+
 git clone https://github.com/dlundqvist/xone /tmp/xone
-cd /tmp/xone
+cd_or_exit /tmp/xone
 sudo ./install.sh
 sudo ./install/firmware.sh
 rm -rf /tmp/xone
-

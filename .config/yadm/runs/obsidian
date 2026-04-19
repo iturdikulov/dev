@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 set -u
 
-APP_VERSION=1.9.12
+APP_VERSION=1.12.7
 
 APP_NAME=obsidian
 APP_DESKTOP_NAME=Obsidian

@@ -1,19 +1,25 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # Base dependencies
-sudo apt install -y nodejs npm shellcheck
+install_packages nodejs npm shellcheck
 
-sys_npm=/usr/bin/npm
-
-$sys_npm config set prefix ~/.local/npm
+log_info "Setting npm prefix to ~/.local/npm"
+npm config set prefix ~/.local/npm
 
 packages=(
-    n
+    @devcontainers/cli
     pnpm
     deno
     browser-sync
     single-file-cli
+
     @biomejs/biome
+    @vue/language-server
+    @vue/typescript-plugin
+    @vtsls/language-server
+
     @olrtg/emmet-language-server
     bash-language-server
     critical
@@ -23,7 +29,6 @@ packages=(
     dockerfile-language-server-nodejs
     yaml-language-server
     vscode-langservers-extracted
-    @google/gemini-cli
     @google/clasp
     @343dev/optimizt
     postcss
@@ -32,10 +37,5 @@ packages=(
 )
 
 for package in "${packages[@]}"; do
-    $sys_npm install --global "$package"
+    npm install -g "$package"
 done
-
-export N_PREFIX="$HOME/.local/n"
-export PATH=$N_PREFIX/bin:$PATH
-
-n lts

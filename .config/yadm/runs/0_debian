@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+echo "Decrypt some config files"
+# yadm decrypt
+
+echo "Adding some crontab items"
+crontab_items=(
+    '0 */2 * * * .local/scripts/xdg_notify.sh "Periodic Check" "H2O levels need attention for optimal performance" -u normal -t 4000 -i drink-martini'
+    '0 0 1 * * tldr --update'
+)
+for line in "${crontab_items[@]}"; do
+    if ! crontab -l 2>/dev/null | grep -qF "$line"; then
+        (crontab -l 2>/dev/null; echo "$line") | crontab -
+    fi
+done
+
+# Upgrade system
+log_info "Update system && install core packages"
+sudo apt update && sudo apt upgrade
+
+log_info "Updating kernel from trixie-backports, do not forget to re-run xone/scrcpy runners"
+LINUX_VERSION="6.19.11+deb13-amd64"
+install_packages "linux-image-$LINUX_VERSION/trixie-backports" "linux-headers-$LINUX_VERSION/trixie-backports"
+
+# TODO: move into own runner
+log "Remove discover update notifier"
+sudo rm "/etc/xdg/autostart/org.kde.discover.notifier.desktop"
+
+# Verify /tmp space aviability
+df -k /tmp | awk 'NR==2 {if ($4 < 4194304) {printf "ERROR: Less than 4GB available in /tmp\n"; exit 1}}'
+
+# Minimal install of most required packages
+if ! sudo apt install -y yadm wget2 build-essential curl ca-certificates git jq
+then
+  echo "Failed to update system, check log_infos above and try to fix all issues."
+  exit 1
+fi
