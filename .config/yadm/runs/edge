@@ -1,8 +1,35 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 sudo apt-get install --no-install-recommends -y ca-certificates
 EDGE_VERSION=$(curl -sL https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-stable/ |
     awk -F'(<a href="microsoft-edge-stable_|_amd64.deb\")' '/href=/ {print $2}' | sort --version-sort | tail -1)
 curl -o /tmp/edge.deb -L "https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-stable/microsoft-edge-stable_${EDGE_VERSION}_amd64.deb"
 sudo dpkg -I /tmp/edge.deb
 sudo apt install --no-install-recommends -y /tmp/edge.deb && rm /tmp/edge.deb
+
+# Special gemini app app
+APP_NAME="Gemini"
+FILE_NAME="gemini.desktop"
+TARGET_DIR="$HOME/.local/share/applications"
+
+# 1. Create the directory if it doesn't exist
+mkdir -p "$TARGET_DIR"
+
+# 2. Create the .desktop file, proxy server from global env file
+cat <<EOF > "$TARGET_DIR/$FILE_NAME"
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$APP_NAME
+Comment=Google Gemini AI via Microsoft Edge
+Exec=microsoft-edge --app=https://gemini.google.com --proxy-server="$PROXY_SERVER"
+Icon=microsoft-edge
+Terminal=false
+StartupWMClass=gemini.google.com
+Categories=Network;WebBrowser;AI;
+EOF
+
+# 3. Make the file executable
+chmod +x "$TARGET_DIR/$FILE_NAME"
