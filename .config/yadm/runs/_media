@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 sudo apt remove vlc dragonplayer
 sudo apt install -y mpv obs-studio audacity kdenlive lmms ffmpeg cmus ani-cli picard
 sudo apt install -y krita inkscape imagemagick darktable qrencode gimp mypaint-brushes

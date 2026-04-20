@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 sudo apt install -y clang clangd build-essential cmake gcc git strace
 
 # Install cling

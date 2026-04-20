@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 sudo apt remove konqueror
 sudo apt install -y firefox-esr

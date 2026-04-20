@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/utils.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # F3D and freecad
 log_info "Setting up 3D tools..."

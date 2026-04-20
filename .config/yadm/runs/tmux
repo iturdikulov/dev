@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 set -e
 
 sudo apt install -y tmux tmuxinator

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 # TODO: parmetrize!
 
 # libwebkit2gtk-4.1-dev was required for Orca v2.3.0+

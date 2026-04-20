@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 git clone https://github.com/iturdikulov/slimzsh "$HOME/.config/slimzsh"
 cd "$HOME/.config/slimzsh" || exit 1
 git submodule update --init --recursive

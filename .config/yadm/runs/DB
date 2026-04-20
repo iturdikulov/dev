@@ -2,9 +2,7 @@
 
 set -euo pipefail
 
-# Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/utils.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # DB clients
 install_packages postgresql-client mariadb-client

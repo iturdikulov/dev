@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-# Source common utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/utils.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # Base dependencies
 install_packages nasm
@@ -26,6 +24,7 @@ tex-fmt
 cargo install stylua --features luajit
 cargo install --locked --git https://github.com/Feel-ix-343/markdown-oxide.git markdown-oxide
 cargo install --locked --git https://github.com/j178/prek
+cargo install --git https://github.com/jinliu/kdotool.git
 
 cargo install mago && mago self-update
 

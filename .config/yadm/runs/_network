@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 sudo apt remove firewalld kmail akregator kaddressbook
-sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh msmtp msmtp-mta filezilla whois qbittorrent-nox
+sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh msmtp msmtp-mta filezilla whois qbittorrent
+
+sudo apt install -y samba
+sudo systemctl disable samba-ad-dc
+sudo systemctl mask samba-ad-dc
 
 # WARN: Enable firewall for debian!
 sudo apt install -y ufw
@@ -24,12 +30,14 @@ sudo ufw allow 1716:1764/udp
 # Valutwarden
 sudo ufw allow 8000/tcp
 
+# Jellyfin
+sudo ufw allow 8096/tcp
+sudo ufw allow 8920/tcp
+sudo ufw allow 7359/udp
+
 # Custom
 sudo ufw allow 8080/tcp
 sudo ufw allow 9090/tcp
 
 sudo ufw enable
 sudo ufw status verbose
-
-# Add qbittorrent-nox
-sudo systemctl enable --now "qbittorrent-nox@$USER"

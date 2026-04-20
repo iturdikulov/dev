@@ -2,6 +2,7 @@
 .config/environment.d/git_askpass.conf
 .config/io.datasette.llm/keys.json
 .config/environment.d/*.conf
+.config/lazygit/config.yml
 .config/yadm/sync.sh
 .config/yadm/universal_sys/etc/sing-box/config.json
 .config/singbox-direct-rules.json

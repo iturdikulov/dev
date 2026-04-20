@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 sudo apt update
 sudo apt install zathura zathura-cb zathura-djvu mupdf texlive-base texlive latexmk texlive-lang-cyrillic texlive-fonts-extra
 # texlive-latex-extra texlive-xetex

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 sudo apt install -y qemu-system libvirt-daemon-system virt-manager virt-viewer virtiofsd
 sudo adduser `id -un` libvirt
 sudo virsh net-autostart default

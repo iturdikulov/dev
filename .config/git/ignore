@@ -71,3 +71,8 @@ dmypy.json
 
 # node
 node_modules/
+
+tmp
+**/.claude/settings.local.json
+.codex
+inom_only

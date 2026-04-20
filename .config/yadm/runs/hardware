@@ -1,4 +1,4 @@
 #!/bin/sh
 
-sudo apt install -y lm-sensors stress-ng hardinfo2 psensor
+sudo apt install -y lm-sensors stress-ng hardinfo2 psensor fatrace openrgb
 sudo sensors-detect

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 pkgver=5.16.1
 downloaded_file="/tmp/tsetup.${pkgver}.tar.xz"
 

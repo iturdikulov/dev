@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
 # This script installs dolt on your Linux or macOS computer.
 # It should be run as root, and can be run directly from a GitHub
 # release, for example as:
