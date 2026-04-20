@@ -1,64 +1,15 @@
-#!/usr/bin/env zsh
-log() {
-    echo "$1"
-}
+#!/usr/bin/env bash
 
-log "Update system && install core packages"
-# Verify that we are running not as root
-if [[ $EUID -eq 0 ]]; then
-echo "This script should not be run as root"
-exit 1
-fi
-
-if [[ -z "$HOME" ]]; then
-echo "HOME env var is not set"
-exit 1
-fi
-
-sudo apt update && sudo apt upgrade
+# Source common utilities
+source "$(dirname -- "${BASH_SOURCE[0]}")/runs/utils.sh"
 
 # Because Git submodule commands cannot operate without a work tree, they must
 # be run from within $HOME (assuming this is the root of your dotfiles)
-cd "$HOME"
-yadm submodule update --recursive --init
-cd "$OLDPWD"
+cd "$HOME" || exit 1
 
 git config --global user.email "i@inomoz.ru"
 git config --global user.name "Inom T."
 
-# Minimal install of most required packages
-sudo apt install -y yadm wget2 build-essential curl ca-certificates git jq
+yadm submodule update --recursive --init
 
-if [ $? -ne 0 ]; then
-  echo "Failed to update system, check logs above and try to fix all issues."
-  exit 1
-fi
-
-echo "Decrypt some config files"
-yadm decrypt
-
-echo "Adding some crontab items"
-crontab_items=(
-    '0 */2 * * * .local/scripts/xdg_notify.sh "Periodic Check" "H2O levels need attention for optimal performance" -u normal -t 4000 -i drink-martini'
-    '0 0 1 * * tldr --update'
-)
-for line in "${crontab_items[@]}"; do
-    if ! crontab -l 2>/dev/null | grep -qF "$line"; then
-        (crontab -l 2>/dev/null; echo "$line") | crontab -
-    fi
-done
-
-log "Updating kernel from trixie-backports"
-log "Do not forget to re-run nvidia/xone/camera runners"
-LINUX_VERSION="6.16.3+deb13-amd64"
-sudo apt install -y "linux-image-$LINUX_VERSION/trixie-backports"
-sudo apt install -y "linux-headers-$LINUX_VERSION/trixie-backports"
-
-# TODO: move into own runner
-log "Remove discover update notifier"
-sudo rm "/etc/xdg/autostart/org.kde.discover.notifier.desktop"
-
-# Verify /tmp space aviability
-df -k /tmp | awk 'NR==2 {if ($4 < 4194304) {printf "ERROR: Less than 4GB available in /tmp\n"; exit 1}}'
-
-echo "Now go to ~/.config/yadm/runs and execute required runners"
+echo "Now go to ~/.config/yadm/runs and execute required runners, e.g. 0_debian"

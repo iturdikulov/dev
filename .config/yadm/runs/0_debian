@@ -2,6 +2,15 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
+# Configure tty font
+sudo dpkg-reconfigure console-setup
+
+# Disable baloo
+balooctl6 status
+balooctl6 disable
+balooctl6 purge
+systemctl --user mask kde-baloo.service
+
 echo "Decrypt some config files"
 # yadm decrypt
 
