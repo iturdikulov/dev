@@ -2,8 +2,8 @@
 
 set -e
 
-sudo apt install -y firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon hipcc
-sudo usermod -a -G render,video $LOGNAME # Add the current user to the render and video groups
+sudo apt install -y firmware-amd-graphics i2c-tools libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon hipcc
+sudo usermod -a -G render,video $LOGNAME # Add the current user to the render, video and printer groups
 
 
 # Add nct6687d for MS-7C95-B550M-PRO-VDH
@@ -19,3 +19,10 @@ if ! [ -e /etc/sensors.d/MS-7C95-B550M-PRO-VDH.conf ]; then
     echo "Sensors config linked successfully."
 fi
 
+# Load i2c-dev at boot (/dev/i2c-*)
+if ! [ -e /etc/modules-load.d/i2c-dev.conf ]; then
+    sudo apt install -y i2c-tools
+    sudo ln pc_sys/etc/modules-load.d/i2c-dev.conf /etc/modules-load.d/
+    sudo modprobe i2c-dev || true
+    echo "modules-load.d i2c-dev linked successfully."
+fi
