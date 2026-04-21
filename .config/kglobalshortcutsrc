@@ -235,7 +235,7 @@ _k_friendly_name=Power Management
 powerProfile=Battery\tMeta+B,Battery\tMeta+B,Switch Power Profile
 
 [plasmashell]
-_k_friendly_name=System Settings
+_k_friendly_name=plasmashell
 activate application launcher=Meta+Space,Meta\tAlt+F1,Activate Application Launcher
 activate task manager entry 1=Meta+1,Meta+1,Activate Task Manager Entry 1
 activate task manager entry 10=Meta+0,,Activate Task Manager Entry 10
@@ -254,27 +254,27 @@ activate widget 38=none,none,Activate System Monitor Sensor Widget
 activate widget 41=none,none,Activate Day Progress Widget
 activate widget 46=Meta+C,none,Activate Digital Clock Widget
 activate widget 58=none,none,Activate System Tray Widget
-activate widget 59=,none,Activate Notifications Widget
+activate widget 59=none,none,Activate Notifications Widget
 activate widget 64=none,none,Activate Notifications Widget
 activate widget 75=none,none,Activate Icons-Only Task Manager Widget
 activate widget 8=none,none,Activate System Tray Widget
 activate widget 9=Meta+N,none,Activate System Tray Widget
-clear-history=none,,Clear Clipboard History
+clear-history=none,none,Clear Clipboard History
 clipboard_action=Meta+Ctrl+X,Meta+Ctrl+X,Automatic Action Popup Menu
 cycle-panels=Meta+Alt+P,Meta+Alt+P,Move keyboard focus between panels
-cycleNextAction=none,,Next History Item
-cyclePrevAction=none,,Previous History Item
+cycleNextAction=none,none,Next History Item
+cyclePrevAction=none,none,Previous History Item
 manage activities=none,Meta+Q,Show Activity Switcher
 next activity=Ctrl+F10,none,Walk through activities
 previous activity=Ctrl+Shift+F10,none,Walk through activities (Reverse)
-repeat_action=none,,Manually Invoke Action on Current Clipboard
+repeat_action=none,none,Manually Invoke Action on Current Clipboard
 show dashboard=Ctrl+F12,Ctrl+F12,Show Desktop
-show-barcode=none,,Show Barcode…
+show-barcode=none,none,Show Barcode…
 show-on-mouse-pos=none,Meta+V,Show Clipboard Items at Mouse Position
 stop current activity=none,Meta+S,Stop Current Activity
 switch to next activity=Meta+Tab,,Switch to Next Activity
 switch to previous activity=Meta+Shift+Tab,,Switch to Previous Activity
-toggle do not disturb=,,Toggle do not disturb
+toggle do not disturb=none,,Toggle do not disturb
 
 [services][io.crow_translate.CrowTranslate.desktop]
 Open=Ctrl+Alt+Shift+T

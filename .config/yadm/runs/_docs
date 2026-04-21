@@ -3,7 +3,7 @@
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 remove_packages okular # will be used Firefox & Foliate as default
-install_packages libreoffice-calc libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre pandoc ghostwriter
+install_packages libreoffice-calc libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre pandoc
 install_packages visidata python3-openpyxl crow-translate xournalpp zeal
 
 # Tesseract data for crow-translate
