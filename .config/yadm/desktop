@@ -5,7 +5,6 @@ set -e
 sudo apt install -y firmware-amd-graphics i2c-tools libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon hipcc
 sudo usermod -a -G render,video $LOGNAME # Add the current user to the render, video and printer groups
 
-
 # Add nct6687d for MS-7C95-B550M-PRO-VDH
 cd /tmp || exit 1
 git clone https://github.com/Fred78290/nct6687d

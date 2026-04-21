@@ -1,0 +1,28 @@
+#!/usr/bin/env zsh
+
+set -e
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+cd $script_dir
+
+# For Steam + nvidia
+sudo apt install -y libgl1-nvidia-glvnd-glx:i386
+
+# AMD
+sudo apt install -y firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon
+
+# Recursively symlink laptop config files into /etc, /usr, etc.
+laptop_conf_dir="$script_dir/laptop_conf"
+for src in "$laptop_conf_dir"/**/*(.N); do
+  rel_path="${src#"$laptop_conf_dir"/}"
+  dest_path="/$rel_path"
+
+  sudo mkdir -p "$(dirname "$dest_path")"
+  if [ -e "$dest_path" ] && [ ! -L "$dest_path" ]; then
+    echo "Skipping existing non-symlink: $dest_path"
+    continue
+  fi
+
+  echo "Creating symlink for $src to $dest_path"
+  sudo ln "$src" "$dest_path"
+done
