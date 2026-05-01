@@ -1,4 +1,5 @@
 [Added Associations]
+application/epub+zip=sioyek.desktop;calibre-ebook-edit.desktop;calibre-gui.desktop;mupdf.desktop;calibre-ebook-viewer.desktop;org.pwmt.zathura-pdf-mupdf.desktop;org.kde.ark.desktop;
 application/ogg=mpv.desktop;org.musicbrainz.Picard.desktop;no.mifi.losslesscut.desktop.desktop;audacity.desktop;msedge-fijgaclkfjcmebpnabiloceblffgpppc-Default.desktop;
 application/pdf=com.github.xournalpp.xournalpp.desktop;
 application/vnd.comicbook+zip=org.pwmt.zathura.desktop;calibre-ebook-viewer.desktop;calibre-gui.desktop;org.kde.ark.desktop;
@@ -30,6 +31,21 @@ audio/x-scpls=mpv.desktop;
 audio/x-vorbis=mpv.desktop;
 audio/x-vorbis+ogg=mpv.desktop;
 audio/x-wav=mpv.desktop;
+image/avif=org.nomacs.ImageLounge.desktop;
+image/bmp=org.nomacs.ImageLounge.desktop;
+image/gif=org.nomacs.ImageLounge.desktop;shutter.desktop;display-im7.q16.desktop;gimp.desktop;microsoft-edge.desktop;krita_gif.desktop;feh.desktop;com.microsoft.Edge.desktop;
+image/heif=org.nomacs.ImageLounge.desktop;
+image/jp2=org.nomacs.ImageLounge.desktop;gimp.desktop;org.darktable.darktable.desktop;krita_jp2.desktop;
+image/jpeg=org.nomacs.ImageLounge.desktop;
+image/jpm=org.nomacs.ImageLounge.desktop;
+image/jpx=org.nomacs.ImageLounge.desktop;gimp.desktop;krita_jp2.desktop;
+image/jxl=org.nomacs.ImageLounge.desktop;krita_jxl.desktop;gimp.desktop;org.darktable.darktable.desktop;
+image/png=org.nomacs.ImageLounge.desktop;
+image/tiff=org.nomacs.ImageLounge.desktop;shutter.desktop;display-im7.q16.desktop;gimp.desktop;org.darktable.darktable.desktop;feh.desktop;krita_tiff.desktop;
+image/webp=org.nomacs.ImageLounge.desktop;
+image/x-adobe-dng=org.nomacs.ImageLounge.desktop;krita_raw.desktop;org.darktable.darktable.desktop;display-im7.q16.desktop;feh.desktop;gimp.desktop;shutter.desktop;krita_tiff.desktop;
+image/x-icns=org.nomacs.ImageLounge.desktop;
+model/stl=OrcaSlicer.desktop;org.freecad.FreeCAD.desktop;f3d-plugin-native.desktop;
 video/3gp=mpv.desktop;
 video/3gpp=mpv.desktop;
 video/3gpp2=mpv.desktop;
@@ -64,6 +80,7 @@ video/x-theora=mpv.desktop;
 video/x-theora+ogg=mpv.desktop;
 
 [Default Applications]
+application/epub+zip=sioyek.desktop;
 application/ogg=mpv.desktop;
 application/pdf=com.github.xournalpp.xournalpp.desktop;
 application/vnd.comicbook+zip=org.pwmt.zathura.desktop;
@@ -95,6 +112,21 @@ audio/x-scpls=mpv.desktop;
 audio/x-vorbis=mpv.desktop;
 audio/x-vorbis+ogg=mpv.desktop;
 audio/x-wav=mpv.desktop;
+image/avif=org.nomacs.ImageLounge.desktop;
+image/bmp=org.nomacs.ImageLounge.desktop;
+image/gif=org.nomacs.ImageLounge.desktop;
+image/heif=org.nomacs.ImageLounge.desktop;
+image/jp2=org.nomacs.ImageLounge.desktop;
+image/jpeg=org.nomacs.ImageLounge.desktop;
+image/jpm=org.nomacs.ImageLounge.desktop;
+image/jpx=org.nomacs.ImageLounge.desktop;
+image/jxl=org.nomacs.ImageLounge.desktop;
+image/png=org.nomacs.ImageLounge.desktop;
+image/tiff=org.nomacs.ImageLounge.desktop;
+image/webp=org.nomacs.ImageLounge.desktop;
+image/x-adobe-dng=org.nomacs.ImageLounge.desktop;
+image/x-icns=org.nomacs.ImageLounge.desktop;
+model/stl=OrcaSlicer.desktop;
 video/3gp=mpv.desktop;
 video/3gpp=mpv.desktop;
 video/3gpp2=mpv.desktop;
@@ -128,6 +160,9 @@ video/x-ogm+ogg=mpv.desktop;
 video/x-theora=mpv.desktop;
 video/x-theora+ogg=mpv.desktop;
 x-scheme-handler/obsidian=obsidian.desktop
+x-scheme-handler/wljs-url-message=wljs-notebook.desktop
+application/uproject=com.epicgames.UnrealEngineEditor.desktop
+x-scheme-handler/discord-1484148764850786414=discord-1484148764850786414.desktop
 
 [Removed Associations]
 application/xhtml+xml=calibre-ebook-edit.desktop;

@@ -9,6 +9,6 @@ window-padding-y = 0
 cursor-style = block
 cursor-style-blink = false
 shell-integration-features = no-cursor
-command = tmux new-session -A -s inomoz; zsh
+command = zsh
 theme = kanso-zen
 gtk-custom-css = tab-style.css

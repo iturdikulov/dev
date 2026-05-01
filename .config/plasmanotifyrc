@@ -4,8 +4,12 @@ ShowInHistory=false
 [Applications][chromium]
 Seen=true
 
+[Applications][code]
+Seen=true
+
 [Applications][com.mitchellh.ghostty]
 Seen=true
+ShowInHistory=false
 
 [Applications][cursor]
 Seen=true
@@ -46,3 +50,6 @@ Seen=true
 
 [DoNotDisturb]
 WhenScreensMirrored=false
+
+[Services][xdg-desktop-portal-kde]
+ShowPopups=false

@@ -218,6 +218,11 @@ playpausemedia=Media Play,Media Play,Play/Pause media playback
 previousmedia=Media Previous,Media Previous,Media playback previous
 stopmedia=Media Stop,Media Stop,Stop media playback
 
+[notebook]
+245129E3238A3FBC738262C0A25773CB-Alt+Shift+Space=none,Alt+Shift+Space,wljs-notebook shortcut: Alt+Shift+Space
+BD47AED14B1930A9DB74467FAF974633-Alt+Shift+Space=none,none,wljs-notebook shortcut: Alt+Shift+Space
+_k_friendly_name=notebook
+
 [org_kde_powerdevil]
 Decrease Keyboard Brightness=Keyboard Brightness Down,Keyboard Brightness Down,Decrease Keyboard Brightness
 Decrease Screen Brightness=Monitor Brightness Down,Monitor Brightness Down,Decrease Screen Brightness
@@ -318,13 +323,13 @@ _launch=Meta+M
 _launch=Meta+Q
 
 [services][net.local.ww.sh-15.desktop]
-_launch=Meta+F2
+_launch=Meta+F4
 
 [services][net.local.ww.sh-16.desktop]
 _launch=Meta+F3
 
 [services][net.local.ww.sh-2.desktop]
-_launch=Meta+F4
+_launch=Meta+F2
 
 [services][net.local.ww.sh-4.desktop]
 _launch=Meta+F
