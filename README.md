@@ -1,9 +1,10 @@
-## Minimal Debian 13 installation
+## Debian 13 installation
 
-Use the Netinst ISO - https://www.debian.org/CD/netinst/
-Verify checksums.
+1. Use the Netinst ISO - https://www.debian.org/CD/netinst/
 
-Set root password during install, otherwise `sudo` will not work.
+2. Verify checksums.
+
+3. Set root password during install, otherwise `sudo` will not work.
 
 Partitioning:
 
@@ -14,8 +15,8 @@ Partitioning:
 - Scroll down to "Finish Partitioning" and "Write Changes"
 
 When you get to "software selection", deselect everything
-but System Utilities, reboot, log into the shell with your username and
-password and:
+but System Utilities, reboot, log into the shell with your username (`inom`) and
+password and execute:
 
 ```
 su -
@@ -24,8 +25,13 @@ apt update && apt upgrade
 # a smaller, more flexible KDE environment compared to kde-full
 apt install -y kde-standard
 
+# check section below
 apt purge ifupdown
 ```
+
+## ifupdown issues
+
+TODO: might be not actual!
 
 You will need to remove the ifupdown package, because that's what the installer
 uses, while Gnome uses NetworkManager, so there will be a conflict and your WiFi
@@ -44,11 +50,9 @@ shutdown -r now
 ## Bootstrapping
 
 Before running script, verify:
-- sudo access
-- added additional repositories in "Software & Update" or in /etc/sources.list (contrib, non-free, non-free-firmware)
-https://wiki.debian.org/SourcesList
 
-On Debian you might need to add user into sudo group and reboot.
+- sudo access
+- added additional repositories in "Software & Update" or in /etc/sources.list (contrib, non-free, non-free-firmware). https://wiki.debian.org/SourcesList
 
 ```
 su -
@@ -65,49 +69,11 @@ yadm clone https://github.com/iturdikulov/dev
 ## Post install
 
 - System Prefrences: layout `kcmshell6 kcm_keyboard`, keybindings Ctrl Position
-- System Preferences: dark theme, default applications
-- Settings, `Dark` theme, Resolution, scale-factor, refresh rate
-- Import shortcuts scheme: from `.config/yadm/shortcuts_scheme.kksrc`
-- General behaviour, no animation?
-- Sync Account
-- Configure desktop app run arguments (in KDE very easy): foot --maximized
+- System Preferences: dark theme, default applications, resolution, scale-factor, refresh rate
+- General behaviour: no animation?
+- Sync Account in browser
 - Export/Import gpg backup with script
+- Sync files with sync.sh scrpt
+- Execute runners
 - Verify ~/.config/mimeapps.list
-- https://wiki.calculate-linux.org/ru/btrbk, TODO: offline?
-- https://wiki.debian.org/NvidiaGraphicsDrivers
-- https://wiki.debian.org/NVIDIA%20Optimus
-- https://gitlab.com/asus-linux/asusctl
-- https://discussion.fedoraproject.org/t/kde-battery-charge-limit-reset-after-reboot/95628/8
-- add kernel parameter to fix freeze `amd_pstate=active` (2025)
-- https://wiki.archlinux.org/title/Laptop/ASUS
-- sudo update-initramfs -c  -k all after frimware install
-`GRUB_CMDLINE_LINUX_DEFAULT="quiet nvidia.NVreg_EnableGpuFirmware=0 amdgpu.dcdebugmask=0x10"`
-sudo update-grub2
-- https://gitlab.com/asus-linux/asusctl
-  -  /etc/asusd/fan_curves.ron
-- https://itsecforu.ru/2023/05/30/autossh-zapusk-monitoring-i-perezapusk-ssh-soe/
-- remove discover updates
-```
-sudo rm /etc/xdg/autostart/org.kde.discover.notifier.desktop
-```
-
-
-### LLM CLI
-
-```
-llm install llm-openrouter
-pass show ...|y
-llm keys set openrouter
-llm models
-
-# Set default model, for example
-llm models default openrouter/google/gemini-2.5-flash-preview
-```
-
-### Shortcuts
-
-M-F2
-C-F10
-M-S-Up/Left/Right/Down - focus between visible windows
-M-Tab
-M-`
+- Copy /etc configs, including specific ones (`update-grub`, `update-initramfs -u`, etc. if required)
