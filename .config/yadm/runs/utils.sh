@@ -270,17 +270,17 @@ install_archive() {
 # missing command can make utils.sh call the same installer recursively.
 CALLER_SCRIPT="$(basename -- "${BASH_SOURCE[1]:-}")"
 
-if [[ ! " go node python _rust " =~ " $CALLER_SCRIPT " ]]; then
+if [[ ! " 04_go 05_python 06_rust 07_node " =~ " $CALLER_SCRIPT " ]]; then
     # 1. Get current script directory once
     DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 
     # 2. Define tools: "command : installer_script : binary_paths_to_add"
     # Separate multiple paths for a single tool with a space
     tools=(
-        "go:go:/usr/local/go/bin $HOME/go/bin"
-        "uv:python:$HOME/.local/bin"
-        "cargo:_rust:$HOME/.cargo/bin"
-        "npm:node:/usr/bin /usr/local/bin"
+        "go:04_go:/usr/local/go/bin $HOME/go/bin"
+        "uv:05_python:$HOME/.local/bin"
+        "cargo:06_rust:$HOME/.cargo/bin"
+        "npm:07_node:/usr/bin /usr/local/bin"
     )
 
     # 3. Process each toolchain in a single loop
