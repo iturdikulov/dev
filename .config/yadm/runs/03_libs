@@ -2,5 +2,5 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-install_packages git lazygit ripgrep fd-find zoxide jq tealdeer shutter python3-pip 7zip wl-clipboard wget2 xxd gh
+install_packages git lazygit ripgrep fd-find zoxide jq tealdeer python3-pip 7zip wl-clipboard wget2 xxd gh
 install_packages htop libsensors5 gdu apt-show-versions detox entr eza fdupes gitleaks trash-cli
