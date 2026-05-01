@@ -2,25 +2,41 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-sudo apt remove vlc dragonplayer
-sudo apt install -y mpv obs-studio audacity kdenlive lmms ffmpeg cmus ani-cli picard
-sudo apt install -y krita inkscape imagemagick darktable qrencode gimp mypaint-brushes
+remove_packages vlc dragonplayer gwenview
+install_packages nomacs mpv obs-studio audacity kdenlive lmms ffmpeg cmus ani-cli picard
+install_packages krita inkscape imagemagick darktable qrencode gimp mypaint-brushes
 
-wget2 --progress=bar --output-document ~/.local/bin/yt-dlp \
-    "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux"
-chmod +x ~/.local/bin/yt-dlp
+for tool in piper-tts  \
+            obs-cli; do
+    uv tool install --upgrade $tool
+done
 
-wget2 --progress=bar --output-document ~/.local/bin/lossless-cut \
-    "https://github.com/mifi/lossless-cut/releases/latest/download/LosslessCut-linux-x86_64.AppImage"
-chmod +x ~/.local/bin/lossless-cut
+ensure_directory "$HOME/.local/bin"
 
-# LAUNCHER
+YT_DLP_VERSION="2026.03.17"
+YT_DLP_PATH="$HOME/.local/bin/yt-dlp"
+YT_DLP_URL="https://github.com/yt-dlp/yt-dlp/releases/download/${YT_DLP_VERSION}/yt-dlp_linux"
+if [[ -x "$YT_DLP_PATH" ]] && [[ "$("$YT_DLP_PATH" --version 2>/dev/null)" == "$YT_DLP_VERSION" ]]; then
+    log_info "yt-dlp version $YT_DLP_VERSION already installed; skipping download"
+else
+    trash_path "$YT_DLP_PATH"
+    download_file "$YT_DLP_URL" "$YT_DLP_PATH" && chmod +x "$YT_DLP_PATH"
+fi
+
+LOSSLESS_CUT_VERSION="latest"  # always latest
+LOSSLESS_CUT_PATH="$HOME/.local/bin/lossless-cut"
+LOSSLESS_CUT_URL="https://github.com/mifi/lossless-cut/releases/download/${LOSSLESS_CUT_VERSION}/LosslessCut-linux-x86_64.AppImage"
+if [[ "$LOSSLESS_CUT_VERSION" == "latest" && -x "$LOSSLESS_CUT_PATH" ]]; then
+    log_info "lossless-cut already exists at $LOSSLESS_CUT_PATH; skipping latest re-download"
+else
+    download_file "$LOSSLESS_CUT_URL" "$LOSSLESS_CUT_PATH" && chmod +x "$LOSSLESS_CUT_PATH"
+fi
+
 APP="no.mifi.losslesscut.desktop"
-mkdir -p "$HOME/.local/share/applications"
-echo "[Desktop Entry]
+create_desktop_entry "$APP" "[Desktop Entry]
 Name=LosslessCut
 Comment=simple video editor to trim or cut videos
-Comment[fr]=Un simple éditeur vidéo pour retailler ou couper les vidéos
+Comment[fr]=Un simple editeur video pour retailler ou couper les videos
 Exec=$HOME/.local/bin/lossless-cut
 MimeType=video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-anim;video/x-avi;video/x-ms-asf;video/x-ms-wmv;video/x-msvideo;video/x-nsv;video/x-flc;video/x-fli;video/x-flv;video/vnd.rn-realvideo;video/mp4;video/mp4v-es;video/mp2t;application/ogg;application/x-ogg;video/x-ogm+ogg;audio/x-vorbis+ogg;application/x-matroska;audio/x-matroska;video/x-matroska;video/webm;
 Icon=$HOME/.local/bin/icons/losslesscut.svg
@@ -29,4 +45,4 @@ Type=Application
 Encoding=UTF-8
 Categories=AudioVideo;AudioVideoEditing;
 Keywords=trim;codec;cut;movie;mpeg;avi;h264;mkv;mp4;
-StartupWMClass=losslesscut" > "$HOME/.local/share/applications/$APP.desktop"
+StartupWMClass=losslesscut"

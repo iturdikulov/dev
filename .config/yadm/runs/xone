@@ -2,7 +2,7 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-install_packages dkms "linux-headers-$(uname -r)"
+install_packages dkms "linux-headers-$(uname -r)" libarchive-tools curl
 
 git clone https://github.com/dlundqvist/xone /tmp/xone
 cd_or_exit /tmp/xone

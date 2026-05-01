@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+go install github.com/bootdotdev/bootdev@latest
+cargo binstall leetcode-cli

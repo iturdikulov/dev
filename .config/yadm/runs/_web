@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+packages=(
+    pnpm
+    browser-sync
+    critical
+    postcss
+    postcss-cli
+    @343dev/optimizt
+    autoprefixer
+    typescript
+    @google/clasp
+)
+
+for package in "${packages[@]}"; do
+    npm install -g "$package"
+done

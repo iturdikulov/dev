@@ -3,60 +3,98 @@
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 sudo dpkg --add-architecture i386
-sudo apt update
 
-sudo apt -y install steam-installer icoutils
-sudo apt -y install mesa-vulkan-drivers libglx-mesa0:i386 mesa-vulkan-drivers:i386 libgl1-mesa-dri:i386
+install_packages steam-installer icoutils
+install_packages mesa-vulkan-drivers libglx-mesa0:i386 mesa-vulkan-drivers:i386 libgl1-mesa-dri:i386
 
 # protontricks to tune proton prefixes and protontricks-launch to launch games
 # gamemode to tune hardware while playing games
-sudo apt -y install winetricks gamemode gamescope lutris antimicro dolphin-emu
+install_packages winetricks gamemode gamescope vkbasalt goverlay lutris antimicro dolphin-emu
 sudo usermod -aG gamemode $USER
 
-# protonup-qt
-wget2 --progress=bar --output-document "$HOME/.local/bin/ProtonUp-Qt.AppImage" "https://github.com/DavidoTek/ProtonUp-Qt/releases/download/v2.12.0/ProtonUp-Qt-2.12.0-x86_64.AppImage"
-chmod a+x $HOME/.local/bin/ProtonUp-Qt.AppImage
+# protonup-qt (version pin, idempotent download, stable launcher symlink)
+PROTONUP_QT_VERSION="2.12.0"
+PROTONUP_QT_URL="https://github.com/DavidoTek/ProtonUp-Qt/releases/download/v${PROTONUP_QT_VERSION}/ProtonUp-Qt-${PROTONUP_QT_VERSION}-x86_64.AppImage"
+PROTONUP_QT_APPIMAGE="$HOME/.local/bin/ProtonUp-Qt_${PROTONUP_QT_VERSION}.AppImage"
+PROTONUP_QT_LAUNCHER="$HOME/.local/bin/ProtonUp-Qt.AppImage"
 
-mkdir -p $HOME/.local/share/applications
-cat > $HOME/.local/share/applications/ProtonUp-Qt.desktop << EOF
-[Desktop Entry]
-Version=2.12.0
+ensure_directory "$HOME/.local/bin"
+if [ "$(readlink -- "$PROTONUP_QT_LAUNCHER" 2>/dev/null)" = "$PROTONUP_QT_APPIMAGE" ] && [ -x "$PROTONUP_QT_APPIMAGE" ]; then
+    log_info "ProtonUp-Qt $PROTONUP_QT_VERSION is already installed"
+else
+    download_file "$PROTONUP_QT_URL" "$PROTONUP_QT_APPIMAGE" || exit 1
+    chmod +x "$PROTONUP_QT_APPIMAGE"
+    ln -sf "$PROTONUP_QT_APPIMAGE" "$PROTONUP_QT_LAUNCHER"
+fi
+
+PROTONUP_QT_DESKTOP_CONTENT="[Desktop Entry]
+Version=$PROTONUP_QT_VERSION
 Name=ProtonUp-Qt
 Comment=Install and manage Proton-GE and Luxtorpeda for Steam and Wine-GE for Lutris
 GenericName=ProtonUp-Qt
-Exec=$HOME/.local/bin/ProtonUp-Qt.AppImage
+Exec=$PROTONUP_QT_LAUNCHER
 Icon=games-config-options
 Terminal=false
 Type=Application
 Categories=GTK;Game
-StartupNotify=true
-EOF
+StartupNotify=true"
 
-# citron
-wget2 --progress=bar --output-document "$HOME/.local/bin/citron.AppImage" "https://git.citron-emu.org/api/v4/projects/1/packages/generic/Citron/0.8.0/citron_0.8.0-x86_64_v3.AppImage"
-chmod a+x $HOME/.local/bin/citron.AppImage
-cat> $HOME/.local/share/applications/citron.desktop << EOF
-[Desktop Entry]
-Version=0.8.0
+create_desktop_entry "ProtonUp-Qt" "$PROTONUP_QT_DESKTOP_CONTENT"
+
+# citron — nightly Linux AppImage from citron-neo/CI (pin SHA when upgrading)
+CITRON_NIGHTLY_SHA="cf6129959"
+CITRON_APPIMAGE_BASENAME="citron_nightly-${CITRON_NIGHTLY_SHA}-linux-x86_64.AppImage"
+CITRON_URL="https://github.com/citron-neo/CI/releases/download/nightly-linux/${CITRON_APPIMAGE_BASENAME}"
+CITRON_APPIMAGE="$HOME/.local/bin/$CITRON_APPIMAGE_BASENAME"
+CITRON_LAUNCHER="$HOME/.local/bin/citron.AppImage"
+
+ensure_directory "$HOME/.local/bin"
+if [ "$(readlink -- "$CITRON_LAUNCHER" 2>/dev/null)" = "$CITRON_APPIMAGE" ] && [ -x "$CITRON_APPIMAGE" ]; then
+    log_info "Citron nightly ($CITRON_NIGHTLY_SHA) is already installed"
+else
+    download_file "$CITRON_URL" "$CITRON_APPIMAGE" || exit 1
+    chmod +x "$CITRON_APPIMAGE"
+    ln -sf "$CITRON_APPIMAGE" "$CITRON_LAUNCHER"
+fi
+
+CITRON_DESKTOP_CONTENT="[Desktop Entry]
+Version=nightly-$CITRON_NIGHTLY_SHA
 Name=Citron
-Comment=Nintendo Switch Emulator
+Comment=Nintendo Switch Emulator (nightly CI build)
 GenericName=Citron Emulator
-Exec=$HOME/.local/bin/citron.AppImage
+Exec=$CITRON_LAUNCHER
 Icon=applications-games
 Terminal=false
 Type=Application
 Categories=Game;Emulator;
-StartupNotify=true
-EOF
+StartupNotify=true"
 
-cd /tmp || exit 1
-wget --progress=bar --output-document ProdKeys.zip https://files.prodkeys.net/ProdKeys.NET-v20.4.0.zip
-wget --progress=bar --output-document Frimware.zip  https://github.com/THZoria/NX_Firmware/releases/download/20.4.0/Firmware.20.4.0.zip
+create_desktop_entry "citron" "$CITRON_DESKTOP_CONTENT"
 
-# Extract the downloaded zip files
-unzip "ProdKeys.zip" -d "ProdKeys" && rm "ProdKeys.zip"
-unzip "Frimware.zip" -d "Frimware" && rm "Frimware.zip"
+CITRON_KEYS_DIR="$HOME/.local/share/citron/keys"
+CITRON_FIRMWARE_DIR="$HOME/.local/share/citron/nand/system/Contents/registered"
 
-# Copy files to their respective directories
-cp -r ProdKeys/*/*.keys "$HOME/.local/share/citron/keys"
-cp -r Frimware/* "$HOME/.local/share/citron/nand/system/Contents/registered"
+ensure_directory "$CITRON_KEYS_DIR"
+ensure_directory "$CITRON_FIRMWARE_DIR"
+
+cd_or_exit /tmp
+
+if [[ -n "$(find "$CITRON_KEYS_DIR" -type f -name '*.keys' -print -quit 2>/dev/null)" ]]; then
+    log_info "Citron prod keys already present; skipping ProdKeys download"
+else
+    rm -rf ProdKeys ProdKeys.zip
+    wget --progress=bar --output-document ProdKeys.zip https://files.prodkeys.net/ProdKeys.NET-v20.4.0.zip
+    unzip ProdKeys.zip -d ProdKeys && rm ProdKeys.zip
+    cp -r ProdKeys/*/*.keys "$CITRON_KEYS_DIR"
+    rm -rf ProdKeys
+fi
+
+if [[ -n "$(find "$CITRON_FIRMWARE_DIR" -mindepth 1 -print -quit 2>/dev/null)" ]]; then
+    log_info "Citron firmware already present; skipping firmware download"
+else
+    rm -rf Firmware Firmware.zip
+    wget --progress=bar --output-document Firmware.zip https://github.com/THZoria/NX_Firmware/releases/download/20.4.0/Firmware.20.4.0.zip
+    unzip Firmware.zip -d Firmware && rm Firmware.zip
+    cp -r Firmware/* "$CITRON_FIRMWARE_DIR"
+    rm -rf Firmware
+fi

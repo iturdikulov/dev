@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+APP_NAME="wljs-notebook"
+REPO="WLJSTeam/wljs-notebook"
+TMP_DEB="/tmp/${APP_NAME}.deb"
+WOLFRAM_ENGINE_VERSION="14.3"
+
+check_not_root
+check_home_set
+
+find_wolfram_engine_installer() {
+    local installer
+
+    shopt -s nullglob
+    for installer in \
+        "$HOME"/Downloads/WolframEngine_*_LINUX*.sh \
+        "$HOME"/Downloads/WolframEngine*.sh \
+        "$HOME"/Downloads/*Wolfram*Engine*.sh
+    do
+        printf '%s\n' "$installer"
+        shopt -u nullglob
+        return 0
+    done
+    shopt -u nullglob
+    return 1
+}
+
+ensure_wolfram_engine() {
+    local installer
+
+    if command_exists wolframscript; then
+        log_info "wolframscript is already installed"
+        return 0
+    fi
+
+    installer="$(find_wolfram_engine_installer || true)"
+    if [[ -z "$installer" ]]; then
+        log_error "Wolfram Engine is required before installing WLJS Notebook from the Debian package."
+        log_error "Download Wolfram Engine ${WOLFRAM_ENGINE_VERSION} for Linux from: https://www.wolfram.com/engine/"
+        log_error "Place the installer in $HOME/Downloads, get the free developer license, then rerun this script."
+        exit 1
+    fi
+
+    log_info "Installing Wolfram Engine from: $installer"
+    sudo bash "$installer"
+
+    if ! command_exists wolframscript; then
+        log_error "Wolfram Engine installer finished, but wolframscript was not found in PATH."
+        log_error "Rerun the installer and accept script integration, or add wolframscript to PATH."
+        exit 1
+    fi
+}
+
+case "$(dpkg --print-architecture)" in
+    amd64)
+        DEB_ASSET_REGEX='wljs-notebook.*(amd64|x86_64).*\.deb$'
+        ;;
+    arm64)
+        DEB_ASSET_REGEX='wljs-notebook.*(arm64|aarch64).*\.deb$'
+        ;;
+    *)
+        log_error "Unsupported architecture: $(dpkg --print-architecture)"
+        exit 1
+        ;;
+esac
+
+install_packages ca-certificates curl jq libfuse2
+
+ensure_wolfram_engine
+
+LATEST_RELEASE_JSON="$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest")"
+LATEST_TAG="$(jq -r '.tag_name' <<< "$LATEST_RELEASE_JSON")"
+DEB_URL="$(
+    jq -r --arg regex "$DEB_ASSET_REGEX" \
+        '.assets[] | select(.name | test($regex; "i")) | .browser_download_url' \
+        <<< "$LATEST_RELEASE_JSON" | head -n 1
+)"
+
+if [[ -z "$DEB_URL" ]]; then
+    log_error "Could not find a Debian package asset in ${REPO} ${LATEST_TAG}"
+    exit 1
+fi
+
+LATEST_UPSTREAM="${LATEST_TAG#v}"
+
+if dpkg -s "$APP_NAME" >/dev/null 2>&1; then
+    INSTALLED_UPSTREAM="$(dpkg-query -W -f='${Upstream-Version}' "$APP_NAME" 2>/dev/null || true)"
+    if [[ -z "$INSTALLED_UPSTREAM" ]]; then
+        INSTALLED_FULL="$(dpkg-query -W -f='${Version}' "$APP_NAME")"
+        INSTALLED_UPSTREAM="${INSTALLED_FULL%%-*}"
+    fi
+
+    if [[ "$INSTALLED_UPSTREAM" == "$LATEST_UPSTREAM" ]]; then
+        log_info "$APP_NAME $INSTALLED_UPSTREAM already matches latest ($LATEST_TAG); skipping download and install"
+        log_info "If Wolfram Engine is not activated yet, run: wolframscript"
+        log_info "Run it from the desktop launcher or with: wljs ."
+        exit 0
+    fi
+
+    log_info "Upgrading $APP_NAME from $INSTALLED_UPSTREAM to $LATEST_UPSTREAM ($LATEST_TAG)"
+fi
+
+log_info "Downloading $APP_NAME $LATEST_TAG..."
+curl -fL -o "$TMP_DEB" "$DEB_URL"
+
+sudo dpkg -I "$TMP_DEB"
+sudo apt install --no-install-recommends -y "$TMP_DEB"
+rm -f "$TMP_DEB"
+
+log_info "WLJS Notebook installation completed."
+log_info "If Wolfram Engine is not activated yet, run: wolframscript"
+log_info "Run it from the desktop launcher or with: wljs ."

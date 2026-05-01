@@ -2,4 +2,6 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-sudo apt install -y php-cli
+install_packages php-cli
+cargo binstall mago && mago self-update
+

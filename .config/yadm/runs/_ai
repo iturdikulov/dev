@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+for tool in llm \
+	files-to-prompt; do
+	uv tool install --upgrade $tool
+done
+
+uv tool run llm install \
+	llm-openrouter \
+	llm-ollama \
+	llm-gemini \
+	llm-mistral

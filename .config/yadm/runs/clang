@@ -2,22 +2,28 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-sudo apt install -y clang clangd build-essential cmake gcc git strace
+install_packages clang build-essential cmake gcc git strace
 
-# Install cling
-cd /tmp || exit 1
-git clone --depth=1 https://github.com/root-project/llvm-project.git
-cd llvm-project || exit 1
-git checkout cling-latest
-cd ..
-git clone https://github.com/root-project/cling.git
-mkdir -p cling-build && cd cling-build || exit 1
-mkdir -p "$HOME/.local/cling"
-cmake -DLLVM_EXTERNAL_PROJECTS=cling -DLLVM_EXTERNAL_CLING_SOURCE_DIR=../cling/ \
-      -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" \
-      -DCMAKE_BUILD_TYPE=Release ../llvm-project/llvm \
-      -DCMAKE_INSTALL_PREFIX="$HOME/.local/cling"
-cmake --build . --target install -- -j 16
+if command_exists cling && cling --version >/dev/null 2>&1; then
+    log_info "cling is already installed; skipping source build."
+    exit 0
+else
+      # Install cling
+      cd /tmp || exit 1
+      git clone --depth=1 https://github.com/root-project/llvm-project.git
+      cd llvm-project || exit 1
+      git checkout cling-latest
+      cd ..
+      git clone https://github.com/root-project/cling.git
+      mkdir -p cling-build && cd cling-build || exit 1
+      mkdir -p "$HOME/.local/cling"
+      cmake -DLLVM_EXTERNAL_PROJECTS=cling -DLLVM_EXTERNAL_CLING_SOURCE_DIR=../cling/ \
+            -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" \
+            -DCMAKE_BUILD_TYPE=Release ../llvm-project/llvm \
+            -DCMAKE_INSTALL_PREFIX="$HOME/.local/cling"
+      cmake --build . --target install -- -j 16
 
-rm -rf "/tmp/llvm-project"
-rm -rf "/tmp/cling-latest"
+      rm -rf "/tmp/llvm-project"
+      rm -rf "/tmp/cling-latest"
+fi
+

@@ -2,7 +2,21 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-VERSION=1.24.2
+VERSION=1.26.2
+
+if command_exists go && go version >/dev/null 2>&1; then
+    current_go_version="$(go version)"
+    if [[ "$current_go_version" == *"go$VERSION "* ]]; then
+        log_info "Go $VERSION is already installed; skipping reinstall."
+        exit 0
+    fi
+
+    go clean -modcache
+    go clean -cache
+else
+    log_warn "Skipping go cache cleanup; \`go version\` check failed."
+fi
+
 echo "Downloading GO"
 wget2 --progress=bar --output-document /tmp/go_$VERSION.tar.gz "https://go.dev/dl/go$VERSION.linux-amd64.tar.gz"
 
@@ -14,28 +28,3 @@ echo "set correct GOPATH and PATH in your shell!"
 export GOPATH=$HOME/.local/go
 
 cd /usr/local/go/bin/ || { echo "Failed"; exit 1; }
-
-# Install gopls lang server
-./go install golang.org/x/tools/gopls@latest
-
-# Dev tools
-./go install golang.org/x/tools/cmd/goimports@latest
-./go install mvdan.cc/sh/v3/cmd/shfmt@latest
-./go install github.com/xjasonlyu/tun2socks/v2@latest
-./go install github.com/antonmedv/countdown@latest
-./go install github.com/bootdotdev/bootdev@latest
-./go install github.com/sqls-server/sqls@latest
-./go install github.com/xo/usql@latest
-./go install github.com/charmbracelet/vhs@latest  # terminal recorder
-./go install github.com/snowie2000/geoview@0.1.11
-./go install github.com/joshmedeski/sesh/v2@latest
-
-# Cursor for opencode
-echo "This will run external bash script, do you want to continue? (y/n)"
-read -r answer
-if [ "$answer" != "${answer#[Yy]}" ]; then
-    echo "Continuing..."
-else
-    echo "Exiting..."
-    exit 1
-fi

@@ -5,26 +5,43 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 ## Apt
 ## https://docs.docker.com/engine/install/debian/
 
-# Add Docker's official GPG key:
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
+docker_keyring="/etc/apt/keyrings/docker.asc"
+docker_source="/etc/apt/sources.list.d/docker.list"
+docker_repo="deb [arch=$(dpkg --print-architecture) signed-by=${docker_keyring}] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable"
+docker_repo_added=0
 
-# Add the repository to Apt sources:
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
+install_packages ca-certificates curl
+
+if [ ! -f "$docker_keyring" ]; then
+  log_info "Adding Docker APT key..."
+  sudo install -m 0755 -d /etc/apt/keyrings
+  sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o "$docker_keyring"
+  sudo chmod a+r "$docker_keyring"
+  docker_repo_added=1
+else
+  log_info "Docker APT key is already installed"
+fi
+
+if [ ! -f "$docker_source" ] || ! grep -Fxq "$docker_repo" "$docker_source"; then
+  log_info "Adding Docker APT repository..."
+  echo "$docker_repo" | sudo tee "$docker_source" > /dev/null
+  docker_repo_added=1
+else
+  log_info "Docker APT repository is already configured"
+fi
+
+if [ "$docker_repo_added" -eq 1 ]; then
+  sudo apt-get update
+fi
 
 # Install
-sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+install_packages docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # Post install
 sudo usermod -aG docker "$USER"
 
 # Lazydocker
-cd /usr/local/go/bin/ || { echo "Failed"; exit 1; }
-./go install github.com/jesseduffield/lazydocker@latest
+go install github.com/jesseduffield/lazydocker@latest
+
+# Devcontainers
+npm install -g @devcontainers/cli

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+# Avoid re-running sensors-detect when lm-sensors is already set up. Re-probing
+lm_sensors_detect_should_skip() {
+    if command -v sensors >/dev/null 2>&1 && sensors 2>/dev/null | grep -q '°C'; then
+        return 0
+    fi
+    local mods
+    mods=$(grep -hvE '^[[:space:]]*#|^[[:space:]]*$' /etc/modules /etc/modules-load.d/*.conf 2>/dev/null | tr '\n' ' ')
+    case "$mods" in
+        *coretemp*|*k10temp*|*zenpower*|*k8temp*|*fam15h_power*|*amd_energy*|\
+        *nct*|*it87*|*it862*|*f718*|*lm75*|*lm92*|*lm78*|*lm85*|*jc42*|\
+        *via686a*|*asus_atk0110*|*applesmc*|*dell_smm*|*sch563*|*adt747*|\
+        *adt746*|*adt749*|*w837*|*w836*|*gpio_fan*|*pwm_fan*|*sbtsi*|\
+        *ibmpex*|*powermeter*|*gl520sm*|*emc*)
+            return 0 ;;
+    esac
+    return 1
+}
+
+install_packages lm-sensors stress-ng hardinfo2 psensor fatrace openrgb nvtop
+
+if lm_sensors_detect_should_skip; then
+    log_info "lm-sensors already configured (readings or hwmon modules present); skipping sensors-detect."
+else
+    sudo sensors-detect
+fi

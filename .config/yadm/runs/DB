@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # DB clients
 install_packages postgresql-client mariadb-client
+go install github.com/xo/usql@latest
+go install github.com/jorgerojas26/lazysql@latest
+
+uv tool install --upgrade DSLR --with psycopg2-binary
 
 if [ ! -f /etc/apt/sources.list.d/dbeaver.list ]; then
     log_info "Installing DBeaver"
     sudo  wget -O /usr/share/keyrings/dbeaver.gpg.key https://dbeaver.io/debs/dbeaver.gpg.key
     echo "deb [signed-by=/usr/share/keyrings/dbeaver.gpg.key] https://dbeaver.io/debs/dbeaver-ce /" | sudo tee /etc/apt/sources.list.d/dbeaver.list
-    sudo apt-get update && sudo apt-get install -y dbeaver-ce
+    sudo apt-get update 
 fi
+
+install_packages dbeaver-ce
 
 # Postgresql 18
 install_packages postgresql-common
@@ -21,5 +25,3 @@ if [ ! -f /etc/apt/sources.list.d/pgdg.sources ]; then
 fi
 install_packages postgresql-18
 
-cd /usr/local/go/bin/ || { echo "Failed"; exit 1; }
-./go install github.com/jorgerojas26/lazysql@latest

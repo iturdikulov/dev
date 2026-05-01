@@ -2,9 +2,15 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
+for tool in "markitdown[pdf, docx, pptx]"; do
+    uv tool install --upgrade "$tool"
+done
+
 remove_packages okular # will be used Firefox & Foliate as default
 install_packages libreoffice-calc libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre pandoc
 install_packages visidata python3-openpyxl crow-translate xournalpp zeal
+
+npm install -g single-file-cli
 
 # Tesseract data for crow-translate
 mkdir -p ~/.config/crow-translate/ && cd ~/.config/crow-translate/ || exit 1

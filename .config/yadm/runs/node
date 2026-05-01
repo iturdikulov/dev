@@ -3,39 +3,7 @@
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # Base dependencies
-install_packages nodejs npm shellcheck
+install_packages nodejs npm
 
 log_info "Setting npm prefix to ~/.local/npm"
 npm config set prefix ~/.local/npm
-
-packages=(
-    @devcontainers/cli
-    pnpm
-    deno
-    browser-sync
-    single-file-cli
-
-    @biomejs/biome
-    @vue/language-server
-    @vue/typescript-plugin
-    @vtsls/language-server
-
-    @olrtg/emmet-language-server
-    bash-language-server
-    critical
-    typescript-language-server
-    typescript
-    vscode-langservers-extracted
-    dockerfile-language-server-nodejs
-    yaml-language-server
-    vscode-langservers-extracted
-    @google/clasp
-    @343dev/optimizt
-    postcss
-    postcss-cli
-    autoprefixer
-)
-
-for package in "${packages[@]}"; do
-    npm install -g "$package"
-done

@@ -1,3 +1,4 @@
+.ssh/config
 .config/kwalletrc
 .config/environment.d/git_askpass.conf
 .config/io.datasette.llm/keys.json

@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+APP_NAME="DaVinci Resolve"
+DOWNLOAD_DIR="$HOME/Downloads"
+LATEST_API="https://www.blackmagicdesign.com/api/support/latest-stable-version/davinci-resolve/linux"
+REGISTER_REGION="${DAVINCI_REGISTER_REGION:-us}"
+MRD_VERSION="1.9.0"
+MRD_ARCHIVE_NAME="makeresolvedeb_${MRD_VERSION}_multi.sh.tar.gz"
+MRD_SCRIPT_NAME="makeresolvedeb_${MRD_VERSION}_multi.sh"
+MRD_URL="https://www.danieltufvesson.com/download/?file=makeresolvedeb/${MRD_ARCHIVE_NAME}"
+MRD_ARCHIVE_PATH="$DOWNLOAD_DIR/$MRD_ARCHIVE_NAME"
+
+require_download_dir() {
+    if [[ ! -d "$DOWNLOAD_DIR" ]]; then
+        log_error "Download directory does not exist: $DOWNLOAD_DIR"
+        exit 1
+    fi
+}
+
+resolve_installed() {
+    package_installed davinci-resolve || [[ -x /opt/resolve/bin/resolve ]]
+}
+
+installed_resolve_version() {
+    if package_installed davinci-resolve; then
+        dpkg-query -W -f='${Version}' davinci-resolve 2>/dev/null
+        return
+    fi
+
+    /opt/resolve/bin/resolve --version 2>/dev/null | head -n 1
+}
+
+exit_if_resolve_installed() {
+    local installed_version
+
+    if ! resolve_installed; then
+        return
+    fi
+
+    installed_version="$(installed_resolve_version)"
+    if [[ -n "$installed_version" ]]; then
+        log_info "$APP_NAME is already installed: $installed_version"
+    else
+        log_info "$APP_NAME is already installed"
+    fi
+    log_info "Skipping installation."
+    exit 0
+}
+
+json_escape() {
+    printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+json_string() {
+    local key="$1"
+    printf '%s' "$LATEST_JSON" | sed -nE "s/.*\"$key\"[[:space:]]*:[[:space:]]*\"([^\"]+)\".*/\1/p"
+}
+
+json_number() {
+    local key="$1"
+    printf '%s' "$LATEST_JSON" | sed -nE "s/.*\"$key\"[[:space:]]*:[[:space:]]*([0-9]+).*/\1/p"
+}
+
+install_build_dependencies() {
+    log_info "Installing $APP_NAME packaging prerequisites..."
+    install_packages ca-certificates curl fakeroot tar unzip
+}
+
+fetch_latest_metadata() {
+    log_info "Fetching latest $APP_NAME metadata..."
+    LATEST_JSON="$(curl --fail --location --silent --show-error "$LATEST_API")"
+
+    RELEASE_ID="$(json_string releaseId)"
+    DOWNLOAD_ID="$(json_string downloadId)"
+    MAJOR="$(json_number major)"
+    MINOR="$(json_number minor)"
+    RELEASE_NUM="$(json_number releaseNum)"
+
+    if [[ -z "$RELEASE_ID" || -z "$DOWNLOAD_ID" || -z "$MAJOR" || -z "$MINOR" || -z "$RELEASE_NUM" ]]; then
+        log_error "Failed to parse Blackmagic metadata: $LATEST_JSON"
+        exit 1
+    fi
+
+    APP_VERSION="$MAJOR.$MINOR.$RELEASE_NUM"
+    ARCHIVE_NAME="DaVinci_Resolve_${APP_VERSION}_Linux.zip"
+    ARCHIVE_PATH="$DOWNLOAD_DIR/$ARCHIVE_NAME"
+    RUN_NAME="DaVinci_Resolve_${APP_VERSION}_Linux.run"
+}
+
+registration_payload() {
+    local firstname lastname email phone country state city street product
+
+    firstname="$(json_escape "${DAVINCI_FIRSTNAME:-Linux}")"
+    lastname="$(json_escape "${DAVINCI_LASTNAME:-User}")"
+    email="$(json_escape "${DAVINCI_EMAIL:-linux.user@example.com}")"
+    phone="$(json_escape "${DAVINCI_PHONE:-202-555-0194}")"
+    country="$(json_escape "${DAVINCI_COUNTRY:-us}")"
+    state="$(json_escape "${DAVINCI_STATE:-New York}")"
+    city="$(json_escape "${DAVINCI_CITY:-Linux}")"
+    street="$(json_escape "${DAVINCI_STREET:-Bowery 146}")"
+    product="$(json_escape "$APP_NAME")"
+
+    cat <<EOF
+{"firstname":"$firstname","lastname":"$lastname","email":"$email","phone":"$phone","country":"$country","state":"$state","city":"$city","street":"$street","product":"$product"}
+EOF
+}
+
+fetch_download_url() {
+    local register_url referer payload response
+
+    register_url="https://www.blackmagicdesign.com/api/register/$REGISTER_REGION/download/$DOWNLOAD_ID"
+    referer="https://www.blackmagicdesign.com/support/download/$RELEASE_ID/Linux"
+    payload="$(registration_payload)"
+
+    log_info "Requesting official $APP_NAME download URL..."
+    response="$(curl \
+        --fail \
+        --location \
+        --silent \
+        --show-error \
+        --compressed \
+        -H "Accept: application/json, text/plain, */*" \
+        -H "Content-Type: application/json;charset=UTF-8" \
+        -H "Origin: https://www.blackmagicdesign.com" \
+        -H "Referer: $referer" \
+        -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36" \
+        --data-ascii "$payload" \
+        "$register_url")"
+
+    DOWNLOAD_URL="$(printf '%s' "$response" | tr -d '\r\n')"
+    DOWNLOAD_URL="${DOWNLOAD_URL#\"}"
+    DOWNLOAD_URL="${DOWNLOAD_URL%\"}"
+
+    if [[ "$DOWNLOAD_URL" != http* ]]; then
+        log_error "Blackmagic did not return a download URL: $response"
+        exit 1
+    fi
+}
+
+download_archive() {
+    if [[ -f "$ARCHIVE_PATH" ]] && unzip -tq "$ARCHIVE_PATH" >/dev/null 2>&1; then
+        log_info "Using existing archive: $ARCHIVE_PATH"
+        return
+    fi
+
+    if [[ -f "$ARCHIVE_PATH" ]]; then
+        log_warn "Existing archive is incomplete or invalid; downloading again: $ARCHIVE_PATH"
+        rm -f "$ARCHIVE_PATH"
+    fi
+
+    log_info "Downloading $APP_NAME $APP_VERSION to $ARCHIVE_PATH..."
+    curl --fail --location --continue-at - --output "$ARCHIVE_PATH" "$DOWNLOAD_URL"
+}
+
+download_makeresolvedeb() {
+    if [[ -f "$MRD_ARCHIVE_PATH" ]] && tar -tzf "$MRD_ARCHIVE_PATH" >/dev/null 2>&1; then
+        log_info "Using existing MakeResolveDeb archive: $MRD_ARCHIVE_PATH"
+        return
+    fi
+
+    if [[ -f "$MRD_ARCHIVE_PATH" ]]; then
+        log_warn "Existing MakeResolveDeb archive is incomplete or invalid; downloading again: $MRD_ARCHIVE_PATH"
+        rm -f "$MRD_ARCHIVE_PATH"
+    fi
+
+    log_info "Downloading MakeResolveDeb $MRD_VERSION to $MRD_ARCHIVE_PATH..."
+    curl --fail --location --output "$MRD_ARCHIVE_PATH" "$MRD_URL"
+}
+
+build_and_install_deb() {
+    local run_path deb_path
+    local debs=()
+
+    WORK_DIR="$(mktemp -d "$DOWNLOAD_DIR/davinci-resolve-deb.XXXXXX")"
+    trap 'rm -rf "$WORK_DIR"' EXIT
+
+    log_info "Extracting $ARCHIVE_PATH..."
+    unzip -q "$ARCHIVE_PATH" -d "$WORK_DIR"
+
+    log_info "Extracting $MRD_ARCHIVE_PATH..."
+    tar -xzf "$MRD_ARCHIVE_PATH" -C "$WORK_DIR"
+
+    run_path="$WORK_DIR/$RUN_NAME"
+    if [[ ! -f "$run_path" ]]; then
+        log_error "Expected installer was not found: $run_path"
+        exit 1
+    fi
+
+    chmod +x "$run_path"
+    chmod +x "$WORK_DIR/$MRD_SCRIPT_NAME"
+
+    cd_or_exit "$WORK_DIR"
+
+    log_info "Building $APP_NAME Debian package with MakeResolveDeb..."
+    "./$MRD_SCRIPT_NAME" "$RUN_NAME"
+
+    shopt -s nullglob
+    debs=(davinci-resolve*.deb)
+    shopt -u nullglob
+
+    if [[ "${#debs[@]}" -ne 1 ]]; then
+        log_error "Expected one generated .deb package, found ${#debs[@]}"
+        exit 1
+    fi
+
+    deb_path="$DOWNLOAD_DIR/${debs[0]}"
+    mv -f "${debs[0]}" "$deb_path"
+
+    log_info "Installing generated package: $deb_path"
+    sudo apt-get install -y "$deb_path"
+}
+
+main() {
+    exit_if_resolve_installed
+    require_download_dir
+    install_build_dependencies
+    fetch_latest_metadata
+    fetch_download_url
+    download_archive
+    download_makeresolvedeb
+    build_and_install_deb
+    log_info "$APP_NAME $APP_VERSION installation completed"
+}
+
+main "$@"

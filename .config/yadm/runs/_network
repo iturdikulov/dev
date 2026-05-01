@@ -9,6 +9,11 @@ sudo apt install -y samba
 sudo systemctl disable samba-ad-dc
 sudo systemctl mask samba-ad-dc
 
+log_info "Installing tools"
+go install github.com/xjasonlyu/tun2socks/v2@latest
+go install github.com/snowie2000/geoview@latest
+cargo binstall tun2proxy
+
 # WARN: Enable firewall for debian!
 sudo apt install -y ufw
 sudo systemctl enable ufw.service

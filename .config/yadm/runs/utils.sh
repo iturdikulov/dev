@@ -99,29 +99,35 @@ download_file() {
     local url="$1"
     local output="$2"
 
-    # If output set
-    if [ -n "$output" ]; then
-        local wget_args="--progress=bar --continue --output-document $output"
-    else
-        local wget_args="--progress=bar --continue"
+    if [ -n "$output" ] && [ -f "$output" ]; then
+        log_info "File already exists: $output"
+        return 0
     fi
 
-    if [ ! -f "$output" ]; then
-        log_info "Downloading $url..."
-        if command_exists wget2; then
-            if ! wget2 $wget_args "$url"; then
-                log_error "Failed to download file: $url"
-                return 1
-            fi
-        else
-            log_error "Neither wget2 nor wget found. Cannot download file."
+    log_info "Downloading $url..."
+
+    if [ -n "$output" ]; then
+        local wget_args=(--progress=bar --continue --output-document "$output")
+    else
+        local wget_args=(--progress=bar --continue)
+    fi
+
+    if command_exists wget2; then
+        if ! wget2 "${wget_args[@]}" "$url"; then
+            log_error "Failed to download file: $url"
             return 1
         fi
-        return 0
+    elif command_exists wget; then
+        if ! wget "${wget_args[@]}" "$url"; then
+            log_error "Failed to download file: $url"
+            return 1
+        fi
     else
-        log_info "File already exists: $output"
+        log_error "Neither wget2 nor wget found. Cannot download file."
         return 1
     fi
+
+    return 0
 }
 
 # Create directory if it doesn't exist
@@ -144,6 +150,23 @@ file_exists() {
     [ -f "$1" ]
 }
 
+trash_path() {
+    local path="$1"
+
+    if [ ! -e "$path" ]; then
+        log_warn "Path does not exist: $path"
+        return 0
+    fi
+
+    if command_exists trash-put; then
+        trash-put "$path"
+    elif command_exists gio; then
+        gio trash "$path"
+    else
+        rm -rf -- "$path"
+    fi
+}
+
 # Create desktop entry if it doesn't exist
 create_desktop_entry() {
     local filename="$1"
@@ -161,14 +184,34 @@ find_old_versions() {
     local search_dir="$1"
     local pattern="$2"
     local current_version="$3"
+    local cleanup_action="${4:-manual}"
 
     local old_versions
     old_versions=$(find "$search_dir" -maxdepth 1 -type d -name "$pattern" ! -name "$current_version" 2>/dev/null)
 
-    if [ -n "$old_versions" ]; then
-        log_warn "Found old versions that can be removed manually:"
-        echo "$old_versions"
+    if [ -z "$old_versions" ]; then
+        return 0
     fi
+
+    log_warn "Found old versions:"
+    echo "$old_versions"
+
+    if [ "$cleanup_action" != "trash" ]; then
+        log_warn "Please remove old versions manually"
+        return 0
+    fi
+
+    read -r -p "Move old versions to trash? [y/N] " remove_old_versions
+    case "$remove_old_versions" in
+    [Yy] | [Yy][Ee][Ss])
+        while IFS= read -r old_version; do
+            trash_path "$old_version"
+        done <<< "$old_versions"
+        ;;
+    *)
+        log_info "Keeping old versions"
+        ;;
+    esac
 }
 
 install_archive() {
@@ -221,6 +264,45 @@ install_archive() {
 
     return 0
 }
+
+# Toolchain packange managers
+# Skip this block when a toolchain installer imports utils.sh; otherwise a
+# missing command can make utils.sh call the same installer recursively.
+CALLER_SCRIPT="$(basename -- "${BASH_SOURCE[1]:-}")"
+
+if [[ ! " go node python _rust " =~ " $CALLER_SCRIPT " ]]; then
+    # 1. Get current script directory once
+    DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
+    # 2. Define tools: "command : installer_script : binary_paths_to_add"
+    # Separate multiple paths for a single tool with a space
+    tools=(
+        "go:go:/usr/local/go/bin $HOME/go/bin"
+        "uv:python:$HOME/.local/bin"
+        "cargo:_rust:$HOME/.cargo/bin"
+        "npm:node:/usr/bin /usr/local/bin"
+    )
+
+    # 3. Process each toolchain in a single loop
+    for entry in "${tools[@]}"; do
+        # Split the string by the colon delimiter
+        IFS=":" read -r cmd installer paths <<< "$entry"
+
+        log_info "Ensuring toolchain: $cmd"
+
+        # Install if missing
+        if ! command -v "$cmd" &>/dev/null; then
+            "$DIR/$installer"
+        fi
+
+        # Loop through and add any paths provided for the tool
+        for bin_path in $paths; do
+            if [ -d "$bin_path" ] && [[ ":$PATH:" != *":$bin_path:"* ]]; then
+                export PATH="$PATH:$bin_path"
+            fi
+        done
+    done
+fi
 
 # Check prerequisites
 check_not_root

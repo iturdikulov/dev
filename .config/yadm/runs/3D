@@ -2,19 +2,50 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-# F3D and freecad
+# F3D and FreeCAD
 log_info "Setting up 3D tools..."
-install_packages f3d freecad
+install_packages f3d
+
+FREECAD_VERSION="1.1.1"
+FREECAD_URL="https://github.com/FreeCAD/FreeCAD/releases/download/$FREECAD_VERSION/FreeCAD_$FREECAD_VERSION-Linux-x86_64-py311.AppImage"
+FREECAD_APPIMAGE="$HOME/.local/bin/FreeCAD_$FREECAD_VERSION.AppImage"
+FREECAD_BIN="$HOME/.local/bin/freecad"
+
+ensure_directory "$HOME/.local/bin"
+if [ "$(readlink -- "$FREECAD_BIN" 2>/dev/null)" = "$FREECAD_APPIMAGE" ] && [ -x "$FREECAD_APPIMAGE" ]; then
+    log_info "FreeCAD $FREECAD_VERSION is already installed"
+else
+    download_file "$FREECAD_URL" "$FREECAD_APPIMAGE" || exit 1
+    chmod +x "$FREECAD_APPIMAGE"
+    ln -sf "$FREECAD_APPIMAGE" "$FREECAD_BIN"
+fi
+
+FREECAD_DESKTOP_CONTENT="[Desktop Entry]
+Categories=Graphics;Science;Education;Engineering;X-CNC;
+Comment=Feature based Parametric Modeler
+Exec=env QT_AUTO_SCREEN_SCALE_FACTOR=1 $FREECAD_BIN - --single-instance %F
+GenericName=CAD Application
+Icon=org.freecad.FreeCAD
+MimeType=application/x-extension-fcstd;model/obj;image/vnd.dwg;image/vnd.dxf;model/vnd.collada+xml;application/iges;model/iges;model/step;model/step+zip;model/stl;application/vnd.shp;model/vrml;
+Name=FreeCAD
+NoDisplay=false
+Path=
+PrefersNonDefaultGPU=false
+StartupNotify=true
+StartupWMClass=FreeCAD
+Terminal=false
+TerminalOptions=
+Type=Application
+X-KDE-SubstituteUID=false
+X-KDE-Username="
+
+create_desktop_entry "org.freecad.FreeCAD" "$FREECAD_DESKTOP_CONTENT"
 
 # Function to install Blender
-BLENDER_VERSION="5.0.1"
-BLENDER_RELEASE_TAG="candidate+v50.0616cc718a03"
-BLENDER_URL="https://cdn.builder.blender.org/download/daily/blender-$BLENDER_VERSION-$BLENDER_RELEASE_TAG-linux.x86_64-release.tar.xz"
+BLENDER_VERSION="5.1.1"
+BLENDER_URL="https://download.blender.org/release/Blender5.1/blender-$BLENDER_VERSION-linux-x64.tar.xz"
 BLENDER_ARCHIVE_FORMAT="tar.xz"
-BLENDER_INSTALL_DIR="$HOME/.local/blender-$BLENDER_VERSION-$BLENDER_RELEASE_TAG-linux.x86_64-release"
-
-# Find and suggest removal of old versions
-find_old_versions "$HOME/.local/" "blender-*" "blender-$BLENDER_VERSION*"
+BLENDER_INSTALL_DIR="$HOME/.local/blender-$BLENDER_VERSION-linux-x64"
 
 # Install Blender
 DESKTOP_CONTENT="[Desktop Entry]
@@ -29,7 +60,15 @@ Type=Application
 Categories=Graphics;Science
 StartupNotify=true"
 
-install_archive "blender" "$BLENDER_URL" "$BLENDER_VERSION" "$BLENDER_INSTALL_DIR" "$BLENDER_ARCHIVE_FORMAT" &&
+if [ -x "$BLENDER_INSTALL_DIR/blender" ] &&
+    "$BLENDER_INSTALL_DIR/blender" --version | head -n 1 | grep -Fq "Blender $BLENDER_VERSION"; then
+    log_info "Blender $BLENDER_VERSION is already installed"
     create_desktop_entry "blender" "$DESKTOP_CONTENT"
+else
+    install_archive "blender" "$BLENDER_URL" "$BLENDER_VERSION" "$BLENDER_INSTALL_DIR" "$BLENDER_ARCHIVE_FORMAT" &&
+        create_desktop_entry "blender" "$DESKTOP_CONTENT"
+fi
+
+find_old_versions "$HOME/.local/" "blender-*" "blender-$BLENDER_VERSION*" "trash"
 
 log_info "3D setup completed successfully!"
