@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
+# Re-exec first: $SHELL is login shell env, not the interpreter running this file — using it can skip exec under bash or loop after chsh.
+if [[ -z "${ZSH_VERSION:-}" ]]; then
+    exec zsh "$0" "$@"
+fi
 
-script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd)"
 
 sudo apt install -y wget2 curl
 
-# Change shell && reopen script in zsh if not already
-sudo chsh -s $(which zsh)
-sudo chsh -s $(which zsh) $(whoami)
-
-if [[ "$SHELL" != *zsh ]]; then
-    # Re-exec with zsh
-    exec zsh "$0" "$@"
-fi
+# Default login shell for future sessions
+sudo chsh -s "$(command -v zsh)"
+sudo chsh -s "$(command -v zsh)" "$(whoami)"
 
 # Source common utilities
 source "$script_dir/runs/utils.sh"
