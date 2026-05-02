@@ -2,7 +2,7 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-sudo apt -y install borgbackup
+install_packages borgbackup
 
 # Service
 sudo tee /etc/systemd/system/borgbackup.service > /dev/null << EOF
