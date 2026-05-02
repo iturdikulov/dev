@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+if [ ! -f /etc/apt/sources.list.d/dbeaver.list ]; then
+    log_info "Installing DBeaver"
+    sudo  wget -O /usr/share/keyrings/dbeaver.gpg.key https://dbeaver.io/debs/dbeaver.gpg.key
+    echo "deb [signed-by=/usr/share/keyrings/dbeaver.gpg.key] https://dbeaver.io/debs/dbeaver-ce /" | sudo tee /etc/apt/sources.list.d/dbeaver.list
+    sudo apt-get update
+fi
+
+install_packages dbeaver-ce
