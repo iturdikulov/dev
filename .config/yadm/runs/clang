@@ -13,7 +13,7 @@ else
       git clone --depth=1 -b cling-latest https://github.com/root-project/llvm-project.git || true
       mkdir llvm-build && cd llvm-build
       cmake -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" -DCMAKE_BUILD_TYPE=Release ../llvm-project/llvm
-      cmake --build .
+      cmake --build . --target install -- --parallel
 
       git clone https://github.com/root-project/cling.git || true
       mkdir -p cling-build && cd cling-build || exit 1
@@ -22,7 +22,7 @@ else
             -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" \
             -DCMAKE_BUILD_TYPE=Release ../llvm-project/llvm \
             -DCMAKE_INSTALL_PREFIX="$HOME/.local/cling"
-      cmake --build . --target install -- -j 16
+      cmake --build . --target install -- --parallel
 
       rm -rf "/tmp/llvm-project"
       rm -rf "/tmp/cling-latest"
