@@ -18,24 +18,38 @@ git config --global user.email "i@inomoz.ru"
 git config --global user.name "Inom T."
 
 echo
-PS3="Runner #: "
-select opt in desktop laptop wsl skip; do
-    case $opt in
-        desktop | laptop | wsl)
-            log_info "Starting $opt bootstrap..."
-            bash "$script_dir/$opt"
-            exit $?
+echo "Select bootstrap runner:"
+echo "  1) desktop"
+echo "  2) laptop"
+echo "  3) wsl"
+echo "  4) skip"
+
+while true; do
+    read -r -p "Runner #: " opt
+    case "$opt" in
+        1 | desktop)
+            opt=desktop
             ;;
-        skip)
+        2 | laptop)
+            opt=laptop
+            ;;
+        3 | wsl)
+            opt=wsl
+            ;;
+        4 | skip)
             log_info "Skipped. Run ~/.config/yadm/desktop, laptop, or wsl when ready."
             exit 0
             ;;
         *)
             echo "Invalid choice."
+            continue
             ;;
     esac
+
+    log_info "Starting $opt bootstrap..."
+    bash "$script_dir/$opt"
+    exit $?
 done
 
 # Sync submodules
 yadm submodule update --recursive --init
-
