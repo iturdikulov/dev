@@ -14,6 +14,11 @@ cd "$HOME" || exit 1
 git config --global user.email "i@inomoz.ru"
 git config --global user.name "Inom T."
 
+# Change shell && reopen script in zsh
+sudo chsh -s $(which zsh)
+sudo chsh -s $(which zsh) $(whoami)
+exec zsh "$0" "$@"
+
 echo
 PS3="Runner #: "
 select opt in desktop laptop wsl skip; do
