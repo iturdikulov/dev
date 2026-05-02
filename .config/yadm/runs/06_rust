@@ -11,6 +11,7 @@ fi
 export PATH="$PATH:$HOME/.cargo/bin"
 
 # Cargo B(inary)Install
+install_packages build-essential
 cargo install cargo-binstall --locked
 
 cargo install cargo-eval
