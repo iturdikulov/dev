@@ -1,10 +1,5 @@
-#!/usr/bin/env bash
-# Re-exec first: $SHELL is login shell env, not the interpreter running this file — using it can skip exec under bash or loop after chsh.
-if [[ -z "${ZSH_VERSION:-}" ]]; then
-    exec zsh "$0" "$@"
-fi
-
-script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd)"
+#!/usr/bin/env zsh
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 sudo apt install -y wget2 curl
 
