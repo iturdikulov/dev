@@ -2,5 +2,5 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-install_packages sioyek zathura zathura-cb zathura-djvu mupdf texlive-base texlive latexmk texlive-lang-cyrillic texlive-fonts-extra
+install_packages texlive-base texlive latexmk texlive-lang-cyrillic texlive-fonts-extra
 # texlive-latex-extra texlive-xetex
