@@ -162,7 +162,6 @@ video/x-theora+ogg=mpv.desktop;
 x-scheme-handler/obsidian=obsidian.desktop
 x-scheme-handler/wljs-url-message=wljs-notebook.desktop
 application/uproject=com.epicgames.UnrealEngineEditor.desktop
-x-scheme-handler/discord-1484148764850786414=discord-1484148764850786414.desktop
 
 [Removed Associations]
 application/xhtml+xml=calibre-ebook-edit.desktop;
