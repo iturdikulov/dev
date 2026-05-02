@@ -305,7 +305,7 @@ if [[ ! " 04_go 05_python 06_rust 07_node " =~ " $CALLER_SCRIPT " ]]; then
     # 2. Define tools: "command : installer_script : binary_paths_to_add"
     # Separate multiple paths for a single tool with a space
     tools=(
-        "go:04_go:/usr/bin $HOME/go/bin"
+        "go:04_go:/usr/local/go/bin $HOME/go/bin"
         "uv:05_python:$HOME/.local/bin"
         "cargo:06_rust:$HOME/.cargo/bin"
         "npm:07_node:/usr/bin /usr/local/bin"
