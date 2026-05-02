@@ -14,8 +14,6 @@ cd "$HOME" || exit 1
 git config --global user.email "i@inomoz.ru"
 git config --global user.name "Inom T."
 
-yadm submodule update --recursive --init
-
 echo
 PS3="Runner #: "
 select opt in desktop laptop wsl skip; do
@@ -34,3 +32,7 @@ select opt in desktop laptop wsl skip; do
             ;;
     esac
 done
+
+# Sync submodules
+yadm submodule update --recursive --init
+
