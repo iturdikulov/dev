@@ -2,10 +2,10 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-sudo apt remove firewalld kmail akregator kaddressbook
-sudo apt install -y aria2 wget2 curl thunderbird rsync nfs-common kdeconnect sshfs openssh-server autossh msmtp msmtp-mta filezilla whois qbittorrent
+remove_packages firewalld
+install_packages aria2 wget2 curl rsync nfs-common sshfs openssh-server autossh msmtp msmtp-mta whois
 
-sudo apt install -y samba
+install_packages samba
 sudo systemctl disable samba-ad-dc
 sudo systemctl mask samba-ad-dc
 
@@ -15,7 +15,7 @@ go install github.com/snowie2000/geoview@latest
 cargo binstall tun2proxy
 
 # WARN: Enable firewall for debian!
-sudo apt install -y ufw
+install_packages ufw
 sudo systemctl enable ufw.service
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
