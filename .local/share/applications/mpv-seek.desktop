@@ -1,5 +1,0 @@
-[Desktop Entry]
-Name=MPV Seek
-Exec=mpv-seek.sh %u
-MimeType=x-scheme-handler/mpvseek
-
