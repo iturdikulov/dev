@@ -4,6 +4,15 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 sudo apt install -y wget2 curl
 
+# Change shell && reopen script in zsh if not already
+sudo chsh -s $(which zsh)
+sudo chsh -s $(which zsh) $(whoami)
+
+if [[ "$SHELL" != *zsh ]]; then
+    # Re-exec with zsh
+    exec zsh "$0" "$@"
+fi
+
 # Source common utilities
 source "$script_dir/runs/utils.sh"
 
@@ -13,11 +22,6 @@ cd "$HOME" || exit 1
 
 git config --global user.email "i@inomoz.ru"
 git config --global user.name "Inom T."
-
-# Change shell && reopen script in zsh
-sudo chsh -s $(which zsh)
-sudo chsh -s $(which zsh) $(whoami)
-exec zsh "$0" "$@"
 
 echo
 PS3="Runner #: "
