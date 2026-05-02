@@ -53,7 +53,13 @@ if [[ ! ${MYVIMRC} ]]; then
     fi
 fi
 
-export TERM="xterm-ghostty"
+if [[ -n "$TMUX" ]] && infocmp tmux-256color >/dev/null 2>&1; then
+    export TERM="tmux-256color"
+elif infocmp xterm-ghostty >/dev/null 2>&1; then
+    export TERM="xterm-ghostty"
+else
+    export TERM="xterm-256color"
+fi
 
 export STARDICT_DATA_DIR="$HOME/Library/dictionary"
 export EDITOR=nvim
