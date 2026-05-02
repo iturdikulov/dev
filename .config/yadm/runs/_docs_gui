@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+remove_packages okular # will be used Firefox & Foliate as default
+install_packages libreoffice-calc libreoffice-writer libreoffice-gtk3 calibre crow-translate xournalpp zeal
+
+# Tesseract data for crow-translate
+mkdir -p ~/.config/crow-translate/ && cd ~/.config/crow-translate/ || exit 1
+download_file https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/eng.traineddata
+download_file https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/rus.traineddata

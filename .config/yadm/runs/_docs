@@ -7,12 +7,7 @@ for tool in "markitdown[pdf, docx, pptx]"; do
 done
 
 remove_packages okular # will be used Firefox & Foliate as default
-install_packages libreoffice-calc libreoffice-writer libreoffice-gtk3 hunspell-ru mythes-ru sdcv calibre pandoc
-install_packages visidata python3-openpyxl crow-translate xournalpp zeal
+install_packages hunspell-ru mythes-ru sdcv pandoc
+install_packages visidata python3-openpyxl
 
 npm install -g single-file-cli
-
-# Tesseract data for crow-translate
-mkdir -p ~/.config/crow-translate/ && cd ~/.config/crow-translate/ || exit 1
-download_file https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/eng.traineddata
-download_file https://github.com/tesseract-ocr/tessdata/raw/refs/heads/main/rus.traineddata
