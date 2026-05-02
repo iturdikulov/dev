@@ -20,7 +20,7 @@ lm_sensors_detect_should_skip() {
     return 1
 }
 
-install_packages lm-sensors stress-ng hardinfo2 psensor fatrace openrgb nvtop
+install_packages lm-sensors stress-ng fatrace nvtop
 
 if lm_sensors_detect_should_skip; then
     log_info "lm-sensors already configured (readings or hwmon modules present); skipping sensors-detect."
