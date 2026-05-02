@@ -2,9 +2,22 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-git clone https://github.com/iturdikulov/slimzsh "$HOME/.config/slimzsh"
-cd "$HOME/.config/slimzsh" || exit 1
-git submodule update --init --recursive
+SLIMZSH_URL="https://github.com/iturdikulov/slimzsh.git"
+SLIMZSH_DIR="$HOME/.config/slimzsh"
+
+if git -C "$SLIMZSH_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+    log_info "slimzsh already present; pulling updates"
+    git -C "$SLIMZSH_DIR" pull --ff-only || log_warn "slimzsh git pull failed (fix repo manually)"
+elif [[ ! -e "$SLIMZSH_DIR" ]]; then
+    git clone "$SLIMZSH_URL" "$SLIMZSH_DIR"
+elif [[ -d "$SLIMZSH_DIR" ]] && [[ -z "$(find "$SLIMZSH_DIR" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]]; then
+    git clone "$SLIMZSH_URL" "$SLIMZSH_DIR"
+else
+    log_error "$SLIMZSH_DIR exists, is non-empty, and is not a git repository — remove or rename it, then re-run"
+    exit 1
+fi
+
+git -C "$SLIMZSH_DIR" submodule update --init --recursive
 
 sudo apt install -y zsh direnv glow cloc zsh-autosuggestions
 sudo chsh -s $(which zsh)
@@ -12,8 +25,8 @@ sudo chsh -s $(which zsh) $(whoami)
 
 # Fix insecure directories
 sudo chmod 755 "$HOME/.config/"
-sudo chmod 755 "$HOME/.config/slimzsh"
-sudo chmod 755 "$HOME/.config/slimzsh/fast-syntax-highlighting/"
+sudo chmod 755 "$SLIMZSH_DIR"
+sudo chmod 755 "$SLIMZSH_DIR/fast-syntax-highlighting/"
 
 # Prompt
 sudo apt install -y starship

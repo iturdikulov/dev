@@ -2,12 +2,11 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-sudo apt remove neovim kate
-
-# Install Neovim from nightly release by downloading the precompiled binaries.
+# Install Neovim from the latest stable release by downloading the precompiled binaries.
 backup=true
-downloaded_file=/tmp/nvim-linux64.tar.gz
 backup_dir=/tmp/nvim-backup
+release_url="https://github.com/neovim/neovim/releases/latest"
+archive_url="$release_url/download/nvim-linux-x86_64.tar.gz"
 
 while (( "$#" )); do
   case "$1" in
@@ -22,8 +21,50 @@ while (( "$#" )); do
   esac
 done
 
-wget2 --progress=bar --output-document $downloaded_file \
-    "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
+installed_nvim_version() {
+  if ! command_exists nvim; then
+    return 1
+  fi
+
+  nvim --version | sed -n '1s/^NVIM v//p'
+}
+
+latest_nvim_version() {
+  local effective_url
+
+  if command_exists curl; then
+    effective_url=$(curl -fsSLI -o /dev/null -w '%{url_effective}' "$release_url") || return 1
+  elif command_exists wget2; then
+    effective_url=$(wget2 --max-redirect=10 --spider "$release_url" 2>&1 | sed -n 's/.*URL transformed to //p' | tail -n 1) || return 1
+  elif command_exists wget; then
+    effective_url=$(wget --max-redirect=10 --spider "$release_url" 2>&1 | sed -n 's/^Location: //p' | tr -d '\r' | tail -n 1) || return 1
+  else
+    log_error "Neither curl, wget2, nor wget found. Cannot check latest Neovim version."
+    return 1
+  fi
+
+  printf '%s\n' "${effective_url##*/}" | sed 's/^v//'
+}
+
+installed_version="$(installed_nvim_version || true)"
+latest_version="$(latest_nvim_version)"
+
+if [[ -n "$installed_version" ]]; then
+  log_info "Installed Neovim version: $installed_version"
+else
+  log_info "Neovim is not installed"
+fi
+log_info "Latest Neovim version: $latest_version"
+
+if [[ "$installed_version" == "$latest_version" ]]; then
+  log_info "Neovim $installed_version is already installed; skipping installation."
+  exit 0
+fi
+
+downloaded_file="/tmp/nvim-linux-x86_64-$latest_version.tar.gz"
+remove_packages neovim kate
+
+download_file "$archive_url" "$downloaded_file"
 
 # Was the last command ok?
 if [ $? -ne 0 ]; then
@@ -33,16 +74,18 @@ fi
 
 echo Neovim downloaded
 
-if [ $backup = true ]; then
+if [ "$backup" = true ]; then
   echo Backing up old Neovim
-  mkdir --parents $backup_dir
-  sudo mv /usr/bin/nvim $backup_dir/bin
-  sudo mv /usr/lib/nvim $backup_dir/lib
-  sudo mv /usr/share/nvim $backup_dir/share
+  mkdir --parents "$backup_dir"
+  for path in /usr/bin/nvim /usr/lib/nvim /usr/share/nvim; do
+    if [ -e "$path" ]; then
+      sudo mv "$path" "$backup_dir/"
+    fi
+  done
 fi
 
 echo Installing Neovim
-# --strip-components=1 removes the first directory from the tarball (nvim-linux64).
-sudo tar -xzvf $downloaded_file -C /usr/ --strip-components=1
+# --strip-components=1 removes the first directory from the tarball.
+sudo tar -xzvf "$downloaded_file" -C /usr/ --strip-components=1
 echo Neovim installed!
 nvim --version

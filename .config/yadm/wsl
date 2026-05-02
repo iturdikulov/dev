@@ -5,4 +5,4 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 cd "$script_dir"
 
-exec "$script_dir/run_runner.sh" --no-gui --blacklist "_hardware nvidia xone"
+exec "$script_dir/run_runner.sh" --no-gui --no-ufw --blacklist "01_debian _hardware nvidia xone games gamedev _media _virt borg nginx resilio-sync singbox ttyd.sh whisper ollama_v2025"

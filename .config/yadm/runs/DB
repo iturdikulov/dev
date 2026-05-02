@@ -7,6 +7,35 @@ install_packages postgresql-client mariadb-client
 go install github.com/xo/usql@latest
 go install github.com/jorgerojas26/lazysql@latest
 
+# psqldef — https://github.com/sqldef/sqldef
+PSQLDEF_TAG="v3.11.1"
+PSQLDEF_VER="${PSQLDEF_TAG#v}"
+case "$(uname -m)" in
+    x86_64) psqldef_arch=amd64 ;;
+    aarch64|arm64) psqldef_arch=arm64 ;;
+    *)
+        log_error "psqldef: unsupported architecture $(uname -m)"
+        exit 1
+        ;;
+esac
+PSQLDEF_URL="https://github.com/sqldef/sqldef/releases/download/${PSQLDEF_TAG}/psqldef_linux_${psqldef_arch}.tar.gz"
+
+psqldef_installed_correct_version() {
+    command_exists psqldef || return 1
+    local line reported
+    line=$(command psqldef --version 2>/dev/null | head -n1) || return 1
+    [[ "$line" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+) ]] || return 1
+    reported="${BASH_REMATCH[1]}"
+    [[ "$reported" == "$PSQLDEF_VER" ]]
+}
+
+if psqldef_installed_correct_version; then
+    log_info "psqldef ${PSQLDEF_TAG} already installed"
+else
+    ensure_directory "$HOME/.local/bin"
+    install_archive "psqldef" "$PSQLDEF_URL" "$PSQLDEF_TAG" "$HOME/.local/bin" "tar.gz"
+fi
+
 uv tool install --upgrade DSLR --with psycopg2-binary
 
 # Postgresql 18

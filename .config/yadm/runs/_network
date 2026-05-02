@@ -5,44 +5,49 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 remove_packages firewalld
 install_packages aria2 wget2 curl rsync nfs-common sshfs openssh-server autossh msmtp msmtp-mta whois
 
-install_packages samba
-sudo systemctl disable samba-ad-dc
-sudo systemctl mask samba-ad-dc
-
 log_info "Installing tools"
 go install github.com/xjasonlyu/tun2socks/v2@latest
 go install github.com/snowie2000/geoview@latest
 cargo binstall tun2proxy
 
-# WARN: Enable firewall for debian!
-install_packages ufw
-sudo systemctl enable ufw.service
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
+if [[ "${YADM_IS_WSL:-0}" == "1" ]]; then
+    log_info "WSL runner detected; skipping Samba and UFW setup"
+    exit 0
+else
+    install_packages samba
+    sudo systemctl disable samba-ad-dc
+    sudo systemctl mask samba-ad-dc
 
-sudo ufw allow ssh
-sudo ufw allow nfs
-sudo ufw allow samba
+    # WARN: Enable firewall for debian!
+    install_packages ufw
+    sudo systemctl enable ufw.service
+    sudo ufw default deny incoming
+    sudo ufw default allow outgoing
 
-# Proxy
-sudo ufw allow 2080/tcp
-sudo ufw allow 2080/udp
+    sudo ufw allow ssh
+    sudo ufw allow nfs
+    sudo ufw allow samba
 
-# KDE connect rules
-sudo ufw allow 1716:1764/tcp
-sudo ufw allow 1716:1764/udp
+    # Proxy
+    sudo ufw allow 2080/tcp
+    sudo ufw allow 2080/udp
 
-# Valutwarden
-sudo ufw allow 8000/tcp
+    # KDE connect rules
+    sudo ufw allow 1716:1764/tcp
+    sudo ufw allow 1716:1764/udp
 
-# Jellyfin
-sudo ufw allow 8096/tcp
-sudo ufw allow 8920/tcp
-sudo ufw allow 7359/udp
+    # Valutwarden
+    sudo ufw allow 8000/tcp
 
-# Custom
-sudo ufw allow 8080/tcp
-sudo ufw allow 9090/tcp
+    # Jellyfin
+    sudo ufw allow 8096/tcp
+    sudo ufw allow 8920/tcp
+    sudo ufw allow 7359/udp
 
-sudo ufw enable
-sudo ufw status verbose
+    # Custom
+    sudo ufw allow 8080/tcp
+    sudo ufw allow 9090/tcp
+
+    sudo ufw enable
+    sudo ufw status verbose
+fi

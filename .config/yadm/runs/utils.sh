@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # utils.sh - Common utility functions for idempotent runners
 
 # Color definitions for status messages
@@ -122,8 +124,17 @@ download_file() {
             log_error "Failed to download file: $url"
             return 1
         fi
+    elif command_exists curl; then
+        if [ -z "$output" ]; then
+            log_error "curl download requires an output path"
+            return 1
+        fi
+        if ! curl -fsSL -o "$output" "$url"; then
+            log_error "Failed to download file: $url"
+            return 1
+        fi
     else
-        log_error "Neither wget2 nor wget found. Cannot download file."
+        log_error "Neither wget2, wget, nor curl found. Cannot download file."
         return 1
     fi
 

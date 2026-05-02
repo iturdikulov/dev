@@ -5,11 +5,12 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 runs_dir="$script_dir/runs"
 include_gui=1
+include_ufw=1
 blacklist_value=""
 
 usage() {
     cat <<EOF
-Usage: $0 [--no-gui] [--blacklist "name1 name2 ..."]
+Usage: $0 [--no-gui] [--no-ufw] [--blacklist "name1 name2 ..."]
 
 Keys: Enter/y = run or retry, n = skip, p = run previous, q = quit, Ctrl+C = stop active runner.
 EOF
@@ -19,6 +20,10 @@ while (($# > 0)); do
     case "$1" in
         --no-gui)
             include_gui=0
+            shift
+            ;;
+        --no-ufw)
+            include_ufw=0
             shift
             ;;
         --blacklist)
@@ -64,6 +69,9 @@ run_runner() {
     set +e
     (
         trap - INT
+        if ((include_ufw == 0)); then
+            export YADM_IS_WSL=1
+        fi
         "$runner"
     )
     status=$?
