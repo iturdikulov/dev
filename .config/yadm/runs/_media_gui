@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+remove_packages vlc dragonplayer gwenview
+install_packages mpv obs-studio audacity kdenlive lmms picard
+install_packages nomacs krita inkscape darktable gimp mypaint-brushes
+
+ensure_directory "$HOME/.local/bin"
+
+LOSSLESS_CUT_VERSION="latest"  # always latest
+LOSSLESS_CUT_PATH="$HOME/.local/bin/lossless-cut"
+LOSSLESS_CUT_URL="https://github.com/mifi/lossless-cut/releases/download/${LOSSLESS_CUT_VERSION}/LosslessCut-linux-x86_64.AppImage"
+if [[ "$LOSSLESS_CUT_VERSION" == "latest" && -x "$LOSSLESS_CUT_PATH" ]]; then
+    log_info "lossless-cut already exists at $LOSSLESS_CUT_PATH; skipping latest re-download"
+else
+    download_file "$LOSSLESS_CUT_URL" "$LOSSLESS_CUT_PATH" && chmod +x "$LOSSLESS_CUT_PATH"
+fi
+
+APP="no.mifi.losslesscut.desktop"
+create_desktop_entry "$APP" "[Desktop Entry]
+Name=LosslessCut
+Comment=simple video editor to trim or cut videos
+Comment[fr]=Un simple editeur video pour retailler ou couper les videos
+Exec=$HOME/.local/bin/lossless-cut
+MimeType=video/mpeg;video/x-mpeg;video/msvideo;video/quicktime;video/x-anim;video/x-avi;video/x-ms-asf;video/x-ms-wmv;video/x-msvideo;video/x-nsv;video/x-flc;video/x-fli;video/x-flv;video/vnd.rn-realvideo;video/mp4;video/mp4v-es;video/mp2t;application/ogg;application/x-ogg;video/x-ogm+ogg;audio/x-vorbis+ogg;application/x-matroska;audio/x-matroska;video/x-matroska;video/webm;
+Icon=$HOME/.local/bin/icons/losslesscut.svg
+Terminal=false
+Type=Application
+Encoding=UTF-8
+Categories=AudioVideo;AudioVideoEditing;
+Keywords=trim;codec;cut;movie;mpeg;avi;h264;mkv;mp4;
+StartupWMClass=losslesscut"
