@@ -2,48 +2,38 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-sudo apt install -y libsdl2-dev
+install_packages libsdl2-dev
 
-# TODO: parametrize!
+# Raylib
+# TODO: Switch to `install_packages libraylib-dev` when raylib can be pulled from apt without adding extra sources (direct .deb install is only for avoiding sources changes).
+install_packages libglfw3-dev
 
-mkdir -p ~/.local/bin
-cd ~/.local/bin || exit 1
+RAYLIB_POOL_BASE="https://deb.debian.org/debian/pool/main/r/raylib"
+RAYLIB_DEB_VERSION="${RAYLIB_DEB_VERSION:-5.5+ds-1}"
+ARCH="$(dpkg --print-architecture)"
 
-VERSION=4.7-beta1
-APP="Godot_v${VERSION}_mono_linux_x86_64"
-GODOT_BIN="Godot_v${VERSION}_mono_linux.x86_64"
-GODOT_EXTRACT_DIR="$HOME/.local/bin/$APP"
-GODOT_VERSION_OUTPUT="${VERSION/-beta/.beta}"
-URL="https://godot-releases.nbg1.your-objectstorage.com/${VERSION}/${APP}.zip"
+raylib_debs_uptodate() {
+    package_installed libraylib-dev &&
+        package_installed libraylib550 &&
+        [[ "$(dpkg-query -W -f='${Version}' libraylib-dev 2>/dev/null || true)" == "$RAYLIB_DEB_VERSION" ]] &&
+        [[ "$(dpkg-query -W -f='${Version}' libraylib550 2>/dev/null || true)" == "$RAYLIB_DEB_VERSION" ]]
+}
 
-if [ -x "$HOME/.local/bin/godot" ] &&
-    "$HOME/.local/bin/godot" --version | grep -Eq "^${VERSION}|^${GODOT_VERSION_OUTPUT}" &&
-    [ -d "$HOME/.local/bin/GodotSharp" ]; then
-    log_info "Godot $VERSION is already installed"
+if raylib_debs_uptodate; then
+    log_info "raylib Debian packages at $RAYLIB_DEB_VERSION ($ARCH) already installed"
 else
-    install_archive "godot" "$URL" "$VERSION" "$HOME/.local/bin" "zip" || exit 1
-    if [ ! -d "$GODOT_EXTRACT_DIR" ]; then
-        log_error "Godot archive did not extract to expected directory: $GODOT_EXTRACT_DIR"
-        exit 1
+    RAYLIB_TMP=$(mktemp -d) || exit 1
+    RUN_DEB="$RAYLIB_TMP/libraylib550_${RAYLIB_DEB_VERSION}_${ARCH}.deb"
+    DEV_DEB="$RAYLIB_TMP/libraylib-dev_${RAYLIB_DEB_VERSION}_${ARCH}.deb"
+    download_file "${RAYLIB_POOL_BASE}/libraylib550_${RAYLIB_DEB_VERSION}_${ARCH}.deb" "$RUN_DEB" || exit 1
+    download_file "${RAYLIB_POOL_BASE}/libraylib-dev_${RAYLIB_DEB_VERSION}_${ARCH}.deb" "$DEV_DEB" || exit 1
+    # mktemp -d is 0700; apt's pkgAcquire runs as _apt and must read local .deb paths.
+    chmod a+rx -- "$RAYLIB_TMP"
+    chmod a+r -- "$RUN_DEB" "$DEV_DEB"
+    if apt_cache_is_stale; then
+        log_info "Refreshing apt index for local .deb dependency resolution..."
+        sudo apt-get update
     fi
-
-    trash_path "$HOME/.local/bin/GodotSharp"
-    trash_path "$HOME/.local/bin/godot"
-    mv "$GODOT_EXTRACT_DIR"/* "$HOME/.local/bin"
-    trash_path "$GODOT_EXTRACT_DIR"
-    mv "$HOME/.local/bin/$GODOT_BIN" "$HOME/.local/bin/godot"
+    sudo apt install -y "$RUN_DEB" "$DEV_DEB" || exit 1
+    rm -rf "$RAYLIB_TMP"
 fi
-
-# LAUNCHER
-echo "[Desktop Entry]
-Name=Godot Engine
-GenericName=Libre game engine
-Comment=Multi-platform 2D and 3D game engine with a feature-rich editor
-Exec=$HOME/.local/bin/godot %f
-Icon=$HOME/.local/bin/icons/godot.svg
-Terminal=false
-PrefersNonDefaultGPU=true
-Type=Application
-MimeType=application/x-godot-project;
-Categories=Development;IDE;
-StartupWMClass=Godot" > $HOME/.local/share/applications/"$APP".desktop
