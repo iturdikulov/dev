@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
 # Source common utilities
-source "$(dirname -- "${BASH_SOURCE[0]}")/runs/utils.sh"
+source "$script_dir/runs/utils.sh"
+
+install_packages wget2 curl
 
 # Because Git submodule commands cannot operate without a work tree, they must
 # be run from within $HOME (assuming this is the root of your dotfiles)
@@ -12,4 +16,21 @@ git config --global user.name "Inom T."
 
 yadm submodule update --recursive --init
 
-echo "Now go to ~/.config/yadm/runs and execute required runners, e.g. 0_debian"
+echo
+PS3="Runner #: "
+select opt in desktop laptop wsl skip; do
+    case $opt in
+        desktop | laptop | wsl)
+            log_info "Starting $opt bootstrap..."
+            bash "$script_dir/$opt"
+            exit $?
+            ;;
+        skip)
+            log_info "Skipped. Run ~/.config/yadm/desktop, laptop, or wsl when ready."
+            exit 0
+            ;;
+        *)
+            echo "Invalid choice."
+            ;;
+    esac
+done
