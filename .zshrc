@@ -146,6 +146,42 @@ c()
 }
 mkfile() { mkdir --parents "$(dirname "$1")" && touch "$1" ; }
 
+# Compare partialy moved code to another file
+vdiff() {
+  local vcs="git"
+
+  if [[ "$1" == "git" || "$1" == "yadm" ]]; then
+    vcs="$1"
+    shift
+  fi
+
+  if [[ $# -ne 3 ]]; then
+    echo "Usage: vdiff [git|yadm] <ref> <old-file> <new-file>"
+    return 1
+  fi
+
+  local ref="$1"
+  local old_file="$2"
+  local new_file="$3"
+
+  if [[ "$vcs" == "yadm" ]]; then
+    old_file="$(realpath --relative-to="$HOME" "$old_file")"
+  fi
+
+  local tmp
+  tmp="$(mktemp "/tmp/vdiff.XXXXXX")" || return 1
+
+  "$vcs" show "$ref:$old_file" > "$tmp" || {
+    echo "Failed: $vcs show $ref:$old_file"
+    rm -f "$tmp"
+    return 1
+  }
+
+  nvim -d "$tmp" "$new_file"
+
+  rm -f "$tmp"
+}
+
 alias rg_all='rg --hidden --no-ignore'
 alias rga='rga --follow'
 alias disk-usage='ncdu --exclude ~/Media --exclude /proc --exclude /sys --exclude /mnt --exclude /media --exclude /dev/shm /'
