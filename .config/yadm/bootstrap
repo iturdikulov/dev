@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
+bash -ec 'source "${1}/runs/utils.sh" && symlink_sys_tree_into_root "${1}/universal_sys"' bash "$script_dir"
+
 sudo apt install -y wget2 curl
 
 # Default login shell for future sessions

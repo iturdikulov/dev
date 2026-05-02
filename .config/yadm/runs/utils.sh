@@ -62,6 +62,34 @@ cd_or_exit() {
     fi
 }
 
+# Symlink each regular file under src_root into / preserving paths (same rules as laptop_conf).
+symlink_sys_tree_into_root() {
+    local src_root="$1"
+    local src rel_path dest_path
+
+    if [[ ! -d "$src_root" ]]; then
+        log_warn "symlink_sys_tree_into_root: missing directory $src_root"
+        return 0
+    fi
+
+    while IFS= read -r src; do
+        rel_path="${src#"$src_root"/}"
+        [[ -n "$rel_path" ]] || continue
+        dest_path="/$rel_path"
+
+        sudo mkdir -p "$(dirname "$dest_path")"
+        if [[ -e "$dest_path" ]] && [[ ! -L "$dest_path" ]]; then
+            log_warn "Skipping existing non-symlink: $dest_path"
+            continue
+        fi
+        if [[ -L "$dest_path" ]]; then
+            sudo rm "$dest_path"
+        fi
+        log_info "Symlink $dest_path -> $src"
+        sudo ln "$src" "$dest_path"
+    done < <(find "$src_root" -type f | sort)
+}
+
 # Check if a package is installed (Debian/Ubuntu)
 package_installed() { dpkg -l "$1" | grep -q '^ii' >/dev/null 2>&1; }
 

@@ -118,9 +118,10 @@ echo "$package_install $package_name"
 sh -c "$package_install \"$package_name\""
 rm -f "$package_name"
 
-if ! [ -f "/etc/sing-box/config.json" ]; then
-    echo "Copying universal_sys/etc/sing-box/config.json" to "/etc/sing-box/config.json and enable service"
-    sudo cp ../universal_sys/etc/sing-box/config.json /etc/sing-box/config.json
+if ! [ -e "/etc/sing-box/config.json" ]; then
+    echo "Linking universal_sys/etc/sing-box/config.json -> /etc/sing-box/config.json and enabling service"
+    sudo mkdir -p /etc/sing-box
+    sudo ln "$(CDPATH='' cd -- "$(dirname "$0")/.." && pwd)/universal_sys/etc/sing-box/config.json" /etc/sing-box/config.json
     sudo systemctl enable sing-box
     sudo systemctl start sing-box
 fi
