@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-export PATH="$PATH:/usr/local/bin:/usr/bin:/bin:/usr/games:/usr/local/games"
+export PATH="$PATH:/home/inom/.local/go/bin:/usr/local/bin:/usr/bin:/bin:/usr/games:/usr/local/games"
 
 # utils.sh - Common utility functions for idempotent runners
 
