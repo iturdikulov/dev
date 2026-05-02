@@ -4,6 +4,8 @@ set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$script_dir"
+# shellcheck source=runs/utils.sh
+source "$script_dir/runs/utils.sh"
 
 # For Steam + nvidia
 sudo apt install -y libgl1-nvidia-glvnd-glx:i386
@@ -27,4 +29,27 @@ while IFS= read -r src; do
   sudo ln "$src" "$dest_path"
 done < <(find "$laptop_conf_dir" -type f | sort)
 
-exec "$script_dir/run_runner.sh"
+"$script_dir/run_runner.sh"
+
+SYNC_DIRS_DEFAULT=(
+    Desktop/web
+    Desktop/software
+    Music
+    Templates
+    .password-store
+    .config/microsoft-edge
+)
+
+read -rp "Source base path for sync, e.g. user@host:/home/user (empty to skip): " BASE_PATH
+
+if [[ -n "$BASE_PATH" ]]; then
+    OUTPUT_DIR="${SYNC_DEST:-$HOME}"
+
+    read -rp "Sync .ssh plus laptop dirs (${SYNC_DIRS_DEFAULT[*]}) into '$OUTPUT_DIR'? (y/n) "
+    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+        rcp --exclude .ssh/known_hosts "$BASE_PATH/.ssh" "$OUTPUT_DIR"
+        for dir in "${SYNC_DIRS_DEFAULT[@]}"; do
+            rcp --relative "$BASE_PATH/$dir" "$OUTPUT_DIR"
+        done
+    fi
+fi

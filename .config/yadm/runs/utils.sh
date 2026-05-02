@@ -36,6 +36,23 @@ check_home_set() {
 # Check if a command exists
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
+# An rsync wrapper for gitignore-oriented syncs.
+rcp() {
+    #   -a = -rlptgoD
+    #   -r = recursive
+    #   -l = copy symlinks as symlinks
+    #   -p = preserve permissions
+    #   -t = preserve mtimes
+    #   -g = preserve owning group
+    #   -o = preserve owner
+    # -z = use compression
+    # -P = show progress on transferred file
+    # -J = don't touch mtimes on symlinks (always errors)
+    rsync -rtzPJ \
+        --include=.git/ \
+        "$@"
+}
+
 # Change directory or exit 1 after logging the failure.
 cd_or_exit() {
     local dir=$1
