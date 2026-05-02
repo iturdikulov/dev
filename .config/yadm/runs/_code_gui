@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+# Xdot
+install_packages xdot
+
+# Cursor + vscode repo
+if [ ! -f /etc/apt/sources.list.d/cursor.sources ]; then
+    CURSOR_VERSION=latest
+    download_file "https://api2.cursor.sh/updates/download/golden/linux-x64-deb/cursor/$CURSOR_VERSION" /tmp/cursor.deb
+    sudo dpkg -i /tmp/cursor.deb && rm /tmp/cursor.deb
+fi
+
+# Code & Cursor
+install_packages code cursor
+# Sandbox tools for codex
+install_packages seccomp bubblewrap
+
