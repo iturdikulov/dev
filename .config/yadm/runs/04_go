@@ -2,35 +2,4 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-VERSION=1.26.2
-GO_BIN=""
-
-if command_exists go; then
-    GO_BIN="$(command -v go)"
-elif [[ -x /usr/local/go/bin/go ]]; then
-    GO_BIN="/usr/local/go/bin/go"
-fi
-
-if [[ -n "$GO_BIN" ]] && "$GO_BIN" version >/dev/null 2>&1; then
-    current_go_version="$("$GO_BIN" version)"
-    if [[ "$current_go_version" == *"go$VERSION "* ]]; then
-        log_info "Go $VERSION is already installed; skipping reinstall."
-        exit 0
-    fi
-
-    "$GO_BIN" clean -modcache
-    "$GO_BIN" clean -cache
-else
-    log_warn "Skipping go cache cleanup; \`go version\` check failed."
-fi
-
-echo "Downloading GO"
-wget2 --progress=bar --output-document /tmp/go_$VERSION.tar.gz "https://go.dev/dl/go$VERSION.linux-amd64.tar.gz"
-
-echo "Installing GO"
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf "/tmp/go_$VERSION.tar.gz" && rm "/tmp/go_$VERSION.tar.gz"
-
-echo "set correct GOPATH and PATH in your shell!"
-export GOPATH=$HOME/.local/go
-
-cd /usr/local/go/bin/ || { echo "Failed"; exit 1; }
+install_packages golang-go
