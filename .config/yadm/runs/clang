@@ -2,31 +2,107 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-install_packages build-essential cmake gcc git strace
+install_packages build-essential cmake gcc git lld strace
 
-if command_exists cling && cling --version >/dev/null 2>&1; then
-    log_info "cling is already installed; skipping source build."
+INSTALL_PREFIX="/opt/llvm-cling-latest"
+BUILD_ROOT="$HOME/tmp/llvm-cling"
+LLVM_SOURCE_DIR="$BUILD_ROOT/llvm-project"
+CLING_SOURCE_DIR="$BUILD_ROOT/cling"
+BUILD_DIR="$BUILD_ROOT/build"
+CLING_BIN="$INSTALL_PREFIX/bin/cling"
+JOBS="${JOBS:-8}"
+LINK_JOBS="${LINK_JOBS:-1}"
+
+export PATH="$INSTALL_PREFIX/bin:$PATH"
+
+free_memory_before_build() {
+      read -r -p "Drop filesystem caches before building? [y/N] " drop_caches
+      case "$drop_caches" in
+      [Yy] | [Yy][Ee][Ss])
+            sync
+            sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+            ;;
+      *)
+            log_info "Skipping filesystem cache drop"
+            ;;
+      esac
+}
+
+cleanup_build_files() {
+      if [[ -d "$BUILD_ROOT" ]]; then
+            read -r -p "Remove build/download files at $BUILD_ROOT? [y/N] " remove_build_root
+            case "$remove_build_root" in
+            [Yy] | [Yy][Ee][Ss])
+                  rm -rf "$BUILD_ROOT"
+                  ;;
+            *)
+                  log_info "Keeping build/download files at $BUILD_ROOT"
+                  ;;
+            esac
+      fi
+}
+
+if [[ -x "$CLING_BIN" ]] && "$CLING_BIN" --version >/dev/null 2>&1; then
+    log_info "cling is already installed at $CLING_BIN; skipping source build."
+    log_info "Using clang/cling PATH for this session: $INSTALL_PREFIX/bin"
+    if [[ -d "$INSTALL_PREFIX" ]]; then
+          read -r -p "Remove installed clang/cling at $INSTALL_PREFIX? [y/N] " remove_install
+          case "$remove_install" in
+          [Yy] | [Yy][Ee][Ss])
+                sudo rm -rf "$INSTALL_PREFIX"
+                ;;
+          *)
+                log_info "Keeping installed clang/cling at $INSTALL_PREFIX"
+                ;;
+          esac
+    fi
     exit 0
 else
-      # Install cling
-      cd /tmp || exit 1
-      git clone --depth=1 -b cling-latest https://github.com/root-project/llvm-project.git || true
-      mkdir llvm-build && cd llvm-build
-      cmake -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" -DCMAKE_BUILD_TYPE=Release ../llvm-project/llvm
-      cmake --build . -j 8
-      sudo cmake --install .
+      if [[ -d "$INSTALL_PREFIX" ]]; then
+            read -r -p "Remove existing install at $INSTALL_PREFIX before rebuilding? [y/N] " remove_install
+            case "$remove_install" in
+            [Yy] | [Yy][Ee][Ss])
+                  sudo rm -rf "$INSTALL_PREFIX"
+                  ;;
+            *)
+                  log_error "$INSTALL_PREFIX already exists; aborting to avoid overwriting it."
+                  exit 1
+                  ;;
+            esac
+      fi
 
-      cd /tmp || exit 1
-      git clone https://github.com/root-project/cling.git || true
-      mkdir -p cling-build && cd cling-build || exit 1
-      mkdir -p "$HOME/.local/cling"
-      cmake -DLLVM_EXTERNAL_PROJECTS=cling -DLLVM_EXTERNAL_CLING_SOURCE_DIR=../cling/ \
+      mkdir -p "$BUILD_ROOT"
+      cd_or_exit "$BUILD_ROOT"
+
+      if [[ ! -d "$LLVM_SOURCE_DIR/.git" ]]; then
+            git clone --depth=1 -b cling-latest https://github.com/root-project/llvm-project.git "$LLVM_SOURCE_DIR"
+      else
+            log_info "Using existing LLVM source at $LLVM_SOURCE_DIR"
+      fi
+
+      if [[ ! -d "$CLING_SOURCE_DIR/.git" ]]; then
+            git clone https://github.com/root-project/cling.git "$CLING_SOURCE_DIR"
+      else
+            log_info "Using existing Cling source at $CLING_SOURCE_DIR"
+      fi
+
+      mkdir -p "$BUILD_DIR"
+      cd_or_exit "$BUILD_DIR"
+
+      cmake -DLLVM_EXTERNAL_PROJECTS=cling -DLLVM_EXTERNAL_CLING_SOURCE_DIR="$CLING_SOURCE_DIR" \
             -DLLVM_ENABLE_PROJECTS="clang" -DLLVM_TARGETS_TO_BUILD="host;NVPTX" \
-            -DCMAKE_BUILD_TYPE=Release ../llvm-project/llvm \
-            -DCMAKE_INSTALL_PREFIX="$HOME/.local/cling"
-      cmake --build . -j 8
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_USE_LINKER=lld \
+            -DLLVM_PARALLEL_LINK_JOBS="$LINK_JOBS" \
+            -DCMAKE_INSTALL_PREFIX="$INSTALL_PREFIX" \
+            "$LLVM_SOURCE_DIR/llvm"
+
+      log_info "Building with $JOBS compile job(s) and $LINK_JOBS link job(s)"
+      free_memory_before_build
+      cmake --build . -j "$JOBS"
       sudo cmake --install .
 
-      rm -rf "/tmp/llvm-project"
-      rm -rf "/tmp/cling-latest"
+      log_info "Installed clang/cling to $INSTALL_PREFIX"
+      log_info "PATH updated for this script session only: $INSTALL_PREFIX/bin"
+      cleanup_build_files
 fi
