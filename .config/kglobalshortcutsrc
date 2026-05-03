@@ -281,76 +281,11 @@ switch to next activity=Meta+Tab,,Switch to Next Activity
 switch to previous activity=Meta+Shift+Tab,,Switch to Previous Activity
 toggle do not disturb=none,,Toggle do not disturb
 
-[services][io.crow_translate.CrowTranslate.desktop]
-Open=Ctrl+Alt+Shift+T
-SpeakSelection=none
-TranslateSelectedText=none
-
-[services][net.local.cd-2.desktop]
-_launch=Meta+Shift+R
-
-[services][net.local.cd.desktop]
-_launch=Meta+R
-
-[services][net.local.copyq-2.desktop]
+[services][net.local.copyq.desktop]
 _launch=Meta+V
 
-[services][net.local.crow.sh.desktop]
-_launch=Meta+K
-
-[services][net.local.for.desktop]
-_launch=Meta+Shift+N
-
-[services][net.local.piper-speak.sh.desktop]
-_launch=Meta+Media Play
-
-[services][net.local.toggle_audio.sh.desktop]
-_launch=Ctrl+Alt+Media Play
-
-[services][net.local.ww.sh-10.desktop]
-_launch=Meta+S
-
-[services][net.local.ww.sh-11.desktop]
-_launch=Meta+D
-
-[services][net.local.ww.sh-12.desktop]
-_launch=Meta+G
-
-[services][net.local.ww.sh-13.desktop]
-_launch=Meta+M
-
-[services][net.local.ww.sh-14.desktop]
-_launch=Meta+Q
-
-[services][net.local.ww.sh-15.desktop]
-_launch=Meta+F4
-
-[services][net.local.ww.sh-16.desktop]
-_launch=Meta+F3
-
-[services][net.local.ww.sh-2.desktop]
-_launch=Meta+F2
-
-[services][net.local.ww.sh-4.desktop]
-_launch=Meta+F
-
-[services][net.local.ww.sh-5.desktop]
-_launch=Meta+W
-
-[services][net.local.ww.sh-6.desktop]
-_launch=Meta+F1
-
-[services][net.local.ww.sh-7.desktop]
-_launch=Meta+Shift+M
-
-[services][net.local.ww.sh-9.desktop]
-_launch=Meta+J
-
-[services][net.local.ww.sh.desktop]
+[services][net.local.ww.sh-3.desktop]
 _launch=Meta+`
-
-[services][org.kde.dolphin.desktop]
-_launch=none
 
 [services][org.kde.kcalc.desktop]
 _launch=Meta+=\tCalculator

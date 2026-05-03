@@ -39,9 +39,9 @@ KineticScrollingGesture=2
 KineticScrollingHideScrollbar=false
 KineticScrollingSensitivity=75
 KisDlgPreferences/CurrentPage=shortcuts
-LastBackGroundColor=<!DOCTYPE LastBackGroundColor>\n<LastBackGroundColor>\n <RGB g="1" r="1" space="sRGB-elle-V2-srgbtrc.icc" b="1"/>\n</LastBackGroundColor>\n
+LastBackGroundColor=<!DOCTYPE LastBackGroundColor>\n<LastBackGroundColor>\n <RGB g="1" b="1" space="sRGB-elle-V2-srgbtrc.icc" r="1"/>\n</LastBackGroundColor>\n
 LastEraser_0=a) Eraser Circle
-LastForeGroundColor=<!DOCTYPE LastForeGroundColor>\n<LastForeGroundColor>\n <RGB g="0.0823529437184334" r="0.0745098069310188" space="sRGB-elle-V2-srgbtrc.icc" b="0.172549024224281"/>\n</LastForeGroundColor>\n
+LastForeGroundColor=<!DOCTYPE LastForeGroundColor>\n<LastForeGroundColor>\n <RGB g="0.0823529437184334" b="0.172549024224281" space="sRGB-elle-V2-srgbtrc.icc" r="0.0745098069310188"/>\n</LastForeGroundColor>\n
 LastPreset=d) Ink-3 Gpen
 LastPreset_-1=d) Ink-3 Gpen
 LineSmoothingDelayDistance=50
