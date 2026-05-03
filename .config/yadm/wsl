@@ -16,6 +16,11 @@ if ! [ -e /etc/wsl.conf ]; then
     echo "WSL config linked successfully."
 fi
 
+if ! [ -e "/mnt/c/Users/inom/.wslconfig" ]; then
+    cp "$script_dir/wsl_conf/.wslconfig" /mnt/c/Users/inom/.wslconfig
+    echo "WSL config for win copied successfully."
+fi
+
 "$script_dir/run_runner.sh" --no-gui --no-ufw --blacklist "01_debian _hardware nvidia xone games gamedev _media _virt borg nginx resilio-sync singbox ttyd.sh whisper ollama_v2025"
 
 SYNC_DIRS_WSL=(
