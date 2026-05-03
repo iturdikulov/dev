@@ -16,16 +16,8 @@ LINK_JOBS="${LINK_JOBS:-1}"
 export PATH="$INSTALL_PREFIX/bin:$PATH"
 
 free_memory_before_build() {
-      read -r -p "Drop filesystem caches before building? [y/N] " drop_caches
-      case "$drop_caches" in
-      [Yy] | [Yy][Ee][Ss])
-            sync
-            sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
-            ;;
-      *)
-            log_info "Skipping filesystem cache drop"
-            ;;
-      esac
+  sync
+  sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
 }
 
 cleanup_build_files() {
