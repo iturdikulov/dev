@@ -1,4 +1,5 @@
 [wsl2]
 memory=14GB
-swap=8GB
+swap=5GB
+networkingMode=mirrored
 
