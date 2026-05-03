@@ -14,5 +14,6 @@
 .gnupg/*.conf
 .git/config
 .local/scripts/kde_connect_watcher.py
+.local/bin/az
 .leetcode/leetcode.toml
 .smbcredentials
