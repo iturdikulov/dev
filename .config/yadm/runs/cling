@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # axel@cern.ch, 2014-02-07
+# https://github.com/Axel-Naumann/cling-all-in-one/blob/master/clone.sh
 #
 # arguments:
 #   [cores]  number of cores to use, optional
