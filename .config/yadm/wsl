@@ -10,6 +10,12 @@ cd "$script_dir"
 # shellcheck source=runs/utils.sh
 source "$script_dir/runs/utils.sh"
 
+# Copy config if not exits
+if ! [ -e /etc/wsl.conf ]; then
+    sudo ln "$script_dir/wsl_conf/etc/wsl.conf" /etc/
+    echo "WSL config linked successfully."
+fi
+
 "$script_dir/run_runner.sh" --no-gui --no-ufw --blacklist "01_debian _hardware nvidia xone games gamedev _media _virt borg nginx resilio-sync singbox ttyd.sh whisper ollama_v2025"
 
 SYNC_DIRS_WSL=(
