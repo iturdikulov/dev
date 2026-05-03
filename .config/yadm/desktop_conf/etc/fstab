@@ -17,5 +17,4 @@ UUID=6e628ee3-395f-45ae-b0d2-440328445b0e none            swap    sw            
 
 UUID=ff1ddb67-6528-49b3-8159-3d26eb97d431 /home/inom/Media/archive btrfs subvol=root,compress=zstd,nofail,x-gvfs-trash 0 0
 UUID=be3fc6b1-d2d0-4c37-ab40-53567d54e67d /home/inom/Media/games btrfs subvol=games,compress=zstd,x-gvfs-trash 0 0
-UUID=AEC0F993C0F961CF /media/inom/seed ntfs3 defaults,uid=1000,gid=1000,x-systemd.mount-timeout=120 0 0
-
+UUID=AEC0F993C0F961CF /home/inom/Media/seed ntfs3 defaults,uid=1000,gid=1000,x-systemd.mount-timeout=120 0 0
