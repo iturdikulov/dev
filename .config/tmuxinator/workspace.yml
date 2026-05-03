@@ -1,0 +1,10 @@
+# ~/.config/tmuxinator/workspace.yml
+
+name: workspace
+root: /workspace
+
+windows:
+  - overmind:
+      layout: main-vertical
+      panes:
+        - overmind start
