@@ -30,4 +30,3 @@ else
       rm -rf "/tmp/llvm-project"
       rm -rf "/tmp/cling-latest"
 fi
-

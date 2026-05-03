@@ -13,7 +13,9 @@ source "$script_dir/runs/utils.sh"
 "$script_dir/run_runner.sh" --no-gui --no-ufw --blacklist "01_debian _hardware nvidia xone games gamedev _media _virt borg nginx resilio-sync singbox ttyd.sh whisper ollama_v2025"
 
 SYNC_DIRS_WSL=(
-    Desktop
+    Desktop/atd
+    Desktop/web
+    Desktop/programming
     Templates
     Wiki
     Library/dictionary
