@@ -16,12 +16,54 @@ TMP_PATH="/tmp/$APP_NAME"
 APP_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v$APP_VERSION/Obsidian-$APP_VERSION.AppImage"
 SHA_256_SUM="41f721df379f899f802efb6e79f8a30b491734634b03434e28daf82558a2a8f3"
 
+# Agent Client plugin (manual install: release artifacts → Vault/.obsidian/plugins/agent-client/)
+# Set OBSIDIAN_VAULT to your vault root to install; enable in Obsidian Settings → Community plugins.
+AGENT_CLIENT_VERSION="0.10.2"
+AGENT_CLIENT_ID="agent-client"
+AGENT_CLIENT_BASE_URL="https://github.com/RAIT-09/obsidian-agent-client/releases/download/$AGENT_CLIENT_VERSION"
+AGENT_CLIENT_MAIN_SHA="78a8e8c31093da2f043827dde2b3cac74942c725747416390c0001652c515801"
+AGENT_CLIENT_MANIFEST_SHA="c239a9e96973cc57f95adf7afad266da49634aa15d312c203c5bef6e3b9fe2ca"
+AGENT_CLIENT_STYLES_SHA="369525a4765230a22d1964cac1bc78a184bd0f50807c31b1875ec9dbab534b84"
+
+export OBSIDIAN_VAULT="$HOME/Wiki"
+
 wget2 --progress=bar --output-document $TMP_PATH $APP_URL
 echo "$SHA_256_SUM $TMP_PATH"
 echo "$SHA_256_SUM $TMP_PATH" | sha256sum --check || { sha256sum $TMP_PATH; exit 1; }
 
 mv $TMP_PATH "$APP_PATH"
 chmod a+x "$APP_PATH"
+
+if [[ -n "$OBSIDIAN_VAULT" ]]; then
+    AGENT_DST="$OBSIDIAN_VAULT/.obsidian/plugins/$AGENT_CLIENT_ID"
+    mkdir -p "$AGENT_DST"
+    AG_TMP="/tmp/agent-client-$AGENT_CLIENT_VERSION"
+    mkdir -p "$AG_TMP"
+    wget2 --progress=bar --directory-prefix="$AG_TMP" \
+        "$AGENT_CLIENT_BASE_URL/main.js" \
+        "$AGENT_CLIENT_BASE_URL/manifest.json" \
+        "$AGENT_CLIENT_BASE_URL/styles.css"
+    echo "$AGENT_CLIENT_MAIN_SHA $AG_TMP/main.js"
+    echo "$AGENT_CLIENT_MAIN_SHA $AG_TMP/main.js" | sha256sum --check || {
+        sha256sum "$AG_TMP/main.js"
+        exit 1
+    }
+    echo "$AGENT_CLIENT_MANIFEST_SHA $AG_TMP/manifest.json"
+    echo "$AGENT_CLIENT_MANIFEST_SHA $AG_TMP/manifest.json" | sha256sum --check || {
+        sha256sum "$AG_TMP/manifest.json"
+        exit 1
+    }
+    echo "$AGENT_CLIENT_STYLES_SHA $AG_TMP/styles.css"
+    echo "$AGENT_CLIENT_STYLES_SHA $AG_TMP/styles.css" | sha256sum --check || {
+        sha256sum "$AG_TMP/styles.css"
+        exit 1
+    }
+    install -m0644 "$AG_TMP/main.js" "$AG_TMP/manifest.json" "$AG_TMP/styles.css" "$AGENT_DST/"
+    rm -rf "$AG_TMP"
+    log_info "Agent Client plugin $AGENT_CLIENT_VERSION installed to $AGENT_DST — enable it under Settings → Community plugins"
+else
+    log_warn 'OBSIDIAN_VAULT is unset — skipping Agent Client plugin; set OBSIDIAN_VAULT to your vault root to install manually from https://github.com/RAIT-09/obsidian-agent-client/releases'
+fi
 
 mkdir -p "$HOME/.local/share/applications"
 cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
