@@ -71,14 +71,20 @@ noborderrule=3
 
 [6728f00c-c1f6-4edb-970f-f0479d1bc309]
 Description=cmus
+noborder=true
+noborderrule=3
+placement=6
+placementrule=2
+size=1930,540
+sizerule=2
 skiptaskbar=true
 skiptaskbarrule=3
 wmclass=cmus
 wmclassmatch=1
 
 [General]
-count=12
-rules=cd26447c-52ae-4eec-bc9d-0ec642c9020b,3b96aea6-551f-4c65-9f4c-5f929ae9e0c8,051ceab2-1c45-417f-8efa-648e6954bdcc,bebd4a15-adea-46ca-af76-eeed724ee634,a591d008-f7ac-4074-89a4-110d7f6dc4c1,230decd2-383f-4b04-9260-5e3ca2118178,314c9cfa-c069-427e-af4e-6cb0e566066e,4d57f5f7-b5fb-46e9-abbe-fbf729547dd2,3fe49d4c-b2e5-4290-bfea-93f8ab447f30,ed1b6def-9763-49e4-8ef3-0b32219f56a0,aa538ca5-31e6-4ae3-be5d-f6846302e2b2,6728f00c-c1f6-4edb-970f-f0479d1bc309
+count=13
+rules=cd26447c-52ae-4eec-bc9d-0ec642c9020b,3b96aea6-551f-4c65-9f4c-5f929ae9e0c8,051ceab2-1c45-417f-8efa-648e6954bdcc,bebd4a15-adea-46ca-af76-eeed724ee634,a591d008-f7ac-4074-89a4-110d7f6dc4c1,230decd2-383f-4b04-9260-5e3ca2118178,314c9cfa-c069-427e-af4e-6cb0e566066e,4d57f5f7-b5fb-46e9-abbe-fbf729547dd2,3fe49d4c-b2e5-4290-bfea-93f8ab447f30,ed1b6def-9763-49e4-8ef3-0b32219f56a0,aa538ca5-31e6-4ae3-be5d-f6846302e2b2,6728f00c-c1f6-4edb-970f-f0479d1bc309,f9b307d7-eef1-4c42-9c25-d6f6dab6b5ac
 
 [a591d008-f7ac-4074-89a4-110d7f6dc4c1]
 Description=Copy of ghostty
@@ -134,4 +140,13 @@ sizerule=3
 skiptaskbar=true
 skiptaskbarrule=3
 wmclass=gl_foot_shortcut
+wmclassmatch=1
+
+[f9b307d7-eef1-4c42-9c25-d6f6dab6b5ac]
+Description=MPV
+position=214,94
+positionrule=3
+size=1600,900
+sizerule=3
+wmclass=mpv
 wmclassmatch=1
