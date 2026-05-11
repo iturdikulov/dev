@@ -14,7 +14,7 @@ Version=1.0
 Name=az
 GenericName=Terminal Emulator
 Comment=Ghostty instance with custom class main.app
-Exec=ghostty -e az
+Exec=ghostty --class=com.mitchellh.ghosttyaz -e az
 Terminal=false
 Type=Application
 Icon=utilities-terminal
