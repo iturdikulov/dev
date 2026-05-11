@@ -144,16 +144,16 @@ remove_packages() {
 # Download file if it doesn't exist
 download_file() {
     local url="$1"
-    local output="$2"
-
-    if [ -n "$output" ] && [ -f "$output" ]; then
-        log_info "File already exists: $output"
-        return 0
-    fi
+    local output=${2:-}
 
     log_info "Downloading $url..."
 
     if [ -n "$output" ]; then
+        if [ -n "$output" ] && [ -f "$output" ]; then
+            log_info "File already exists: $output"
+            return 0
+        fi
+
         local wget_args=(--progress=bar --continue --output-document "$output")
     else
         local wget_args=(--progress=bar --continue)
