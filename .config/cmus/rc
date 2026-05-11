@@ -8,3 +8,4 @@ set format_playlist_va=%3n  %A  %-10%l/%t (%a)%= %d
 set format_trackwin=%3n  %a  %-10%l/%t%= %d
 set format_trackwin_va=%3n  %A  %-10%l/%t (%a)%= %d
 set format_title=%n %a - %l/%t
+set lib_sort=albumartist date discnumber tracknumber title filename play_count

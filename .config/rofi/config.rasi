@@ -1,0 +1,14 @@
+configuration {
+    /* Define the modes: 'win' uses your script, 'drun' is native apps */
+    modi: "win:~/.local/scripts/rofi-windows.sh,drun,combi";
+    combi-modi: "win,drun,calc";
+    calc-command: "echo -n '{result}' | y";
+    show-icons: true;
+    icon-theme: "Papirus";
+    font: "Sans 12";
+    display-win: "󱂬  ";
+    display-drun: "";
+}
+
+/* Link to the theme file below */
+@theme "split-view"

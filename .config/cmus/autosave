@@ -65,17 +65,17 @@ set dsp.jack.resampling_quality=2
 set dsp.jack.server_name=
 set follow=false
 set format_clipped_text=…
-set format_current=%3n  %a / %l  %t%= %d
+set format_current=%3n  %a  %-10%l/%t%= %d
 set format_heading_album=%a - %l%= %y %{duration}
 set format_heading_artist=%a%= %{duration}
 set format_heading_playlist=%{?!panel?Playlist - }%{genre}%{title}%= %{duration}
-set format_playlist=%3n  %a / %l  %t%= %d
-set format_playlist_va=%3n  %A / %l  %t (%a)%= %d
+set format_playlist=%3n  %a  %-10%l/%t%= %d
+set format_playlist_va=%3n  %A  %-10%l/%t (%a)%= %d
 set format_statusline= %{status} %{?show_playback_position?%{position} %{?duration?/ %{duration} }?%{?duration?%{duration} }}%{?bpm>0?at %{bpm} BPM }%{?stream?buf: %{buffer} }%{?show_current_bitrate & bitrate>=0? %{bitrate} kbps }%= %{?repeat_current?repeat current?%{?play_library?%{?playlist_mode!="all"?%{playlist_mode} from }%{?play_sorted?sorted }library?playlist}} | %{?volume>=0?%{?lvolume!=rvolume?%{lvolume}%% %{rvolume}?%{volume}}%% | }%1{continue}%1{follow}%1{repeat}%1{shuffle}
-set format_title=%n %a / %l - %t
-set format_trackwin=%3n  %a / %l  %t%= %d
+set format_title=%n %a - %l/%t
+set format_trackwin=%3n  %a  %-10%l/%t%= %d
 set format_trackwin_album= %l %= %y %{duration}
-set format_trackwin_va=%3n  %A / %l  %t (%a)%= %d
+set format_trackwin_va=%3n  %A  %-10%l/%t (%a)%= %d
 set format_treewin=  %l
 set format_treewin_artist=%a
 set icecast_default_charset=ISO-8859-1
@@ -95,7 +95,7 @@ set input.vorbis.priority=50
 set input.wav.priority=50
 set input.wavpack.priority=50
 set lib_add_filter=
-set lib_sort=genre albumartist date album discnumber tracknumber title filename play_count
+set lib_sort=albumartist date album discnumber tracknumber title filename play_count
 set mixer.alsa.channel=
 set mixer.alsa.device=
 set mixer.pulse.restore_volume=1
