@@ -5,6 +5,7 @@
 .config/environment.d/*.conf
 .config/lazygit/config.yml
 .config/yadm/universal_sys/etc/sing-box/config.json
+.config/yadm/runs/marshmellow
 .config/singbox-direct-rules.json
 .config/singbox-rules.json
 .config/sqls/config.yml
@@ -17,4 +18,3 @@
 .local/bin/az
 .leetcode/leetcode.toml
 .smbcredentials
-runs/marshmellow

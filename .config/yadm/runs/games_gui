@@ -61,31 +61,6 @@ StartupNotify=true"
 
 create_desktop_entry "ProtonUp-Qt" "$PROTONUP_QT_DESKTOP_CONTENT"
 
-# legendary — pinned Linux release binary from legendary-gl/legendary
-LEGENDARY_VERSION="0.20.34"
-LEGENDARY_URL="https://github.com/legendary-gl/legendary/releases/download/${LEGENDARY_VERSION}/legendary"
-LEGENDARY_BIN="$HOME/.local/bin/legendary_${LEGENDARY_VERSION}"
-LEGENDARY_LAUNCHER="$HOME/.local/bin/legendary"
-
-case "$(uname -m)" in
-    x86_64|amd64)
-        ;;
-    *)
-        log_warn "Legendary ${LEGENDARY_VERSION} is x86_64-only; skipping on $(uname -m)"
-        LEGENDARY_BIN=""
-        ;;
-esac
-
-if [[ -n "$LEGENDARY_BIN" ]]; then
-    ensure_directory "$HOME/.local/bin"
-    if [ "$(readlink -- "$LEGENDARY_LAUNCHER" 2>/dev/null)" = "$LEGENDARY_BIN" ] && [ -x "$LEGENDARY_BIN" ]; then
-        log_info "Legendary $LEGENDARY_VERSION is already installed"
-    else
-        download_file "$LEGENDARY_URL" "$LEGENDARY_BIN" || exit 1
-        chmod +x "$LEGENDARY_BIN"
-        ln -sf "$LEGENDARY_BIN" "$LEGENDARY_LAUNCHER"
-    fi
-
 # citron — nightly Linux AppImage from citron-neo/CI (pin SHA when upgrading)
 CITRON_NIGHTLY_SHA="cf6129959"
 CITRON_APPIMAGE_BASENAME="citron_nightly-${CITRON_NIGHTLY_SHA}-linux-x86_64.AppImage"

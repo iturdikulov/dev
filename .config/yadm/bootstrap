@@ -3,7 +3,7 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
 bash -ec 'source "${1}/runs/utils.sh" && symlink_sys_tree_into_root "${1}/universal_sys"' bash "$script_dir"
 
-sudo apt install -y wget2 curl
+sudo apt install -y wget2 curl zsh
 
 # Default login shell for future sessions
 sudo chsh -s "$(command -v zsh)"
@@ -55,3 +55,6 @@ done
 
 # Sync submodules
 yadm submodule update --recursive --init
+
+# Gnome speicific settings (TODO: verify gsettings exist)
+gsettings set org.gnome.mutter check-alive-timeout 60000

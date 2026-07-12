@@ -5,6 +5,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 remove_packages vlc dragonplayer gwenview
 install_packages mpv obs-studio audacity kdenlive lmms picard
 install_packages nomacs krita inkscape darktable gimp mypaint-brushes
+install_packages file-roller
 
 ensure_directory "$HOME/.local/bin"
 

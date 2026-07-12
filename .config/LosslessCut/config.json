@@ -2,8 +2,8 @@
 	"captureFormat": "webp",
 	"customOutDir": "/home/inom/Downloads",
 	"keyframeCut": true,
-	"autoMerge": false,
-	"autoDeleteMergedSegments": false,
+	"autoMerge": true,
+	"autoDeleteMergedSegments": true,
 	"segmentsToChaptersOnly": false,
 	"enableSmartCut": false,
 	"timecodeFormat": "timecodeWithDecimalFraction",
@@ -36,10 +36,10 @@
 	"treatOutputFileModifiedTimeAsStart": true,
 	"safeOutputFileName": true,
 	"windowBounds": {
-		"x": 545,
-		"y": 240,
-		"width": 800,
-		"height": 600
+		"x": 1,
+		"y": 14,
+		"width": 1918,
+		"height": 1021
 	},
 	"enableAutoHtml5ify": true,
 	"keyBindings": [

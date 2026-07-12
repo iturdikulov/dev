@@ -44,6 +44,9 @@ else
     sudo ufw allow 8920/tcp
     sudo ufw allow 7359/udp
 
+    # Miniflux
+    sudo ufw allow 8082/tcp
+
     # Custom
     sudo ufw allow 8080/tcp
     sudo ufw allow 9090/tcp
