@@ -9,13 +9,11 @@
 #
 # <file system> <mount point>   <type>  <options>       <dump>  <pass>
 # / was on /dev/nvme1n1p3 during installation
-UUID=ca54a700-1344-4051-a511-5a5dea4e0102 /               btrfs   compress,subvol=@rootfs 0       0
+UUID=ca54a700-1344-4051-a511-5a5dea4e0102 /               btrfs   defaults,compress=zstd:1,subvol=@rootfs 0       0
 # /boot/efi was on /dev/nvme1n1p1 during installation
 UUID=325E-3887  /boot/efi       vfat    umask=0077      0       1
 # swap was on /dev/nvme1n1p4 during installation
 UUID=6e628ee3-395f-45ae-b0d2-440328445b0e none            swap    sw              0       0
 
 UUID=ff1ddb67-6528-49b3-8159-3d26eb97d431 /home/inom/Media/archive btrfs subvol=root,compress=zstd,nofail,x-gvfs-trash 0 0
-
 UUID=be3fc6b1-d2d0-4c37-ab40-53567d54e67d /home/inom/Media/games btrfs subvol=games,compress=zstd,x-gvfs-trash 0 0
-/home/inom/Media/games/SteamLibrary  /SteamLibrary  none  bind  0  0
