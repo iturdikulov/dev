@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+HEROIC_VERSION="2.22.0"
+HEROIC_PACKAGE="heroic"
+HEROIC_URL="https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher/releases/download/v${HEROIC_VERSION}/Heroic-${HEROIC_VERSION}-linux-amd64.deb"
+HEROIC_DEB="/tmp/Heroic-${HEROIC_VERSION}.deb"
+
+if [[ "$(dpkg --print-architecture)" != "amd64" ]]; then
+    log_warn "Heroic .deb is x86_64-only; skipping on $(dpkg --print-architecture)"
+    exit 0
+fi
+
+if package_installed "$HEROIC_PACKAGE"; then
+    installed_ver=$(dpkg-query -W -f='${Version}' "$HEROIC_PACKAGE" 2>/dev/null || true)
+    if [[ "$installed_ver" == "$HEROIC_VERSION" ]]; then
+        log_info "Heroic ${HEROIC_VERSION} is already installed; skipping download"
+        exit 0
+    fi
+    log_info "Heroic ${installed_ver:-unknown} installed; upgrading to ${HEROIC_VERSION}"
+fi
+
+download_file "$HEROIC_URL" "$HEROIC_DEB"
+sudo apt install -y -f "$HEROIC_DEB"
+rm -f "$HEROIC_DEB"
