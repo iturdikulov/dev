@@ -89,3 +89,6 @@ echo Installing Neovim
 sudo tar -xzvf "$downloaded_file" -C /usr/ --strip-components=1
 echo Neovim installed!
 nvim --version
+
+echo Installing tree-sitter
+npm install -g tree-sitter-cli
