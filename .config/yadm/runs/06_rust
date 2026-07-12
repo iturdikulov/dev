@@ -2,15 +2,17 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-# Get cargo & rust toolchain
-if ! command -v cargo &> /dev/null || ! command -v rustup &> /dev/null; then
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+CARGO_BIN="$HOME/.cargo/bin"
+export PATH="$CARGO_BIN:$PATH"
+
+# Get cargo & rust toolchain (check the install dir, not only PATH).
+if [[ ! -x "$CARGO_BIN/rustup" ]]; then
+    log_info "Installing rustup toolchain..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+    export PATH="$CARGO_BIN:$PATH"
 fi
 
 # Installing additional tools
-export PATH="$PATH:$HOME/.cargo/bin"
-
-# Cargo B(inary)Install
 install_packages build-essential
 cargo install cargo-binstall --locked
 

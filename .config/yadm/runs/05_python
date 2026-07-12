@@ -12,6 +12,7 @@ else
     uv self update
 fi
 
+ensure_directory "$HOME/.local/bin"
 cd "$HOME/.local/bin" || {
     echo "Error: Failed to change directory to $HOME/.local/bin" >&2
     exit 1

@@ -115,39 +115,53 @@ symlink_sys_tree_into_root() {
 # Check if a package is installed (Debian/Ubuntu)
 package_installed() { dpkg -l "$1" | grep -q '^ii' >/dev/null 2>&1; }
 
-# True if apt package lists should be refreshed (missing cache or older than ~7 days).
-apt_cache_is_stale() {
-    local cache=/var/cache/apt/pkgcache.bin
-    local week_sec=$((7 * 24 * 60 * 60))
-    local now mtime age
+# Stamp file: apt-get update runs at most once per day across all runners.
+APT_UPDATE_STAMP="${XDG_CACHE_HOME:-$HOME/.cache}/yadm-runs/last-apt-update"
 
-    if [[ ! -f "$cache" ]]; then
+# True if apt package lists should be refreshed (no stamp or older than ~1 day).
+apt_cache_is_stale() {
+    local day_sec=$((24 * 60 * 60))
+    local now last_update age
+
+    if [[ ! -f "$APT_UPDATE_STAMP" ]]; then
         return 0
     fi
 
     now=$(date +%s)
-    mtime=$(stat -c %Y -- "$cache" 2>/dev/null) || return 0
-    age=$((now - mtime))
-    ((age > week_sec))
+    last_update=$(<"$APT_UPDATE_STAMP") || return 0
+    age=$((now - last_update))
+    ((age >= day_sec))
 }
 
-# Install package if not already installed
+# Run apt-get update when the daily stamp is missing or expired.
+apt_update_if_needed() {
+    if apt_cache_is_stale; then
+        log_info "Package index not refreshed today; running apt update..."
+        sudo apt-get update
+        ensure_directory "$(dirname "$APT_UPDATE_STAMP")"
+        date +%s >"$APT_UPDATE_STAMP"
+    fi
+}
+
+# Install packages if not already installed (missing ones in one apt call).
 install_packages() {
     local pkg_names=("$@")
+    local pkg_name to_install=()
 
-    if apt_cache_is_stale; then
-        log_info "Package index is missing or older than 7 days; running apt update..."
-        sudo apt-get update
-    fi
+    apt_update_if_needed
 
     for pkg_name in "${pkg_names[@]}"; do
-        if ! package_installed "$pkg_name"; then
-            log_info "Installing $pkg_name..."
-            sudo apt install -y "$pkg_name"
-        else
+        if package_installed "$pkg_name"; then
             log_info "$pkg_name is already installed"
+        else
+            to_install+=("$pkg_name")
         fi
     done
+
+    if ((${#to_install[@]} > 0)); then
+        log_info "Installing ${to_install[*]}..."
+        sudo apt install -y "${to_install[@]}"
+    fi
 }
 
 # Remove package if installed
@@ -370,17 +384,22 @@ if [[ ! " 04_go 05_python 06_rust 07_node " =~ " $CALLER_SCRIPT " ]]; then
 
         log_info "Ensuring toolchain: $cmd"
 
+        # Add known bin dirs before probing PATH (install may already exist off-PATH).
+        for bin_path in $paths; do
+            if [[ -d "$bin_path" ]] && [[ ":$PATH:" != *":$bin_path:"* ]]; then
+                export PATH="$bin_path:$PATH"
+            fi
+        done
+
         # Install if missing
         if ! command -v "$cmd" &>/dev/null; then
             "$DIR/$installer"
+            for bin_path in $paths; do
+                if [[ -d "$bin_path" ]] && [[ ":$PATH:" != *":$bin_path:"* ]]; then
+                    export PATH="$bin_path:$PATH"
+                fi
+            done
         fi
-
-        # Loop through and add any paths provided for the tool
-        for bin_path in $paths; do
-            if [ -d "$bin_path" ] && [[ ":$PATH:" != *":$bin_path:"* ]]; then
-                export PATH="$PATH:$bin_path"
-            fi
-        done
     done
 fi
 

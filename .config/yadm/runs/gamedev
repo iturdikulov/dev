@@ -30,10 +30,7 @@ else
     # mktemp -d is 0700; apt's pkgAcquire runs as _apt and must read local .deb paths.
     chmod a+rx -- "$RAYLIB_TMP"
     chmod a+r -- "$RUN_DEB" "$DEV_DEB"
-    if apt_cache_is_stale; then
-        log_info "Refreshing apt index for local .deb dependency resolution..."
-        sudo apt-get update
-    fi
+    apt_update_if_needed
     sudo apt install -y "$RUN_DEB" "$DEV_DEB" || exit 1
     rm -rf "$RAYLIB_TMP"
 fi
