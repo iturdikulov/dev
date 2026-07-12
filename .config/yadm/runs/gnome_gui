@@ -2,5 +2,5 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-install_packages gnome-core
+install_packages gnome-core gnome-tweaks
 remove_packages showtime
