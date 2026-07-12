@@ -42,10 +42,15 @@ borg create \
     --exclude "home/*/.cache/*" \
     --exclude "home/*/.npm" \
     --exclude "home/*/.steam" \
-    --exclude "home/*/Media/" \
+    --exclude "home/*/Media/archive" \
+    --exclude "home/*/Media/games/RetroArch" \
+    --exclude "home/*/Media/games/SteamLibrary" \
+    --exclude "home/*/Media/games/Legendary" \
+    --exclude "home/*/Media/games/gamedev/unreal_engine_5" \
     --exclude "home/*/.thunderbird/*/calendar-data/cache.sqlite*" \
     --exclude "/home/*/.config/Slack/Service Worker" \
     --exclude "/home/*/Desktop/atd/az-containers/runtime" \
+    --exclude "/home/*/.codex/.tmp" \
     --exclude "var/lib/docker" \
     --exclude "var/lib/libvirt/images" \
     --exclude "var/tmp/*" \
@@ -83,7 +88,8 @@ borg prune                          \
     --show-rc                       \
     --keep-daily    7               \
     --keep-weekly   4               \
-    --keep-monthly  6
+    --keep-monthly  6               \
+    --keep-yearly   1
 
 prune_exit=$?
 
