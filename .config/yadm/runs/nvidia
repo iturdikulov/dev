@@ -1,9 +1,11 @@
 #!/bin/sh
 cd /tmp || exit 1
 
-sudo apt install -y firmware-linux  firmware-linux-nonfree  firmware-misc-nonfree
+sudo apt install -y firmware-linux  firmware-linux-nonfree  firmware-misc-nonfree linux-headers-generic
+sudo add-apt-repository contrib
+sudo dpkg --add-architecture i386
 
-wget2 --progress=bar https://developer.download.nvidia.com/compute/cuda/repos/debian12/x86_64/cuda-keyring_1.1-1_all.deb
+wget2 --progress=bar https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
 sudo apt update
 rm -f cuda-keyring_1.1-1_all.deb
@@ -15,8 +17,8 @@ echo 'options nvidia NVreg_PreserveVideoMemoryAllocations=1' | sudo tee /etc/mod
 echo "Check after reboot cat /sys/module/nvidia_drm/parameters/modeset, cat /proc/driver/nvidia/params | grep PreserveVideoMemoryAllocations should return Y and 1"
 
 # Enable power-management services
-sudo systemctl disable --now nvidia-suspend.service
-sudo systemctl disable --now nvidia-hibernate.service
-sudo systemctl disable --now nvidia-resume.service
+sudo systemctl enable nvidia-suspend.service
+sudo systemctl enable nvidia-hibernate.service
+sudo systemctl enable nvidia-resume.service
 
 echo "Check https://docs.coolercontrol.org/installation/debian.html for coolercontrol"

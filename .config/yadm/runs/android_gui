@@ -34,3 +34,10 @@ Type=Application
 Categories=$APP_DESKTOP_CATEGORIES
 StartupNotify=true
 EOF
+
+
+install_packages kdeconnect android-file-transfer
+
+# Disable built-in mtp & mounter
+KMTD_DBUS_SERVICE="$HOME/.local/share/dbus-1/services/org.kde.kmtpd5.service"
+ln -sf /dev/null $KMTD_DBUS_SERVICE

@@ -9,27 +9,31 @@ curl -o /tmp/edge.deb -L "https://packages.microsoft.com/repos/edge/pool/main/m/
 sudo dpkg -I /tmp/edge.deb
 sudo apt install --no-install-recommends -y /tmp/edge.deb && rm /tmp/edge.deb
 
-# Special gemini app app
-APP_NAME="Gemini"
-FILE_NAME="gemini.desktop"
-TARGET_DIR="$HOME/.local/share/applications"
-
-# 1. Create the directory if it doesn't exist
-mkdir -p "$TARGET_DIR"
-
-# 2. Create the .desktop file, proxy server from global env file
-cat <<EOF > "$TARGET_DIR/$FILE_NAME"
+mkdir -p "$HOME/.local/share/applications"
+rm -f "$HOME/.local/share/applications/microsoft-edge.desktop"
+cat > "$HOME/.local/share/applications/com.microsoft.Edge.desktop" << EOF
 [Desktop Entry]
 Version=1.0
-Type=Application
-Name=$APP_NAME
-Comment=Google Gemini AI via Microsoft Edge
-Exec=microsoft-edge --app=https://gemini.google.com --proxy-server="$PROXY_SERVER"
+Name=Microsoft Edge
+GenericName=Web Browser
+Comment=Access the Internet
+Exec=/home/inom/.local/bin/microsoft-edge %U
 Icon=microsoft-edge
 Terminal=false
-StartupWMClass=gemini.google.com
-Categories=Network;WebBrowser;AI;
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/microsoft-edge;x-scheme-handler/chromium;
+NoDisplay=false
+StartupNotify=true
+Actions=new-window;new-private-window;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=/usr/bin/microsoft-edge-stable
+
+[Desktop Action new-private-window]
+Name=New InPrivate Window
+Exec=/usr/bin/microsoft-edge-stable --inprivate
 EOF
 
-# 3. Make the file executable
-chmod +x "$TARGET_DIR/$FILE_NAME"
+update-desktop-database "$HOME/.local/share/applications/"

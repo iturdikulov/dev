@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+VENTOY_REPO="ventoy/Ventoy"
+
+ensure_directory "$HOME/.local/bin"
+
+resolve_ventoy_release() {
+    local release_json url version
+
+    if command_exists curl; then
+        release_json="$(curl -fsSL "https://api.github.com/repos/$VENTOY_REPO/releases/latest")"
+    elif command_exists wget; then
+        release_json="$(wget -qO- "https://api.github.com/repos/$VENTOY_REPO/releases/latest")"
+    else
+        log_error "curl or wget required to resolve latest Ventoy release"
+        return 1
+    fi
+
+    url="$(printf '%s\n' "$release_json" |
+        sed 's/[()",{} ]/\n/g' |
+        grep -oi 'https.*' |
+        grep -vi 'i386\|i686\|aarch64\|arm64\|armv7l' |
+        grep -i 'linux\.tar\.gz' |
+        head -n 1)"
+
+    version="$(printf '%s\n' "$url" | sed -n 's#.*/download/v\([^/]*\)/.*#\1#p')"
+
+    if [[ -z "$url" || -z "$version" ]]; then
+        log_error "Unable to resolve latest Ventoy linux tarball"
+        return 1
+    fi
+
+    printf '%s %s\n' "$version" "$url"
+}
+
+read -r VENTOY_VERSION VENTOY_URL < <(resolve_ventoy_release)
+
+VENTOY_NAME="ventoy"
+VENTOY_ARCHIVE_FORMAT="tar.gz"
+VENTOY_INSTALL_DIR="$HOME/.local/ventoy-$VENTOY_VERSION"
+VENTOY_BIN="$HOME/.local/bin/ventoy"
+VENTOY_ICON="$HOME/.local/bin/icons/ventoy.png"
+VENTOY_ARCHIVE="/tmp/ventoy-$VENTOY_VERSION.$VENTOY_ARCHIVE_FORMAT"
+
+DESKTOP_CONTENT="[Desktop Entry]
+Version=$VENTOY_VERSION
+Name=Ventoy
+Comment=Open source tool to create bootable USB drives for ISO/WIM/IMG/VHD(x)/EFI files
+GenericName=Bootable USB Tool
+Exec=$VENTOY_BIN
+Icon=$VENTOY_ICON
+Terminal=false
+Type=Application
+Categories=System;Utility
+StartupNotify=true"
+
+if [[ -x "$VENTOY_INSTALL_DIR/VentoyGUI.x86_64" ]] &&
+    ! grep -aq '^#!/usr/bin/env bash' "$VENTOY_INSTALL_DIR/VentoyGUI.x86_64"; then
+    log_info "Ventoy $VENTOY_VERSION is already installed"
+else
+    log_info "Installing Ventoy $VENTOY_VERSION..."
+    rm -rf "$VENTOY_INSTALL_DIR"
+    download_file "$VENTOY_URL" "$VENTOY_ARCHIVE" || exit 1
+    tar -xzf "$VENTOY_ARCHIVE" -C "$HOME/.local"
+    rm -f "$VENTOY_ARCHIVE"
+    chmod a+x "$VENTOY_INSTALL_DIR/VentoyGUI.x86_64"
+fi
+
+if [[ -L "$VENTOY_BIN" ]]; then
+    rm -f "$VENTOY_BIN"
+fi
+cat > "$VENTOY_BIN" << EOF
+#!/usr/bin/env bash
+cd "$VENTOY_INSTALL_DIR" || exit 1
+exec ./VentoyGUI.x86_64 "\$@"
+EOF
+chmod a+x "$VENTOY_BIN"
+
+ensure_directory "$HOME/.local/bin/icons"
+if [[ ! -f "$VENTOY_ICON" ]]; then
+    download_file "https://www.ventoy.net/static/img/ventoy.png" "$VENTOY_ICON" || true
+fi
+
+create_desktop_entry "$VENTOY_NAME" "$DESKTOP_CONTENT"
+find_old_versions "$HOME/.local/" "ventoy-*" "ventoy-$VENTOY_VERSION" "trash"
+
+log_info "Ventoy setup completed successfully!"

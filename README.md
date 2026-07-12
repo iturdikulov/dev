@@ -1,10 +1,12 @@
+# Home of X device
+
+Configuration and bootstrap specific device.
+
 ## Debian 13 installation
 
-1. Use the Netinst ISO - https://www.debian.org/CD/netinst/
+1. Download & Verify Netinst ISO - https://www.debian.org/CD/netinst/, use `debian-iso.sh` script.
 
-2. Verify checksums.
-
-3. Set root password during install, otherwise `sudo` will not work.
+2. Set root password during install, otherwise `sudo` will not work.
 
 Partitioning:
 
@@ -14,9 +16,14 @@ Partitioning:
 - swap name swap
 - Scroll down to "Finish Partitioning" and "Write Changes"
 
-When you get to "software selection", deselect everything
-but System Utilities, reboot, log into the shell with your username (`inom`) and
-password and execute:
+Personal settings:
+
+- username `inom`
+- hostname based on russian rivers list
+
+When you get to "software selection", deselect everything but System Utilities,
+reboot, log into the shell with your username (`inom`) and password and
+execute:
 
 ```
 su -
@@ -68,7 +75,7 @@ yadm clone https://github.com/iturdikulov/dev
 
 ## Post install
 
-- System Prefrences: layout `kcmshell6 kcm_keyboard`, keybindings Ctrl Position
+- System Prefrences: layout `gnome-control-center keyboard`, keybindings Ctrl Position
 - System Preferences: dark theme, default applications, resolution, scale-factor, refresh rate
 - General behaviour: no animation?
 - Sync Account in browser

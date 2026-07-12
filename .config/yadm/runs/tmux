@@ -2,6 +2,52 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-set -e
+TPM_URL="https://github.com/tmux-plugins/tpm"
+TPM_DIR="$HOME/.tmux/plugins/tpm"
+TMUX_CONF="$HOME/.tmux.conf"
+TPM_MARKER="# yadm-runs: tmux-plugins/tpm"
 
-sudo apt install -y tmux tmuxinator
+install_packages tmux tmuxinator git
+
+if git -C "$TPM_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+    log_info "TPM already present; pulling updates"
+    git -C "$TPM_DIR" pull --ff-only || log_warn "TPM git pull failed (fix repo manually)"
+elif [[ ! -e "$TPM_DIR" ]]; then
+    ensure_directory "$(dirname "$TPM_DIR")"
+    git clone "$TPM_URL" "$TPM_DIR"
+elif [[ -d "$TPM_DIR" ]] && [[ -z "$(find "$TPM_DIR" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]]; then
+    git clone "$TPM_URL" "$TPM_DIR"
+else
+    log_error "$TPM_DIR exists, is non-empty, and is not a git repository — remove or rename it, then re-run"
+    exit 1
+fi
+
+if [[ -f "$TMUX_CONF" ]] && grep -qF "$TPM_MARKER" "$TMUX_CONF"; then
+    log_info "TPM already configured in $TMUX_CONF"
+else
+    tpm_block="$(cat <<EOF
+
+$TPM_MARKER
+set -g @plugin 'tmux-plugins/tpm'
+
+# Initialize TMUX plugin manager (keep at the bottom of tmux.conf)
+run '~/.tmux/plugins/tpm/tpm'
+EOF
+)"
+
+    if [[ ! -f "$TMUX_CONF" ]]; then
+        log_info "Creating $TMUX_CONF with TPM integration"
+        cat >"$TMUX_CONF" <<EOF
+# Managed by ~/.config/yadm/runs/tmux — edit freely; TPM block is appended on re-run if missing.
+$tpm_block
+EOF
+    else
+        log_info "Appending TPM integration to $TMUX_CONF"
+        printf '%s\n' "$tpm_block" >>"$TMUX_CONF"
+    fi
+fi
+
+if command_exists tmux && tmux list-sessions &>/dev/null; then
+    log_info "Reloading tmux config (active sessions)"
+    tmux source-file "$TMUX_CONF" || log_warn "tmux source-file failed — run: tmux source $TMUX_CONF"
+fi

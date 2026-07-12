@@ -3,4 +3,4 @@
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 remove_packages kmail akregator kaddressbook
-install_packages thunderbird filezilla qbittorrent
+install_packages thunderbird filezilla qbittorrent grsync

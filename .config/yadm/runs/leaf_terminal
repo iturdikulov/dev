@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+# Custom terminal-backed desktop file for Leaf.
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/leaf_terminal.desktop" << EOF
+[Desktop Entry]
+Version=1.0
+Name=Leaf
+GenericName=Markdown preview
+Comment=Preview Markdown in a terminal with leaf
+TryExec=$HOME/.local/bin/leaf
+Exec=$HOME/.local/bin/leaf %f
+Terminal=true
+Type=Application
+Icon=text-x-generic
+MimeType=text/markdown;text/x-markdown;
+Categories=Office;Viewer;
+StartupNotify=true
+EOF
+
+update-desktop-database "$HOME/.local/share/applications/"
+log_info "Markdown handler desktop: ~/.local/share/applications/leaf_terminal.desktop"
+log_info "Set default with: xdg-mime default leaf_terminal.desktop text/markdown"

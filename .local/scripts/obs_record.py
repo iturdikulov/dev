@@ -1,0 +1,1 @@
+/home/inom/Desktop/software/obs_auto/obs_record.py

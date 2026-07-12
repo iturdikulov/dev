@@ -17,7 +17,7 @@ else
     download_file "$LOSSLESS_CUT_URL" "$LOSSLESS_CUT_PATH" && chmod +x "$LOSSLESS_CUT_PATH"
 fi
 
-APP="no.mifi.losslesscut.desktop"
+APP="no.mifi.losslesscut"
 create_desktop_entry "$APP" "[Desktop Entry]
 Name=LosslessCut
 Comment=simple video editor to trim or cut videos

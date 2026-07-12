@@ -53,14 +53,6 @@ if [[ ! ${MYVIMRC} ]]; then
     fi
 fi
 
-if [[ -n "$TMUX" ]] && infocmp tmux-256color >/dev/null 2>&1; then
-    export TERM="tmux-256color"
-elif infocmp xterm-ghostty >/dev/null 2>&1; then
-    export TERM="xterm-ghostty"
-else
-    export TERM="xterm-256color"
-fi
-
 export STARDICT_DATA_DIR="$HOME/Library/dictionary"
 export EDITOR=nvim
 export SUDO_EDITOR=nvim
@@ -233,6 +225,18 @@ if (( $+commands[docker] )); then
     alias dc='docker compose'
     alias azc='cd ~/Desktop/atd/az-containers/ && docker compose exec -e TERM=xterm-256color -e COLORTERM=truecolor -w /workspace devcontainer zsh -c "overmind connect rtms-flask"'
 fi
+
+# devcontainer
+if [[ -n "$REMOTE_CONTAINERS" || -n "$CODESPACES" ]]; then
+    alias codex="codex --dangerously-bypass-approvals-and-sandbox"
+    alias agent="agent --yolo"
+    alias agent-ltms="cd /workspace/ && agent --yolo 'Активируй скилл .cursor/skills/ltms/SKILL.md и дождись моих указаний'"
+fi
+
+# Host wrapper for docker
+h() {
+    ssh inom@host.docker.internal "$*"
+}
 
 if (( $+commands[apt] )); then
     alias apts='apt-cache search'
@@ -423,3 +427,4 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+

@@ -44,4 +44,4 @@ PrefersNonDefaultGPU=true
 Type=Application
 MimeType=application/x-godot-project;
 Categories=Development;IDE;
-StartupWMClass=Godot" > $HOME/.local/share/applications/"$APP".desktop
+StartupWMClass=Godot" > $HOME/.local/share/applications/godot.desktop

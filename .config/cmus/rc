@@ -1,6 +1,10 @@
 colorscheme spotify
+fset hide_media=filename!="/home/inom/Music/single/*"&filename!="/home/inom/Music/videos/*"
+factivate hide_media
+set lib_add_filter=filename!="/home/inom/Music/single/*"&filename!="/home/inom/Music/videos/*"
 update-cache
 add ~/Music
+set start_view=playlist
 
 set format_current=%3n  %a  %-10%l/%t%= %d
 set format_playlist=%3n  %a  %-10%l/%t%= %d

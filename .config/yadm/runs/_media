@@ -3,7 +3,7 @@
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 install_packages ffmpeg cmus ani-cli
-install_packages imagemagick qrencode
+install_packages imagemagick qrencode lsix
 
 for tool in piper-tts  \
             obs-cli; do

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+RUSTDESK_VERSION="1.4.6"
+RUSTDESK_PKG="rustdesk"
+PKGURL="https://github.com/rustdesk/rustdesk/releases/download/${RUSTDESK_VERSION}/rustdesk-${RUSTDESK_VERSION}-x86_64.deb"
+TMP_DEB="/tmp/rustdesk-${RUSTDESK_VERSION}.deb"
+
+if [[ "$(dpkg --print-architecture)" != "amd64" ]]; then
+    log_warn "RustDesk .deb is x86_64-only; skipping on $(dpkg --print-architecture)"
+    exit 0
+fi
+
+if package_installed "$RUSTDESK_PKG"; then
+    installed_ver=$(dpkg-query -W -f='${Version}' "$RUSTDESK_PKG" 2>/dev/null || true)
+    if [[ "$installed_ver" == "$RUSTDESK_VERSION" ]]; then
+        log_info "RustDesk ${RUSTDESK_VERSION} is already installed; skipping download"
+        exit 0
+    fi
+    log_info "RustDesk ${installed_ver:-unknown} installed; upgrading to ${RUSTDESK_VERSION}"
+fi
+
+download_file "$PKGURL" "$TMP_DEB"
+sudo apt install -y -f "$TMP_DEB"
+rm -f "$TMP_DEB"

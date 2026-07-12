@@ -2,7 +2,10 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
+remove_packages xterm zutty
+
 cargo binstall atuin
 go install github.com/antonmedv/countdown@latest
 go install github.com/charmbracelet/vhs@latest  # terminal recorder
 go install github.com/joshmedeski/sesh/v2@latest
+

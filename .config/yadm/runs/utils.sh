@@ -36,6 +36,28 @@ check_home_set() {
 # Check if a command exists
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
+# Resolve GitHub "latest" release tag from the redirect (e.g. RivoLink/leaf).
+github_latest_release_tag() {
+    local repo="$1"
+    local tag=""
+    local url="https://github.com/${repo}/releases/latest"
+
+    if command_exists curl; then
+        tag=$(curl -fsSIL "$url" | sed -n 's/^[Ll]ocation: .*\/releases\/tag\/\([^[:space:]\r]*\).*/\1/p' | tail -n 1)
+    elif command_exists wget; then
+        tag=$(wget -S --max-redirect=0 -O /dev/null "$url" 2>&1 | sed -n 's/^  Location: .*\/releases\/tag\/\([^[:space:]\r]*\).*/\1/p' | tail -n 1)
+    else
+        log_error "curl or wget required to resolve latest GitHub release"
+        return 1
+    fi
+
+    if [[ -z "$tag" ]]; then
+        log_error "Unable to resolve latest release tag for $repo"
+        return 1
+    fi
+    printf '%s\n' "$tag"
+}
+
 # An rsync wrapper for gitignore-oriented syncs.
 rcp() {
     #   -a = -rlptgoD
@@ -223,15 +245,17 @@ trash_path() {
     fi
 }
 
-# Create desktop entry if it doesn't exist
+# Create or update a desktop entry. Accepts names with or without ".desktop".
 create_desktop_entry() {
     local filename="$1"
     local content="$2"
     local desktop_dir="$HOME/.local/share/applications"
+    local desktop_name="${filename%.desktop}"
+
     ensure_directory "$desktop_dir"
 
-    log_info "Creating desktop entry: $desktop_dir/$filename"
-    echo "$content" > "$desktop_dir/$filename.desktop"
+    log_info "Creating desktop entry: $desktop_dir/$desktop_name.desktop"
+    echo "$content" > "$desktop_dir/$desktop_name.desktop"
     update-desktop-database $desktop_dir
 }
 
