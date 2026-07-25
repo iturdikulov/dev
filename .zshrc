@@ -223,14 +223,14 @@ if (( $+commands[docker] )); then
     alias m4b='docker run -it --rm -u $(id -u):$(id -g) -v "$(pwd)":/mnt sandreas/m4b-tool:latest merge -v --jobs=3 --output-file="output/" --batch-pattern="input/%g/%a/%n/" "input/"'
     alias d=docker
     alias dc='docker compose'
-    alias azc='cd ~/Desktop/atd/az-containers/ && docker compose exec -e TERM=xterm-256color -e COLORTERM=truecolor -w /workspace devcontainer zsh -c "overmind connect rtms-flask"'
+    alias azc='cd ~/Desktop/atd/az-containers/ && docker compose exec -e TERM=xterm-256color -e COLORTERM=truecolor -w /workspace devcontainer zsh -c "overmind connect ltms-flask"'
 fi
 
 # devcontainer
 if [[ -n "$REMOTE_CONTAINERS" || -n "$CODESPACES" ]]; then
     alias codex="codex --dangerously-bypass-approvals-and-sandbox"
     alias agent="agent --yolo"
-    alias agent-ltms="cd /workspace/ && agent --yolo 'Активируй скилл .cursor/skills/ltms/SKILL.md и дождись моих указаний'"
+    alias agent-ltms="cd /workspace/ && agent --yolo 'Активируй скилл ltms и дождись моих указаний'"
 fi
 
 # Host wrapper for docker
@@ -428,3 +428,11 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# yandex cli
+if [ -f "$HOME/yandex-cloud/path.bash.inc" ]; then
+    source "$HOME/yandex-cloud/path.bash.inc"
+fi
+
+if [ -f "$HOME/yandex-cloud/completion.zsh.inc" ]; then
+    source "$HOME/yandex-cloud/completion.zsh.inc"
+fi
