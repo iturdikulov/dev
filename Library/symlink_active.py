@@ -46,7 +46,7 @@ def build_expected_map(tag_to_find):
             if not formats:
                 continue
             found_in_lib = True
-            fmt = "PDF" if "PDF" in formats else formats[0]
+            fmt = "PDF" if "PDF" in formats else "M4B" if "M4B" in formats else formats[0]
             filepath = calibre_db.format_abspath(book_id, fmt)
             original_filename = os.path.basename(filepath)
             sanitized_filename = sanitize_filename(original_filename)
