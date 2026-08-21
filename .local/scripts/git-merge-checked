@@ -1,0 +1,85 @@
+#!/usr/bin/env zsh
+# Проверяет конфликтующие миграции до запуска git merge.
+
+main() {
+    local merge_source=""
+    local argument
+    for argument in "$@"; do
+        [[ "$argument" == "--" ]] && break
+        [[ "$argument" == -* ]] && continue
+
+        if [[ -n "$merge_source" ]]; then
+            command git merge "$@"
+            return
+        fi
+        merge_source="$argument"
+    done
+
+    if [[ -z "$merge_source" ]] || ! command git rev-parse --verify -q "${merge_source}^{commit}" >/dev/null; then
+        command git merge "$@"
+        return
+    fi
+
+    local head source_commit merge_base next_version answer duplicate_output
+    local -a duplicate_files renamed_files
+    head=$(command git rev-parse --verify HEAD) || return
+    source_commit=$(command git rev-parse --verify "${merge_source}^{commit}") || return
+    merge_base=$(command git merge-base "$head" "$source_commit") || {
+        print -u2 "Не найден общий предок для HEAD и $merge_source."
+        return 1
+    }
+    duplicate_output=$(LC_ALL=C comm -12 \
+        <(
+            {
+                command git diff --name-only "$merge_base" -- migrations
+                command git ls-files --others --exclude-standard -- migrations
+            } | sed -nE '/^migrations\/v[0-9]+\.py$/p' | LC_ALL=C sort -u
+        ) \
+        <(
+            command git ls-tree -r --name-only "$source_commit" -- migrations \
+                | sed -nE '/^migrations\/v[0-9]+\.py$/p' \
+                | LC_ALL=C sort -u
+        ))
+
+    if [[ -z "$duplicate_output" ]]; then
+        command git merge "$@"
+        return
+    fi
+    duplicate_files=("${(@f)duplicate_output}")
+
+    next_version=$(
+        {
+            command git ls-tree -r --name-only "$head" -- migrations
+            command git ls-tree -r --name-only "$source_commit" -- migrations
+        } | sed -nE 's|^migrations/v([0-9]+)\.py$|\1|p' | sort -n | tail -n 1 | awk '{ print $1 + 1 }'
+    )
+    print -u2 "Merge отменён: обе ветки изменяют миграции:"
+    print -u2 -- "${(F)duplicate_files}"
+    print -u2 "Будут выполнены:"
+    local file new_file
+    for file in "${duplicate_files[@]}"; do
+        new_file="migrations/v${next_version}.py"
+        renamed_files+=("$new_file")
+        print -u2 "  git mv $file $new_file"
+        ((next_version++))
+    done
+    print -u2 "  git add -- ${(j: :)renamed_files}"
+
+    if [[ ! -t 0 ]]; then
+        print -u2 "Переименование не выполнено: требуется интерактивный терминал."
+        return 1
+    fi
+    read -r "answer?Выполнить переименование и git add? [Y/n] "
+    print
+    if [[ -z "$answer" || "$answer" == [Yy] ]]; then
+        local index
+        for ((index = 1; index <= ${#duplicate_files[@]}; index++)); do
+            command git mv -- "${duplicate_files[$index]}" "${renamed_files[$index]}" || return
+        done
+        command git add -- "${renamed_files[@]}" || return
+        print "Миграции переименованы и добавлены в индекс. Повторите: git merge $*"
+    fi
+    return 1
+}
+
+main "$@"

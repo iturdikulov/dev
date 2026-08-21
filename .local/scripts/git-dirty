@@ -1,0 +1,53 @@
+#!/usr/bin/env zsh
+# Показывает изменения текущего Git-репозитория и его инициализированных субмодулей.
+
+setopt local_options no_unset pipe_fail
+
+check_repo() {
+    local repo_path=$1 display_path=$2
+    local line branch
+    local -a reasons
+
+    while IFS= read -r line; do
+        if [[ "${line[1,2]}" == '??' ]]; then
+            reasons+=(untracked)
+        else
+            [[ "${line[1]}" != ' ' ]] && reasons+=(staged)
+            [[ "${line[2]}" != ' ' ]] && reasons+=(unstaged)
+        fi
+    done < <(command git -C "$repo_path" status --porcelain=v1 --untracked-files=normal) || return 0
+
+    if command git -C "$repo_path" show-ref --verify --quiet refs/remotes/origin/HEAD \
+        || command git -C "$repo_path" for-each-ref --format='%(refname)' refs/remotes/origin/ | command grep -q .; then
+        if (( $(command git -C "$repo_path" rev-list --count HEAD --not --remotes=origin) > 0 )); then
+            reasons+=(unpublished)
+        fi
+    fi
+
+    if (( ${#reasons[@]} > 0 )); then
+        branch=$(command git -C "$repo_path" symbolic-ref --quiet --short HEAD 2>/dev/null) \
+            || branch="detached:$(command git -C "$repo_path" rev-parse --short HEAD)"
+        print -r -- "$display_path $branch dirty [${(j:,:)${(@u)reasons}}]"
+    fi
+}
+
+main() {
+    local root superproject repo_path display_path
+    root=$(command git rev-parse --show-toplevel 2>/dev/null) || {
+        print -u2 'Текущая директория не находится в Git-репозитории.'
+        return 2
+    }
+    superproject=$(command git -C "$root" rev-parse --show-superproject-working-tree 2>/dev/null)
+    [[ -n "$superproject" ]] && root=$superproject
+
+    check_repo "$root" .
+
+    while IFS=$'\t' read -r repo_path display_path; do
+        [[ -n "$repo_path" ]] && check_repo "$root/$display_path" "$display_path"
+    done < <(
+        command git -C "$root" submodule foreach --quiet --recursive \
+            'printf "%s\\t%s\\n" "$toplevel" "$displaypath"' 2>/dev/null
+    )
+}
+
+main "$@"

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+POWERSHELL_VERSION="7.4.18"
+POWERSHELL_PACKAGE="powershell"
+
+if [[ ! -f /etc/os-release ]]; then
+    log_error "Cannot detect OS release"
+    exit 1
+fi
+
+# shellcheck disable=SC1091
+source /etc/os-release
+
+if [[ "$ID" != "debian" ]]; then
+    log_error "PowerShell installation is only configured for Debian"
+    exit 1
+fi
+
+case "$(dpkg --print-architecture)" in
+    amd64) package_arch="amd64" ;;
+    arm64) package_arch="arm64" ;;
+    *)
+        log_error "Unsupported architecture: $(dpkg --print-architecture)"
+        exit 1
+        ;;
+esac
+
+installed_version=""
+if command_exists pwsh; then
+    installed_version="$(pwsh -NoLogo -NoProfile -Command '$PSVersionTable.PSVersion.ToString()')"
+fi
+
+if [[ "$installed_version" != "$POWERSHELL_VERSION" ]]; then
+    package_file="/tmp/powershell_${POWERSHELL_VERSION}-1.deb_${package_arch}.deb"
+    package_url="https://github.com/PowerShell/PowerShell/releases/download/v${POWERSHELL_VERSION}/$(basename "$package_file")"
+
+    download_file "$package_url" "$package_file"
+    if apt-mark showhold | grep -qx "$POWERSHELL_PACKAGE"; then
+        sudo apt-mark unhold "$POWERSHELL_PACKAGE"
+    fi
+    sudo apt-get install -y --allow-downgrades "$package_file"
+else
+    log_info "PowerShell $installed_version is already installed; skipping installation."
+fi
+
+# Keep the 7.4 runtime selected instead of upgrading it to the newer major LTS.
+if ! apt-mark showhold | grep -qx "$POWERSHELL_PACKAGE"; then
+    sudo apt-mark hold "$POWERSHELL_PACKAGE"
+fi
+
+pwsh --version
+pwsh -NoLogo -NoProfile -Command '$PSVersionTable.PSEdition'
+pwsh -NoLogo -NoProfile -Command '$PSVersionTable.PSVersion'

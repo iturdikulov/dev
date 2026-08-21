@@ -9,6 +9,7 @@ window-padding-y = 0
 cursor-style = block
 cursor-style-blink = false
 shell-integration-features = no-cursor
+initial-command = zsh -ic mux
 theme = kanso-zen
 gtk-custom-css = tab-style.css
 gtk-titlebar = false

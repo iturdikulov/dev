@@ -73,6 +73,7 @@ addToPathFront $HOME/.local/npm/bin
 addToPathFront $HOME/.local/cling/bin
 addToPathFront $HOME/.local/scrcpy
 
+addToPath /opt/idea-IU-262.8665.337/bin/
 addToPath /usr/local/games
 addToPath /usr/games
 
@@ -127,6 +128,13 @@ alias vue_init="pnpm create vue@latest"
 alias py='python3'
 alias python='python3'
 alias ipy='ipython'
+
+git-submodule-hide() {
+  local path="${1%/}/"
+  echo "$path" >> .git/info/exclude
+  git rm --cached -r "${1%/}" 2>/dev/null
+  echo "Скрыто: $path"
+}
 
 # Package managers aliases
 alias uva="uv add"
@@ -436,3 +444,19 @@ fi
 if [ -f "$HOME/yandex-cloud/completion.zsh.inc" ]; then
     source "$HOME/yandex-cloud/completion.zsh.inc"
 fi
+
+# >>> Codex installer >>>
+export PATH="/home/inom/.local/bin:$PATH"
+# <<< Codex installer <<<
+setopt INTERACTIVE_COMMENTS
+
+git() {
+    # Git не предоставляет pre-merge hook, поэтому проверяем миграции до запуска merge.
+    if [[ "$1" == "merge" ]]; then
+        shift
+        "$HOME/.local/scripts/git-merge-checked" "$@"
+        return
+    fi
+
+    command git "$@"
+}
