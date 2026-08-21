@@ -12,7 +12,7 @@ else
 fi
 
 # Tools
-cargo binstall prek git-delta
+cargo binstall prek difftastic
 
 # Rare used languages & toolchains
 install_packages nasm

@@ -23,10 +23,8 @@ sudo tee /etc/systemd/system/borgbackup.timer > /dev/null << EOF
 Description=Borg Backup Timer
 
 [Timer]
-OnCalendar=*-*-* 3:00:00
-Unit=borgbackup.service
-OnCalendar=daily
-Persistent=True
+OnCalendar=*-*-* 03:00:00
+Persistent=true
 
 [Install]
 WantedBy=timers.target

@@ -25,7 +25,7 @@ Categories=Network;WebBrowser;
 MimeType=application/pdf;application/rdf+xml;application/rss+xml;application/xhtml+xml;application/xhtml_xml;application/xml;image/gif;image/jpeg;image/png;image/webp;text/html;text/xml;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/microsoft-edge;x-scheme-handler/chromium;
 NoDisplay=false
 StartupNotify=true
-Actions=new-window;new-private-window;
+Actions=new-window;new-private-window;ltms-debug;
 
 [Desktop Action new-window]
 Name=New Window
@@ -34,6 +34,10 @@ Exec=/usr/bin/microsoft-edge-stable
 [Desktop Action new-private-window]
 Name=New InPrivate Window
 Exec=/usr/bin/microsoft-edge-stable --inprivate
+
+[Desktop Action ltms-debug]
+Name=LTMS Debug
+Exec=/usr/bin/microsoft-edge-stable --remote-debugging-port=9222 --user-data-dir=/home/inom/.config/microsoft-edge-ltms-debug --no-first-run --no-default-browser-check --new-window http://localhost:6573
 EOF
 
 update-desktop-database "$HOME/.local/share/applications/"

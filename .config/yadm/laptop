@@ -7,9 +7,6 @@ cd "$script_dir"
 # shellcheck source=runs/utils.sh
 source "$script_dir/runs/utils.sh"
 
-# For Steam + nvidia
-sudo apt install -y libgl1-nvidia-glvnd-glx:i386
-
 # AMD
 sudo apt install -y firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon
 
