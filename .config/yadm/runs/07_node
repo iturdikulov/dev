@@ -2,8 +2,40 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-# Base dependencies
-install_packages nodejs npm
+NODE_MAJOR=24
+NVM_VERSION=v0.40.7
+NVM_INSTALLER_SHA256=066ce4eaf4d78eaa6410433bc9ba58faaba646157cbbed6109153e6c24c5f8a5
 
-log_info "Setting npm prefix to ~/.local/npm"
-npm config set prefix ~/.local/npm
+check_not_root
+check_home_set
+
+NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+
+install_packages curl
+
+if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+    log_info "Installing nvm ${NVM_VERSION}"
+    installer=$(mktemp)
+    trap 'rm -f -- "$installer"' EXIT
+    curl -fsSL -o "$installer" "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh"
+    printf '%s  %s\n' "$NVM_INSTALLER_SHA256" "$installer" | sha256sum --check --status
+    bash "$installer"
+    rm -f -- "$installer"
+    trap - EXIT
+fi
+
+# The installer updates the shell profile, but load nvm here so this runner can
+# install and select Node.js without requiring a new shell.
+source "$NVM_DIR/nvm.sh"
+
+log_info "Installing Node.js ${NODE_MAJOR} through nvm"
+nvm install "$NODE_MAJOR"
+nvm alias default "$NODE_MAJOR"
+nvm use default
+
+if [[ "$(node -v)" != "v${NODE_MAJOR}."* ]]; then
+    log_error "Expected Node.js ${NODE_MAJOR}.x, got: $(node -v 2>/dev/null || echo missing)"
+    exit 1
+fi
+
+log_info "Node.js installed: $(node -v) (npm $(npm -v)); default: $(nvm version default)"
