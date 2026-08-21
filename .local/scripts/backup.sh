@@ -49,10 +49,24 @@ borg create \
     --exclude "home/*/Media/games/gamedev/unreal_engine_5" \
     --exclude "home/*/.thunderbird/*/calendar-data/cache.sqlite*" \
     --exclude "/home/*/.config/Slack/Service Worker" \
+    --exclude "home/*/.config/microsoft-edge/*/BrowserMetrics" \
+    --exclude "home/*/.config/microsoft-edge/*/History" \
+    --exclude "home/*/.config/microsoft-edge/*/History-journal" \
+    --exclude "home/*/.config/microsoft-edge/**/Service Worker" \
+    --exclude "home/*/.config/microsoft-edge/**/Code Cache" \
+    --exclude "home/*/.mozilla/firefox/*/places.sqlite*" \
+    --exclude "home/*/.mozilla/firefox/*/storage/default/*/cache" \
+    --exclude "home/*/.mozilla/firefox/*/datareporting" \
+    --exclude "home/*/.mozilla/firefox/*/crashes" \
+    --exclude "home/*/.mozilla/firefox/*/sessionstore-backups" \
+    --exclude "home/*/.mozilla/firefox/Crash Reports" \
+    --exclude "home/*/.config/resilio-sync/storage/sync.log*" \
+    --exclude "home/*/tmp" \
     --exclude "/home/*/Desktop/atd/az-containers/runtime" \
     --exclude "/home/*/.codex/.tmp" \
     --exclude "var/lib/docker" \
     --exclude "var/lib/libvirt/images" \
+    --exclude "var/lib/postgresql" \
     --exclude "var/tmp/*" \
     --exclude "var/backups/*" \
     --exclude "var/log/*" \
