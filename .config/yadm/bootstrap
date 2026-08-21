@@ -56,5 +56,5 @@ done
 # Sync submodules
 yadm submodule update --recursive --init
 
-# Gnome speicific settings (TODO: verify gsettings exist)
+# Gnome specific settings (TODO: verify gsettings exist)
 gsettings set org.gnome.mutter check-alive-timeout 60000

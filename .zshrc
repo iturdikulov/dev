@@ -68,6 +68,9 @@ addToPathFront $HOME/.local/scripts
 addToPathFront $HOME/.config/nnn/plugins
 addToPathFront $HOME/.local/.npm-global/bin
 addToPathFront $HOME/.local/bin
+if [[ -d "$HOME/Desktop/atd/az-containers" ]]; then
+    addToPathFront "$HOME/Desktop/atd/az-containers"
+fi
 addToPathFront $HOME/.local/go/bin
 addToPathFront $HOME/.local/npm/bin
 addToPathFront $HOME/.local/cling/bin
