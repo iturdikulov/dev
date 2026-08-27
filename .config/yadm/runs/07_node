@@ -26,7 +26,7 @@ fi
 
 # The installer updates the shell profile, but load nvm here so this runner can
 # install and select Node.js without requiring a new shell.
-source "$NVM_DIR/nvm.sh"
+load_nvm
 
 log_info "Installing Node.js ${NODE_MAJOR} through nvm"
 nvm install "$NODE_MAJOR"

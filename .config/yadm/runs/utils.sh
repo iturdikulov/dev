@@ -359,6 +359,24 @@ install_archive() {
     return 0
 }
 
+# Load nvm and activate the default Node.js version in the current shell.
+# nvm only hooks new login shells via profile; runners must call this after install.
+load_nvm() {
+    NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+    if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+        return 1
+    fi
+
+    # shellcheck disable=SC1090
+    source "$NVM_DIR/nvm.sh"
+
+    if ! nvm use default >/dev/null 2>&1; then
+        nvm use --delete-prefix default >/dev/null 2>&1 \
+            || nvm use --delete-prefix >/dev/null 2>&1 \
+            || true
+    fi
+}
+
 # Toolchain packange managers
 # Skip this block when a toolchain installer imports utils.sh; otherwise a
 # missing command can make utils.sh call the same installer recursively.
@@ -374,7 +392,7 @@ if [[ ! " 04_go 05_python 06_rust 07_node " =~ " $CALLER_SCRIPT " ]]; then
         "go:04_go:/usr/local/go/bin $HOME/go/bin"
         "uv:05_python:$HOME/.local/bin"
         "cargo:06_rust:$HOME/.cargo/bin"
-        "npm:07_node:/usr/bin /usr/local/bin"
+        "npm:07_node:"
     )
 
     # 3. Process each toolchain in a single loop
@@ -383,6 +401,10 @@ if [[ ! " 04_go 05_python 06_rust 07_node " =~ " $CALLER_SCRIPT " ]]; then
         IFS=":" read -r cmd installer paths <<< "$entry"
 
         log_info "Ensuring toolchain: $cmd"
+
+        if [[ "$cmd" == "npm" ]]; then
+            load_nvm || true
+        fi
 
         # Add known bin dirs before probing PATH (install may already exist off-PATH).
         for bin_path in $paths; do
@@ -394,11 +416,15 @@ if [[ ! " 04_go 05_python 06_rust 07_node " =~ " $CALLER_SCRIPT " ]]; then
         # Install if missing
         if ! command -v "$cmd" &>/dev/null; then
             "$DIR/$installer"
-            for bin_path in $paths; do
-                if [[ -d "$bin_path" ]] && [[ ":$PATH:" != *":$bin_path:"* ]]; then
-                    export PATH="$bin_path:$PATH"
-                fi
-            done
+            if [[ "$cmd" == "npm" ]]; then
+                load_nvm || true
+            else
+                for bin_path in $paths; do
+                    if [[ -d "$bin_path" ]] && [[ ":$PATH:" != *":$bin_path:"* ]]; then
+                        export PATH="$bin_path:$PATH"
+                    fi
+                done
+            fi
         fi
     done
 fi
