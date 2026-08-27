@@ -4,10 +4,14 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 sudo apt install -y build-essential
 
+v4l2loopback_dir=/tmp/v4l2loopback
+
 cd /tmp || exit 1
 git clone https://github.com/v4l2loopback/v4l2loopback.git
-cd v4l2loopback || exit 1
+cd "$v4l2loopback_dir" || exit 1
 make && sudo make install
+cd /tmp || exit 1
+rm -rf "$v4l2loopback_dir"
 sudo depmod -a && sudo modprobe v4l2loopback
 sudo apt-get install v4l-utils
 
