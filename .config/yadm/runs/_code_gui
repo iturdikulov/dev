@@ -13,7 +13,7 @@ if [ ! -f /etc/apt/sources.list.d/cursor.sources ]; then
 fi
 
 # Code & Cursor
-install_packages code cursor
+install_packages cursor
 # Sandbox tools for codex
 install_packages seccomp bubblewrap
 
