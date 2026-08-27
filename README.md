@@ -75,12 +75,14 @@ yadm clone https://github.com/iturdikulov/dev
 
 ## Post install
 
-- System Prefrences: layout `gnome-control-center keyboard`, keybindings Ctrl Position
+- System Preferences: layout `gnome-control-center keyboard`, keybindings Ctrl Position
 - System Preferences: dark theme, default applications, resolution, scale-factor, refresh rate
 - General behaviour: no animation?
-- Sync Account in browser
+- Sync basic secrets with `yadm decrypt` command
 - Export/Import gpg backup with script
-- Sync files with sync.sh scrpt
+- Sync files with sync script
+- Sync Account in browser
 - Execute runners
 - Verify ~/.config/mimeapps.list
 - Copy /etc configs, including specific ones (`update-grub`, `update-initramfs -u`, etc. if required)
+- `cd ~/.local/share/yadm/repo.git && git2ssh`
