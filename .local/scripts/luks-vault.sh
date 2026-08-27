@@ -1,5 +1,5 @@
 #!/bin/bash
-# Manage a LUKS file vault next to this script.
+# Manage a LUKS file vault in the current working directory (by default).
 #   luks-vault.sh          — interactive menu
 #   luks-vault.sh open     — open, mount, enter shell in vault
 #   luks-vault.sh create   — create vault.img, then enter shell
@@ -7,8 +7,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VAULT_IMG="${SCRIPT_DIR}/vault.img"
+VAULT_IMG="${PWD}/vault.img"
 MAPPER_NAME="vault"
 MAPPER_DEV="/dev/mapper/${MAPPER_NAME}"
 MOUNT_POINT="/tmp/vault-${USER}"
@@ -71,6 +70,11 @@ enter_vault() {
 }
 
 cmd_open() {
+    local dir
+    read -r -p "Directory [${PWD}]: " dir
+    dir="${dir:-$PWD}"
+    dir="$(realpath -m "$dir")"
+    VAULT_IMG="${dir}/vault.img"
     [[ -f "$VAULT_IMG" ]] || die "no vault at ${VAULT_IMG}; run: $0 create"
 
     if is_mounted; then
@@ -99,9 +103,14 @@ cmd_close() {
 }
 
 cmd_create() {
+    local dir size pass pass2
+    read -r -p "Directory [${PWD}]: " dir
+    dir="${dir:-$PWD}"
+    dir="$(realpath -m "$dir")"
+    [[ -d "$dir" ]] || die "not a directory: ${dir}"
+    VAULT_IMG="${dir}/vault.img"
     [[ ! -e "$VAULT_IMG" ]] || die "vault already exists: ${VAULT_IMG}"
 
-    local size pass pass2
     read -r -p "Size [200M]: " size
     size="${size:-200M}"
     [[ "$size" =~ ^[0-9]+[KMGTP]?$ ]] || die "invalid size: ${size}"
@@ -114,7 +123,10 @@ cmd_create() {
     [[ -n "$pass" ]] || die "password is empty"
 
     truncate -s "$size" "$VAULT_IMG"
-    printf '%s' "$pass" | sudo "$CRYPTSETUP" luksFormat --batch-mode --key-file=- "$VAULT_IMG"
+    printf '%s' "$pass" | sudo "$CRYPTSETUP" luksFormat --batch-mode --type luks2 \
+        --cipher aes-xts-plain64 --key-size 512 \
+        --integrity hmac-sha256 \
+        --key-file=- "$VAULT_IMG"
     printf '%s' "$pass" | sudo "$CRYPTSETUP" open --key-file=- "$VAULT_IMG" "$MAPPER_NAME"
     sudo mkfs.ext4 -q "$MAPPER_DEV"
     mount_vault
