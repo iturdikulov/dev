@@ -192,6 +192,7 @@ x-scheme-handler/https=com.microsoft.Edge.desktop;
 x-scheme-handler/obsidian=obsidian.desktop
 x-scheme-handler/wljs-url-message=wljs-notebook.desktop
 inode/directory=org.gnome.Nautilus.desktop
+x-scheme-handler/jetbrains=jetbrainsd.desktop
 
 [Removed Associations]
 application/vnd.openxmlformats-officedocument.presentationml.presentation=libreoffice-startcenter.desktop;

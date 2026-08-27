@@ -34,23 +34,21 @@ addToPathFront() {
     fi
 }
 
-# Init tools, if shell isn't executed from nvim
-if [[ ! ${MYVIMRC} ]]; then
-    if (( $+commands[fzf] )); then
-        source <(fzf --zsh)
-    fi
-    if (( $+commands[starship] )); then
-        eval "$(starship init zsh)"
-    fi
-    if (( $+commands[zoxide] )); then
-        eval "$(zoxide init zsh)"
-    fi
-    if (( $+commands[atuin] )); then
-        eval "$(atuin init zsh)"
-    fi
-    if (( $+commands[direnv] )); then
-        eval "$(direnv hook zsh)"
-    fi
+# Init tools (also inside Neovim :terminal / Snacks)
+if (( $+commands[fzf] )); then
+    source <(fzf --zsh)
+fi
+if (( $+commands[starship] )); then
+    eval "$(starship init zsh)"
+fi
+if (( $+commands[zoxide] )); then
+    eval "$(zoxide init zsh)"
+fi
+if (( $+commands[atuin] )); then
+    eval "$(atuin init zsh)"
+fi
+if (( $+commands[direnv] )); then
+    eval "$(direnv hook zsh)"
 fi
 
 export STARDICT_DATA_DIR="$HOME/Library/dictionary"
@@ -68,8 +66,8 @@ addToPathFront $HOME/.local/scripts
 addToPathFront $HOME/.config/nnn/plugins
 addToPathFront $HOME/.local/.npm-global/bin
 addToPathFront $HOME/.local/bin
-if [[ -d "$HOME/Desktop/atd/az-containers" ]]; then
-    addToPathFront "$HOME/Desktop/atd/az-containers"
+if [[ -d "$HOME/az" ]]; then
+    addToPathFront "$HOME/az"
 fi
 addToPathFront $HOME/.local/go/bin
 addToPathFront $HOME/.local/npm/bin
@@ -221,6 +219,7 @@ alias chmod="chmod --preserve-root"
 alias E="SUDO_EDITOR=nvim sudo -e"
 
 alias mux='tmux attach || tmux new'
+
 alias f='$(fzf) && nvim -- "$f"'
 alias grep='grep --color'
 
@@ -437,16 +436,8 @@ alias tun2proxy='sudo /home/inom/.cargo/bin/tun2proxy-bin --setup --proxy "socks
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-# yandex cli
-if [ -f "$HOME/yandex-cloud/path.bash.inc" ]; then
-    source "$HOME/yandex-cloud/path.bash.inc"
-fi
-
-if [ -f "$HOME/yandex-cloud/completion.zsh.inc" ]; then
-    source "$HOME/yandex-cloud/completion.zsh.inc"
-fi
+# Yandex Cloud CLI is installed by ~/.config/yadm/runs/yc.
+[ -f "$HOME/.local/completion.zsh.inc" ] && source "$HOME/.local/completion.zsh.inc"
 
 # >>> Codex installer >>>
 export PATH="/home/inom/.local/bin:$PATH"
@@ -464,6 +455,23 @@ git() {
     command git "$@"
 }
 
+# nvm: default node on PATH; load nvm.sh only on first `nvm` call
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+if [[ -s "$NVM_DIR/alias/default" ]]; then
+    _nvm_default=$(<"$NVM_DIR/alias/default")
+    _nvm_default=${_nvm_default%%$'\n'*}
+    _nvm_matches=("$NVM_DIR/versions/node"/v${_nvm_default#v}*(N))
+    if (( ${#_nvm_matches} == 0 )) && [[ -f "$NVM_DIR/alias/$_nvm_default" ]]; then
+        _nvm_default=$(<"$NVM_DIR/alias/$_nvm_default")
+        _nvm_default=${_nvm_default%%$'\n'*}
+        _nvm_matches=("$NVM_DIR/versions/node"/v${_nvm_default#v}*(N))
+    fi
+    (( ${#_nvm_matches} )) && addToPathFront "${_nvm_matches[-1]}/bin"
+    unset _nvm_default _nvm_matches
+fi
+nvm() {
+    unset -f nvm
+    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+    nvm "$@"
+}

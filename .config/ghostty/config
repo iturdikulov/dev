@@ -4,14 +4,62 @@
 # Additionally, each config option is also explained in detail
 # on Ghostty's website, at https://ghostty.org/docs/config.
 font-family = IosevkaTerm Nerd Font
-font-size = 18
-window-padding-y = 0
+font-size = 16.6
 cursor-style = block
 cursor-style-blink = false
 shell-integration-features = no-cursor
-initial-command = zsh -ic mux
+initial-command = zsh -ic 'sesh connect az'
 theme = kanso-zen
 gtk-custom-css = tab-style.css
 gtk-titlebar = false
 maximize = true
 clipboard-paste-protection = false
+
+# Физические Key* + esc:latin — Alt-бинды работают на любой раскладке
+# (tmux M-n/p/hjkl, nvim M-w/c/f и т.п.).
+keybind = alt+KeyA=esc:a
+keybind = alt+KeyC=esc:c
+keybind = alt+KeyF=esc:f
+keybind = alt+KeyG=esc:g
+keybind = alt+KeyH=esc:h
+keybind = alt+KeyJ=esc:j
+keybind = alt+KeyK=esc:k
+keybind = alt+KeyL=esc:l
+keybind = alt+KeyN=esc:n
+keybind = alt+KeyP=esc:p
+keybind = alt+KeyR=esc:r
+keybind = alt+KeyT=esc:t
+keybind = alt+KeyV=esc:v
+keybind = alt+KeyW=esc:w
+keybind = alt+KeyX=esc:x
+keybind = alt+KeyY=esc:y
+keybind = alt+shift+KeyF=esc:F
+keybind = alt+shift+KeyJ=esc:J
+keybind = alt+shift+KeyK=esc:K
+keybind = alt+Period=esc:.
+keybind = alt+Comma=esc:,
+# Ctrl+. → CSI-u для Neovim (Sidekick focus). KeyPeriod в Ghostty нет, только period.
+keybind = ctrl+period=text:\x1b[46;5u
+keybind = alt+Backslash=esc:\\
+keybind = ctrl+shift+Comma=reload_config
+keybind = ctrl+Comma=open_config
+keybind = ctrl+shift+KeyC=copy_to_clipboard:mixed
+keybind = ctrl+shift+KeyV=paste_from_clipboard
+keybind = ctrl+Equal=increase_font_size:1
+keybind = ctrl+shift+Equal=increase_font_size:1
+keybind = ctrl+Minus=decrease_font_size:1
+keybind = super+ctrl+shift+KeyJ=write_screen_file:copy,plain
+keybind = ctrl+shift+KeyJ=write_screen_file:paste,plain
+keybind = ctrl+alt+shift+KeyJ=write_screen_file:open,plain
+keybind = ctrl+shift+KeyN=new_window
+keybind = ctrl+shift+KeyW=close_tab:this
+keybind = ctrl+shift+KeyQ=quit
+keybind = ctrl+shift+KeyT=new_tab
+keybind = ctrl+shift+KeyO=new_split:right
+keybind = ctrl+shift+KeyE=new_split:down
+keybind = super+ctrl+BracketLeft=goto_split:previous
+keybind = super+ctrl+BracketRight=goto_split:next
+keybind = ctrl+shift+KeyF=start_search
+keybind = ctrl+shift+KeyI=inspector:toggle
+keybind = ctrl+shift+KeyA=select_all
+keybind = ctrl+shift+KeyP=toggle_command_palette

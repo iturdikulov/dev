@@ -2,12 +2,25 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-sudo apt-get install --no-install-recommends -y ca-certificates
-EDGE_VERSION=$(curl -sL https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-stable/ |
-    awk -F'(<a href="microsoft-edge-stable_|_amd64.deb\")' '/href=/ {print $2}' | sort --version-sort | tail -1)
-curl -o /tmp/edge.deb -L "https://packages.microsoft.com/repos/edge/pool/main/m/microsoft-edge-stable/microsoft-edge-stable_${EDGE_VERSION}_amd64.deb"
-sudo dpkg -I /tmp/edge.deb
-sudo apt install --no-install-recommends -y /tmp/edge.deb && rm /tmp/edge.deb
+if ! package_installed microsoft-edge-stable; then
+    install_packages ca-certificates curl gnupg
+
+    sudo install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+        | gpg --dearmor \
+        | sudo tee /etc/apt/keyrings/microsoft-edge.gpg >/dev/null
+
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft-edge.gpg] https://packages.microsoft.com/repos/edge stable main" \
+        | sudo tee /etc/apt/sources.list.d/microsoft-edge-stable.list >/dev/null
+
+    sudo apt-get update
+    ensure_directory "$(dirname "$APT_UPDATE_STAMP")"
+    date +%s >"$APT_UPDATE_STAMP"
+
+    install_packages microsoft-edge-stable
+else
+    log_info "microsoft-edge-stable is already installed"
+fi
 
 mkdir -p "$HOME/.local/share/applications"
 rm -f "$HOME/.local/share/applications/microsoft-edge.desktop"
