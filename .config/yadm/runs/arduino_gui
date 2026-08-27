@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+APP_VERSION="1.8.19"
+DEB_VERSION="2:${APP_VERSION}+dfsg1-3"
+ARDUINO_PACKAGE="arduino"
+
+ARDUINO_SKETCHBOOK="$HOME/Library/arduino"
+ARDUINO_PREFS="$HOME/.arduino15/preferences.txt"
+
+if package_installed "$ARDUINO_PACKAGE"; then
+    installed_ver=$(dpkg-query -W -f='${Version}' "$ARDUINO_PACKAGE" 2>/dev/null || true)
+    if [[ "$installed_ver" == "$DEB_VERSION" ]]; then
+        log_info "Arduino $APP_VERSION ($DEB_VERSION) is already installed"
+    else
+        log_info "Arduino ${installed_ver:-unknown} installed; installing $DEB_VERSION"
+        apt_update_if_needed
+        sudo apt install -y "${ARDUINO_PACKAGE}=${DEB_VERSION}"
+    fi
+else
+    log_info "Installing Arduino $APP_VERSION ($DEB_VERSION)..."
+    apt_update_if_needed
+    sudo apt install -y "${ARDUINO_PACKAGE}=${DEB_VERSION}"
+fi
+
+ensure_directory "$HOME/Library"
+
+if [[ -d "$HOME/Arduino" && ! -L "$HOME/Arduino" ]]; then
+    if [[ -e "$ARDUINO_SKETCHBOOK" ]]; then
+        log_warn "$ARDUINO_SKETCHBOOK already exists; leaving $HOME/Arduino in place"
+    else
+        log_info "Moving $HOME/Arduino -> $ARDUINO_SKETCHBOOK"
+        mv "$HOME/Arduino" "$ARDUINO_SKETCHBOOK"
+    fi
+elif [[ ! -d "$ARDUINO_SKETCHBOOK" ]]; then
+    ensure_directory "$ARDUINO_SKETCHBOOK"
+fi
+
+ensure_directory "$(dirname "$ARDUINO_PREFS")"
+touch "$ARDUINO_PREFS"
+if grep -q '^sketchbook\.path=' "$ARDUINO_PREFS"; then
+    sed -i "s|^sketchbook\.path=.*|sketchbook.path=${ARDUINO_SKETCHBOOK}|" "$ARDUINO_PREFS"
+else
+    echo "sketchbook.path=${ARDUINO_SKETCHBOOK}" >>"$ARDUINO_PREFS"
+fi
+
+log_info "Arduino sketchbook: $ARDUINO_SKETCHBOOK"

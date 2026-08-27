@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+YC_INSTALLER_URL=https://storage.yandexcloud.net/yandexcloud-yc/install.sh
+
+check_not_root
+check_home_set
+
+YC_INSTALL_DIR="$HOME/.local"
+install_packages curl
+
+log_info "Installing Yandex Cloud CLI to ${YC_INSTALL_DIR}/bin"
+installer=$(mktemp)
+trap 'rm -f -- "$installer"' EXIT
+curl -fsSL -o "$installer" "$YC_INSTALLER_URL"
+bash "$installer" -i "$YC_INSTALL_DIR" -n
+
+if [[ ! -x "$YC_INSTALL_DIR/bin/yc" ]]; then
+    log_error "Yandex Cloud CLI was not installed to ${YC_INSTALL_DIR}/bin/yc"
+    exit 1
+fi
+
+"$YC_INSTALL_DIR/bin/yc" version
