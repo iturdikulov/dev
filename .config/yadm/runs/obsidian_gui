@@ -5,32 +5,24 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 set -euo pipefail
 
 APP_VERSION=1.13.7
+APP_PACKAGE=obsidian
+APP_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v${APP_VERSION}/obsidian_${APP_VERSION}_amd64.deb"
+APP_DEB="/tmp/obsidian-${APP_VERSION}.deb"
 
-APP_NAME=obsidian
-APP_DESKTOP_NAME=Obsidian
-APP_DESKTOP_DESCRIPTION="A powerful knowledge base that works on top of a local folder of plain text Markdown files"
-APP_DESKTOP_CATEGORIES="Development;Education"
+if [[ "$(dpkg --print-architecture)" != "amd64" ]]; then
+    log_warn "Obsidian .deb is amd64-only; skipping on $(dpkg --print-architecture)"
+    exit 0
+fi
 
-APP_PATH="$HOME/.local/bin/$APP_NAME"
-APP_ASSET="Obsidian-$APP_VERSION.AppImage"
-APP_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v$APP_VERSION/$APP_ASSET"
-# GitHub release asset digest for Obsidian-1.13.7.AppImage
-SHA_256_SUM="e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663"
+if package_installed "$APP_PACKAGE"; then
+    installed_ver=$(dpkg-query -W -f='${Version}' "$APP_PACKAGE" 2>/dev/null || true)
+    if [[ "$installed_ver" == "$APP_VERSION" ]]; then
+        log_info "Obsidian ${APP_VERSION} is already installed; skipping download"
+        exit 0
+    fi
+    log_info "Obsidian ${installed_ver:-unknown} installed; upgrading to ${APP_VERSION}"
+fi
 
-ensure_verified_file "$APP_URL" "$APP_PATH" "$SHA_256_SUM"
-chmod a+x "$APP_PATH"
-
-mkdir -p "$HOME/.local/share/applications"
-cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
-[Desktop Entry]
-Version=$APP_VERSION
-Name=$APP_DESKTOP_NAME
-Comment=$APP_DESKTOP_DESCRIPTION
-GenericName=$APP_DESKTOP_NAME
-Exec=$HOME/.local/bin/$APP_NAME
-Icon=$HOME/.local/bin/icons/$APP_NAME.svg
-Terminal=false
-Type=Application
-Categories=$APP_DESKTOP_CATEGORIES
-StartupNotify=true
-EOF
+download_file "$APP_URL" "$APP_DEB"
+sudo apt install -y -f "$APP_DEB"
+rm -f "$APP_DEB"
