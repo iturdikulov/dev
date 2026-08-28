@@ -119,6 +119,26 @@ set_xkb_ctrl_nocaps() {
     log_info "xkb-options -> $target"
 }
 
+set_input_source_russian() {
+    local current target
+
+    current="$(gsettings get org.gnome.desktop.input-sources sources 2>/dev/null || echo '@as []')"
+    if [[ "$current" == *"('xkb', 'ru')"* ]]; then
+        log_info "Russian input source already configured"
+        return 0
+    fi
+
+    if [[ "$current" == "@as []" || "$current" == "[]" ]]; then
+        target="[('xkb', 'us'), ('xkb', 'ru')]"
+    else
+        target="${current%]}"
+        target+=", ('xkb', 'ru')]"
+    fi
+
+    gsettings set org.gnome.desktop.input-sources sources "$target"
+    log_info "input-sources -> $target"
+}
+
 find_telegram_desktop() {
     local candidate path newest="" newest_name=""
 
@@ -484,6 +504,7 @@ setup_gnome_extensions() {
 log_info "Applying GNOME preferences..."
 
 set_xkb_ctrl_nocaps
+set_input_source_russian
 set_gsetting_if_different org.gnome.desktop.interface color-scheme prefer-dark
 set_gsetting_if_different org.gnome.desktop.default-applications.office.calendar exec 'thunderbird -calendar'
 set_favorite_apps
