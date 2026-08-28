@@ -185,7 +185,7 @@ download_file() {
     log_info "Downloading $url..."
 
     if [ -n "$output" ]; then
-        if [ -n "$output" ] && [ -f "$output" ]; then
+        if [ -s "$output" ]; then
             log_info "File already exists: $output"
             return 0
         fi
@@ -220,6 +220,73 @@ download_file() {
     fi
 
     return 0
+}
+
+file_sha256() {
+    local file="$1"
+
+    if command_exists sha256sum; then
+        sha256sum "$file" | awk '{print $1}'
+    elif command_exists shasum; then
+        shasum -a 256 "$file" | awk '{print $1}'
+    else
+        log_error "sha256sum or shasum required"
+        return 1
+    fi
+}
+
+verify_sha256() {
+    local expected="$1"
+    local file="$2"
+    local actual
+
+    actual="$(file_sha256 "$file")" || return 1
+    if [[ "$actual" != "$expected" ]]; then
+        log_error "Checksum mismatch for $file"
+        log_error "  expected: $expected"
+        log_error "  actual:   $actual"
+        return 1
+    fi
+}
+
+# Download to a temp file, verify SHA-256, then move into place.
+download_verified_file() {
+    local url="$1"
+    local dest="$2"
+    local expected_sha="$3"
+    local tmp
+
+    tmp="$(mktemp "${dest}.XXXXXX")"
+    rm -f "$tmp"
+
+    download_file "$url" "$tmp" || {
+        rm -f "$tmp"
+        return 1
+    }
+    verify_sha256 "$expected_sha" "$tmp" || {
+        rm -f "$tmp"
+        return 1
+    }
+    mv "$tmp" "$dest"
+}
+
+# Skip download when dest already matches the expected SHA-256.
+ensure_verified_file() {
+    local url="$1"
+    local dest="$2"
+    local expected_sha="$3"
+
+    if [[ -f "$dest" ]] && verify_sha256 "$expected_sha" "$dest"; then
+        log_info "$(basename "$dest") already up to date at $dest"
+        return 0
+    fi
+
+    if [[ -f "$dest" ]]; then
+        log_warn "$(basename "$dest") at $dest has unexpected checksum; re-downloading"
+    fi
+
+    ensure_directory "$(dirname "$dest")"
+    download_verified_file "$url" "$dest" "$expected_sha"
 }
 
 # Create directory if it doesn't exist

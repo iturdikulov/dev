@@ -17,44 +17,8 @@ APP_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v$APP
 # GitHub release asset digest for Obsidian-1.13.7.AppImage
 SHA_256_SUM="e0d8e0a611624de8c9c7dcd8a9e648279fb0a0d552faa1312b7e4f3a5fa72663"
 
-verify_sha256() {
-    local expected="$1"
-    local file="$2"
-    local actual
-
-    actual=$(sha256sum "$file" | awk '{print $1}')
-    if [[ "$actual" != "$expected" ]]; then
-        log_error "Checksum mismatch for $file"
-        log_error "  expected: $expected"
-        log_error "  actual:   $actual"
-        return 1
-    fi
-}
-
-cleanup() {
-    rm -f "${TMP_PATH:-}"
-}
-trap cleanup EXIT
-
-ensure_directory "$HOME/.local/bin"
-
-need_obsidian_download=true
-if [[ -x "$APP_PATH" ]]; then
-    if verify_sha256 "$SHA_256_SUM" "$APP_PATH"; then
-        log_info "Obsidian $APP_VERSION already installed at $APP_PATH; skipping download"
-        need_obsidian_download=false
-    else
-        log_warn "Obsidian at $APP_PATH has unexpected checksum; re-downloading"
-    fi
-fi
-
-if [[ "$need_obsidian_download" == true ]]; then
-    TMP_PATH="$(mktemp)"
-    log_info "Downloading Obsidian $APP_VERSION..."
-    download_file "$APP_URL" "$TMP_PATH"
-    verify_sha256 "$SHA_256_SUM" "$TMP_PATH"
-    install -m0755 "$TMP_PATH" "$APP_PATH"
-fi
+ensure_verified_file "$APP_URL" "$APP_PATH" "$SHA_256_SUM"
+chmod a+x "$APP_PATH"
 
 mkdir -p "$HOME/.local/share/applications"
 cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF

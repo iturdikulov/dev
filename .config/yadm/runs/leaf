@@ -87,13 +87,11 @@ else
 fi
 
 base_url="https://github.com/$REPO/releases/download/$tag_name"
-tmp_file="$(mktemp)"
 tmp_checksums="$(mktemp)"
-rm -f "$tmp_file" "$tmp_checksums"
-trap 'rm -f "$tmp_file" "$tmp_checksums"' EXIT
+rm -f "$tmp_checksums"
+trap 'rm -f "$tmp_checksums"' EXIT
 
 ensure_directory "$DEST_DIR"
-download_file "$base_url/$asset_name" "$tmp_file"
 download_file "$base_url/checksums.txt" "$tmp_checksums"
 
 expected="$(grep "[[:space:]]${asset_name}$" "$tmp_checksums" | awk '{print $1}')"
@@ -101,17 +99,8 @@ if [[ -z "$expected" ]]; then
     log_error "Asset $asset_name not found in checksums.txt"
     exit 1
 fi
-if command_exists sha256sum; then
-    actual="$(sha256sum "$tmp_file" | awk '{print $1}')"
-else
-    actual="$(shasum -a 256 "$tmp_file" | awk '{print $1}')"
-fi
-if [[ "$actual" != "$expected" ]]; then
-    log_error "Checksum mismatch for $asset_name"
-    exit 1
-fi
 
-cp "$tmp_file" "$DEST_BIN"
+ensure_verified_file "$base_url/$asset_name" "$DEST_BIN" "$expected"
 chmod 755 "$DEST_BIN"
 
 if [[ -n "$current_version" ]]; then
