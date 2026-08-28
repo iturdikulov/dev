@@ -32,8 +32,8 @@ done < <(find "$laptop_conf_dir" -type f | sort)
 "$script_dir/run_runner.sh"
 
 SYNC_DIRS_DEFAULT=(
+    az
     Desktop/web
-    Desktop/software
     Music
     Templates
     .password-store
