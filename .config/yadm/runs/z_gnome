@@ -146,6 +146,33 @@ find_telegram_desktop() {
     return 1
 }
 
+find_godot_desktop() {
+    local candidate path newest="" newest_name=""
+
+    for candidate in godot.desktop; do
+        if desktop_file_path "$candidate" >/dev/null; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    while IFS= read -r path; do
+        [[ -f "$path" ]] || continue
+        if [[ -z "$newest" || "$path" -nt "$newest" ]]; then
+            newest="$path"
+            newest_name="$(basename "$path")"
+        fi
+    done < <(find "$HOME/.local/share/applications" /usr/share/applications -maxdepth 1 \
+        -name 'Godot_v*_mono_linux_x86_64.desktop' 2>/dev/null)
+
+    if [[ -n "$newest_name" ]]; then
+        printf '%s\n' "$newest_name"
+        return 0
+    fi
+
+    return 1
+}
+
 set_favorite_apps() {
     local -a favorites=(
         com.mitchellh.ghostty.desktop
@@ -156,7 +183,6 @@ set_favorite_apps() {
         sioyek.desktop
         org.kde.krita.desktop
         blender.desktop
-        Godot_v4.7-beta1_mono_linux_x86_64.desktop
         org.nomacs.ImageLounge.desktop
         mpv.desktop
         libreoffice-writer.desktop
@@ -164,7 +190,13 @@ set_favorite_apps() {
         spotify.desktop
         org.gnome.Nautilus.desktop
     )
-    local telegram_desktop current target desktop
+    local telegram_desktop godot_desktop current target desktop
+
+    if godot_desktop="$(find_godot_desktop)"; then
+        favorites=( "${favorites[@]:0:8}" "$godot_desktop" "${favorites[@]:8}" )
+    else
+        log_warn "Godot desktop not found — skipping pin"
+    fi
 
     if telegram_desktop="$(find_telegram_desktop)"; then
         favorites+=("$telegram_desktop")
@@ -199,6 +231,134 @@ gnome_shell_version() {
     gnome-shell --version 2>/dev/null | awk '{print $3}'
 }
 
+extension_is_installed() {
+    [[ -f "$HOME/.local/share/gnome-shell/extensions/$1/metadata.json" ]]
+}
+
+gsettings_string_array() {
+    local key="$1"
+    local -n _out="$2"
+    local item raw
+
+    _out=()
+    raw="$(gsettings get org.gnome.shell "$key" 2>/dev/null || echo '@as []')"
+    if [[ "$raw" == "@as []" || "$raw" == "[]" ]]; then
+        return 0
+    fi
+
+    mapfile -t _out < <(printf '%s' "$raw" | tr -d "[]'" | tr ',' '\n' | sed '/^$/d')
+    for i in "${!_out[@]}"; do
+        item="${_out[$i]}"
+        item="${item#"${item%%[![:space:]]*}"}"
+        item="${item%"${item##*[![:space:]]}"}"
+        _out[$i]="$item"
+    done
+}
+
+gsettings_write_string_array() {
+    local key="$1"
+    shift
+    local -a items=("$@")
+    local value="["
+
+    if ((${#items[@]} == 0)); then
+        gsettings set org.gnome.shell "$key" "@as []"
+        return 0
+    fi
+
+    for item in "${items[@]}"; do
+        [[ "$value" != "[" ]] && value+=", "
+        value+="'$item'"
+    done
+    value+="]"
+    gsettings set org.gnome.shell "$key" "$value"
+}
+
+array_contains() {
+    local needle="$1"
+    shift
+    local item
+    for item in "$@"; do
+        [[ "$item" == "$needle" ]] && return 0
+    done
+    return 1
+}
+
+array_remove() {
+    local needle="$1"
+    local -n _arr="$2"
+    local -a kept=()
+    local item
+
+    for item in "${_arr[@]}"; do
+        [[ "$item" == "$needle" ]] && continue
+        kept+=("$item")
+    done
+    _arr=("${kept[@]}")
+}
+
+set_extension_enabled_gsettings() {
+    local uuid="$1"
+    local state="$2"
+    local -a enabled=() disabled=()
+    local changed=0
+
+    gsettings_string_array enabled-extensions enabled
+    gsettings_string_array disabled-extensions disabled
+
+    case "$state" in
+    enable)
+        array_remove "$uuid" disabled
+        if ! array_contains "$uuid" "${enabled[@]}"; then
+            enabled+=("$uuid")
+            changed=1
+        fi
+        ;;
+    disable)
+        array_remove "$uuid" enabled
+        if ! array_contains "$uuid" "${disabled[@]}"; then
+            disabled+=("$uuid")
+            changed=1
+        fi
+        ;;
+    esac
+
+    ((changed)) || return 0
+
+    gsettings_write_string_array enabled-extensions "${enabled[@]}"
+    gsettings_write_string_array disabled-extensions "${disabled[@]}"
+    log_info "${state^}d $uuid via gsettings"
+    mark_extensions_changed
+}
+
+mark_extensions_changed() {
+    gnome_extensions_changed=1
+}
+
+restart_gnome_shell_if_needed() {
+    if ((gnome_extensions_changed == 0)); then
+        return 0
+    fi
+    if [[ "${YADM_SKIP_SHELL_RESTART:-}" == 1 ]]; then
+        log_warn "Extensions changed; skipping GNOME Shell restart (YADM_SKIP_SHELL_RESTART=1)"
+        return 0
+    fi
+    if [[ "${XDG_CURRENT_DESKTOP:-}" != *GNOME* ]]; then
+        log_warn "Extensions changed; log in to GNOME to load them"
+        return 0
+    fi
+
+    log_info "Restarting GNOME Shell to apply extensions..."
+    if busctl --user call org.gnome.Shell /org/gnome/Shell org.gnome.Shell Eval s 'Meta.restart("Applying yadm extensions")' &>/dev/null \
+        || gdbus call --session --dest org.gnome.Shell --object-path /org/gnome/Shell \
+            --method org.gnome.Shell.Eval 'Meta.restart("Applying yadm extensions")' &>/dev/null; then
+        log_info "GNOME Shell restart requested"
+        return 0
+    fi
+
+    log_warn "Could not restart GNOME Shell — log out and back in to load extensions"
+}
+
 install_gnome_extension() {
     local uuid="$1"
     local shell_version info version_tag target_version installed_version tmp url
@@ -221,7 +381,7 @@ install_gnome_extension() {
         return 0
     fi
 
-    if gnome-extensions list 2>/dev/null | grep -qxF "$uuid"; then
+    if extension_is_installed "$uuid"; then
         installed_version="$(jq -r '.version // empty' "$HOME/.local/share/gnome-shell/extensions/$uuid/metadata.json" 2>/dev/null || true)"
         if [[ "$installed_version" == "$target_version" ]]; then
             log_info "$uuid v$target_version already installed"
@@ -238,39 +398,62 @@ install_gnome_extension() {
         return 0
     fi
 
-    gnome-extensions install -f "$tmp"
+    if ! gnome-extensions install -f "$tmp"; then
+        rm -f "$tmp"
+        log_warn "Failed to install $uuid"
+        return 0
+    fi
     rm -f "$tmp"
+
+    if ! extension_is_installed "$uuid"; then
+        log_warn "Install reported success but $uuid is missing on disk"
+        return 0
+    fi
+
     log_info "Installed $uuid v$target_version"
+    mark_extensions_changed
 }
 
 set_extension_enabled() {
     local uuid="$1"
     local state="$2"
 
-    if ! gnome-extensions list 2>/dev/null | grep -qxF "$uuid"; then
+    if ! extension_is_installed "$uuid"; then
         log_warn "Extension not installed: $uuid"
         return 0
     fi
 
-    case "$state" in
-    enable)
-        if gnome-extensions list --enabled 2>/dev/null | grep -qxF "$uuid"; then
-            return 0
-        fi
-        gnome-extensions enable "$uuid"
-        log_info "Enabled $uuid"
-        ;;
-    disable)
-        if gnome-extensions list --disabled 2>/dev/null | grep -qxF "$uuid"; then
-            return 0
-        fi
-        gnome-extensions disable "$uuid"
-        log_info "Disabled $uuid"
-        ;;
-    esac
+    if gnome-extensions list 2>/dev/null | grep -qxF "$uuid"; then
+        case "$state" in
+        enable)
+            if gnome-extensions list --enabled 2>/dev/null | grep -qxF "$uuid"; then
+                return 0
+            fi
+            if gnome-extensions enable "$uuid" 2>/dev/null; then
+                log_info "Enabled $uuid"
+                mark_extensions_changed
+                return 0
+            fi
+            ;;
+        disable)
+            if gnome-extensions list --disabled 2>/dev/null | grep -qxF "$uuid"; then
+                return 0
+            fi
+            if gnome-extensions disable "$uuid" 2>/dev/null; then
+                log_info "Disabled $uuid"
+                mark_extensions_changed
+                return 0
+            fi
+            ;;
+        esac
+    fi
+
+    set_extension_enabled_gsettings "$uuid" "$state"
 }
 
 setup_gnome_extensions() {
+    gnome_extensions_changed=0
+
     install_packages gnome-shell-extension-manager
 
     if ! command_exists gnome-extensions; then
@@ -295,6 +478,7 @@ setup_gnome_extensions() {
     set_extension_enabled run-or-raise@edvard.cz enable
     set_extension_enabled color-picker@tuberry enable
     set_extension_enabled copyous@boerdereinar.dev disable
+    restart_gnome_shell_if_needed
 }
 
 
