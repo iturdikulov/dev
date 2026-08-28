@@ -16,10 +16,21 @@ echo "deb [signed-by=/etc/apt/keyrings/keys.anydesk.com.asc] https://deb.anydesk
 
 # Update apt caches and install the AnyDesk client
 sudo apt update
-sudo apt install anydesk
-sudo systemctl mask anydesk
+sudo apt install -y anydesk
+
+# Keep AnyDesk installed but don't run it as a background service.
 sudo rm -f /etc/xdg/autostart/anydesk_global_tray.desktop
-sudo dpkg-divert --add --rename --divert /etc/systemd/system/anydesk.service.unused /etc/systemd/system/anydesk.service
+
+if ! dpkg-divert --list /etc/systemd/system/anydesk.service 2>/dev/null | grep -q anydesk.service; then
+    sudo dpkg-divert --add --rename \
+        --divert /etc/systemd/system/anydesk.service.unused \
+        /etc/systemd/system/anydesk.service
+fi
+
+if [[ "$(readlink /etc/systemd/system/anydesk.service 2>/dev/null)" != "/dev/null" ]]; then
+    sudo ln -sfn /dev/null /etc/systemd/system/anydesk.service
+    sudo systemctl daemon-reload
+fi
 
 # --- Remmina
 #
