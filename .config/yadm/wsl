@@ -41,7 +41,7 @@ if [[ -n "$BASE_PATH" ]]; then
     if [[ "$REPLY" =~ ^[Yy]$ ]]; then
         rcp --exclude .ssh/known_hosts "$BASE_PATH/.ssh" "$OUTPUT_DIR"
         for dir in "${SYNC_DIRS_WSL[@]}"; do
-            rcp --relative "$BASE_PATH/$dir" "$OUTPUT_DIR"
+            rcp "$BASE_PATH/$dir" "$OUTPUT_DIR/"
         done
     fi
 fi
