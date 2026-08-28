@@ -31,25 +31,4 @@ done < <(find "$laptop_conf_dir" -type f | sort)
 
 "$script_dir/run_runner.sh"
 
-SYNC_DIRS_DEFAULT=(
-    az
-    Desktop/web
-    Music
-    Templates
-    .password-store
-    .config/microsoft-edge
-)
-
-read -rp "Source base path for sync, e.g. user@host:/home/user (empty to skip): " BASE_PATH
-
-if [[ -n "$BASE_PATH" ]]; then
-    OUTPUT_DIR="${SYNC_DEST:-$HOME}"
-
-    read -rp "Sync .ssh plus laptop dirs (${SYNC_DIRS_DEFAULT[*]}) into '$OUTPUT_DIR'? (y/n) "
-    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
-        rcp --exclude .ssh/known_hosts "$BASE_PATH/.ssh" "$OUTPUT_DIR"
-        for dir in "${SYNC_DIRS_DEFAULT[@]}"; do
-            rcp "$BASE_PATH/$dir" "$OUTPUT_DIR/"
-        done
-    fi
-fi
+"$script_dir/sync.sh"
