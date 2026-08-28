@@ -2,4 +2,7 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-install_packages hardinfo2 psensor openrgb
+# search openrgb if you need to control rgb devices
+
+install_packages hardinfo2 psensor
+
