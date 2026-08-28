@@ -9,27 +9,38 @@ if [[ "${YADM_IS_WSL:-0}" == "1" ]]; then
     log_info "WSL runner detected; skipping pass & browserpass installation"
     exit 0
 else
-    cd /tmp || exit 1
-
-    if ! [ -x "$(command -v pass)" ]; then
-        echo 'Pass is not installed, please install it before adding extensions.'
-        exit 1
-    fi
-
-    if ! [ -x "$(command -v go)" ]; then
-        echo 'Golang compiler not installed, please install it before building browswerpass-native.' >&2
-        exit 1
-    fi
-
     install_packages pass
+
+    if ! command_exists pass; then
+        log_error 'pass is not installed after apt install'
+        exit 1
+    fi
+
+    if ! command_exists go; then
+        log_error 'Go compiler not installed; required to build browserpass-native'
+        exit 1
+    fi
+
+    BROWSERPASS_SRC="/tmp/browserpass-native"
+
+    remove_browserpass_src() {
+        [[ -n "$BROWSERPASS_SRC" ]] || {
+            log_error 'BROWSERPASS_SRC is empty; refusing to remove'
+            exit 1
+        }
+        rm -rf -- "$BROWSERPASS_SRC"
+    }
+
+    cd /tmp || exit 1
 
     # import the GPG key for working with the files.
     curl https://maximbaz.com/pgp_keys.asc | gpg --import || \
         curl https://keybase.io/maximbaz/pgp_keys.asc | gpg --import || \
         gpg --recv-keys EB4F9E5A60D32232BB52150C12C87A28FEAC6B20;
 
-    git clone https://github.com/browserpass/browserpass-native
-    cd "browserpass-native" || exit 1
+    remove_browserpass_src
+    git clone https://github.com/browserpass/browserpass-native "$BROWSERPASS_SRC"
+    cd "$BROWSERPASS_SRC" || exit 1
     make browserpass-linux64
     make BIN=browserpass-linux64 configure
     sudo make BIN=browserpass-linux64 install
@@ -38,4 +49,6 @@ else
     sudo make hosts-firefox-user
     sudo make hosts-chrome
     sudo make hosts-brave
+
+    remove_browserpass_src
 fi
