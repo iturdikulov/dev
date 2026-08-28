@@ -177,7 +177,6 @@ set_favorite_apps() {
     local -a favorites=(
         com.mitchellh.ghostty.desktop
         microsoft-edge.desktop
-        firefox-esr.desktop
         obsidian.desktop
         thunderbird.desktop
         sioyek.desktop
