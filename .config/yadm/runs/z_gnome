@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+if ! command_exists gsettings; then
+    log_warn "gsettings not found — skipping GNOME preferences"
+    exit 0
+fi
+
+if [[ "${XDG_CURRENT_DESKTOP:-}" != *GNOME* ]]; then
+    log_warn "Not in a GNOME session (XDG_CURRENT_DESKTOP=${XDG_CURRENT_DESKTOP:-unset}); applying settings anyway"
+fi
+
+desktop_file_path() {
+    local desktop="$1"
+    if [[ -f "$HOME/.local/share/applications/$desktop" ]]; then
+        printf '%s\n' "$HOME/.local/share/applications/$desktop"
+    elif [[ -f "/usr/share/applications/$desktop" ]]; then
+        printf '%s\n' "/usr/share/applications/$desktop"
+    else
+        return 1
+    fi
+}
+
+set_mime_default() {
+    local mime="$1"
+    local desktop="$2"
+
+    if ! desktop_file_path "$desktop" >/dev/null; then
+        log_warn "Missing $desktop — cannot set default for $mime"
+        return 0
+    fi
+
+    local current
+    current="$(xdg-mime query default "$mime" 2>/dev/null || true)"
+    if [[ "$current" == "$desktop" ]]; then
+        return 0
+    fi
+
+    xdg-mime default "$desktop" "$mime"
+    log_info "$mime -> $desktop"
+}
+
+set_mimes_from_desktop() {
+    local desktop="$1"
+    local path mime_line mime
+
+    path="$(desktop_file_path "$desktop")" || {
+        log_warn "Desktop file not found: $desktop"
+        return 0
+    }
+
+    mime_line="$(grep -m1 '^MimeType=' "$path" | cut -d= -f2-)"
+    if [[ -z "$mime_line" ]]; then
+        log_warn "No MimeType in $desktop"
+        return 0
+    fi
+
+    IFS=';' read -r -a mimes <<< "$mime_line"
+    for mime in "${mimes[@]}"; do
+        [[ -n "$mime" ]] || continue
+        set_mime_default "$mime" "$desktop"
+    done
+}
+
+set_gsetting_if_different() {
+    local schema="$1"
+    local key="$2"
+    local value="$3"
+    local current quoted
+
+    quoted="'$value'"
+    current="$(gsettings get "$schema" "$key" 2>/dev/null || true)"
+    if [[ "$current" == "$quoted" ]]; then
+        return 0
+    fi
+
+    gsettings set "$schema" "$key" "$value"
+    log_info "$schema $key -> $quoted"
+}
+
+set_xkb_ctrl_nocaps() {
+    local current target raw_output
+    local -a kept=()
+    local -a raw=()
+    local opt
+
+    raw_output="$(gsettings get org.gnome.desktop.input-sources xkb-options)"
+    if [[ "$raw_output" != "@as []" && "$raw_output" != "[]" ]]; then
+        mapfile -t raw < <(printf '%s' "$raw_output" | tr -d "[]'" | tr ',' '\n' | sed '/^$/d')
+    fi
+
+    for opt in "${raw[@]}"; do
+        opt="${opt#"${opt%%[![:space:]]*}"}"
+        opt="${opt%"${opt##*[![:space:]]}"}"
+        [[ "$opt" == @as ]] && continue
+        [[ "$opt" == ctrl:nocaps ]] && continue
+        [[ "$opt" == ctrl:* || "$opt" == caps:* ]] && continue
+        [[ -n "$opt" ]] && kept+=("$opt")
+    done
+
+    if ((${#kept[@]} == 0)); then
+        target="['ctrl:nocaps']"
+    else
+        target="['ctrl:nocaps'"
+        for opt in "${kept[@]}"; do
+            target+=", '$opt'"
+        done
+        target+="]"
+    fi
+
+    current="$(gsettings get org.gnome.desktop.input-sources xkb-options)"
+    if [[ "$current" == "$target" ]]; then
+        log_info "xkb-options already set to ctrl:nocaps"
+        return 0
+    fi
+
+    gsettings set org.gnome.desktop.input-sources xkb-options "$target"
+    log_info "xkb-options -> $target"
+}
+
+log_info "Applying GNOME preferences..."
+
+set_xkb_ctrl_nocaps
+set_gsetting_if_different org.gnome.desktop.interface color-scheme prefer-dark
+set_gsetting_if_different org.gnome.desktop.default-applications.office.calendar exec 'thunderbird -calendar'
+
+log_info "Setting default applications..."
+set_mime_default application/pdf sioyek.desktop
+for mime in \
+    x-scheme-handler/http \
+    x-scheme-handler/https \
+    text/html \
+    application/xhtml+xml \
+    application/xhtml_xml; do
+    set_mime_default "$mime" com.microsoft.Edge.desktop
+done
+set_mimes_from_desktop thunderbird.desktop
+for mime in text/calendar application/ics; do
+    set_mime_default "$mime" thunderbird.desktop
+done
+set_mimes_from_desktop mpv.desktop
+set_mimes_from_desktop org.nomacs.ImageLounge.desktop
+
+log_info "GNOME preferences applied"

@@ -77,7 +77,6 @@ yadm clone https://github.com/iturdikulov/dev
 
 - System Preferences: layout `gnome-control-center keyboard`, keybindings Ctrl Position
 - System Preferences: dark theme, default applications, resolution, scale-factor, refresh rate
-- General behaviour: no animation?
 - Sync basic secrets with `yadm decrypt` command
 - Export/Import gpg backup with script
 - Sync files with sync script
