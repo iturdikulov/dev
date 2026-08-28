@@ -14,8 +14,7 @@ fi
 
 # Installing additional tools
 install_packages build-essential
-cargo install cargo-binstall --locked
-
-cargo install cargo-eval
+cargo_install_if_missing cargo-binstall cargo-binstall --locked
+cargo_install_if_missing cargo-eval cargo-eval
 
 rustup component add rust-src

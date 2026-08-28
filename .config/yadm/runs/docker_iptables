@@ -1,0 +1,202 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+# Docker iptables=true + persistent DOCKER-USER allow for docker0 (libvirt / macvlan parent).
+# Default bridge is dedicated br-docker (not docker0, not libvirt virbr0) so:
+# - 172.17/docker0 stays free for guests + compose macvlan
+# - virbr0 stays free for libvirt default NAT network
+#
+# See: packages/ltms-baremetal/docs/hyperv-manual.md (docker0 + libvirt_net)
+
+check_not_root
+check_home_set
+
+daemon_json="/etc/docker/daemon.json"
+bridge_script="/usr/local/sbin/docker-ensure-bridges"
+forward_script="/usr/local/sbin/docker-libvirt-forward"
+forward_unit="/etc/systemd/system/docker-libvirt-forward.service"
+docker_dropin="/etc/systemd/system/docker.service.d/libvirt-forward.conf"
+
+desired_daemon_json='{
+  "bridge": "br-docker",
+  "iptables": true,
+  "runtimes": {
+    "nvidia": {
+      "args": [],
+      "path": "nvidia-container-runtime"
+    }
+  }
+}'
+
+bridge_script_content='#!/usr/bin/env bash
+# Keep two host bridges alive for this workstation layout:
+# - br-docker: Docker default bridge (daemon.json "bridge")
+# - docker0:   libvirt + compose macvlan parent (NOT managed by dockerd)
+# -b and --bip are mutually exclusive, so br-docker CIDR is set here.
+set -euo pipefail
+
+ensure_bridge() {
+	local br=$1
+	local cidr=$2
+	if ! ip link show "$br" >/dev/null 2>&1; then
+		ip link add name "$br" type bridge
+	fi
+	if ! ip -4 addr show dev "$br" | grep -q "inet ${cidr%%/*}/"; then
+		ip -4 addr flush dev "$br" || true
+		ip addr add "$cidr" dev "$br"
+	fi
+	ip link set "$br" up
+}
+
+ensure_bridge br-docker 192.168.123.1/24
+ensure_bridge docker0 172.17.0.1/16
+'
+
+forward_script_content='#!/usr/bin/env bash
+# Allow L2 forwarding + NAT on docker0 when Docker manages iptables (FORWARD DROP).
+# docker0 is the libvirt bridge + macvlan parent for az-containers libvirt_net.
+# Guests at 172.17.250.x use gateway 172.17.0.1; without MASQUERADE they have
+# no outbound Internet (RD Licensing AUTO, Windows Update, etc.).
+set -euo pipefail
+
+wait_for_chain() {
+	local i
+	for i in $(seq 1 60); do
+		if iptables -nL DOCKER-USER >/dev/null 2>&1; then
+			return 0
+		fi
+		sleep 0.5
+	done
+	echo "docker-libvirt-forward: DOCKER-USER chain not found (is Docker iptables enabled?)" >&2
+	return 1
+}
+
+ensure_insert() {
+	if iptables -C "$@" >/dev/null 2>&1; then
+		return 0
+	fi
+	iptables -I "$@"
+}
+
+ensure_nat_append() {
+	if iptables -t nat -C "$@" >/dev/null 2>&1; then
+		return 0
+	fi
+	iptables -t nat -A "$@"
+}
+
+wait_for_chain
+
+# Hairpin / VM↔VM↔macvlan on the same L2 bridge
+ensure_insert DOCKER-USER -i docker0 -o docker0 -j ACCEPT
+# Outbound from docker0 (guests / macvlan) through host forwarding
+ensure_insert DOCKER-USER -i docker0 -j ACCEPT
+# Return path to docker0
+ensure_insert DOCKER-USER -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+# SNAT for guests/macvlan leaving the host (not hairpin back into docker0)
+ensure_nat_append POSTROUTING -s 172.17.0.0/16 ! -o docker0 -j MASQUERADE
+'
+
+forward_unit_content='[Unit]
+Description=DOCKER-USER + MASQUERADE for docker0 (libvirt / macvlan)
+Documentation=file:///usr/local/sbin/docker-libvirt-forward
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/docker-libvirt-forward
+
+[Install]
+WantedBy=docker.service
+'
+
+docker_dropin_content='[Service]
+# Create br-docker + docker0 before dockerd; re-apply DOCKER-USER after iptables setup
+ExecStartPre=+/usr/local/sbin/docker-ensure-bridges
+ExecStartPost=-/usr/local/sbin/docker-libvirt-forward
+'
+
+write_if_changed() {
+	local dest=$1
+	local mode=$2
+	local content=$3
+	local tmp
+
+	tmp="$(mktemp)"
+	printf '%s\n' "$content" >"$tmp"
+	if [[ -f "$dest" ]] && cmp -s "$tmp" "$dest"; then
+		rm -f "$tmp"
+		return 1
+	fi
+	sudo install -d -m 0755 "$(dirname -- "$dest")"
+	sudo install -m "$mode" "$tmp" "$dest"
+	rm -f "$tmp"
+	return 0
+}
+
+changed=0
+
+log_info "Installing $bridge_script"
+if write_if_changed "$bridge_script" 0755 "$bridge_script_content"; then
+	log_info "Updated $bridge_script"
+	changed=1
+else
+	log_info "$bridge_script already up to date"
+fi
+sudo "$bridge_script"
+
+log_info "Ensuring $daemon_json (bridge=br-docker, iptables=true)"
+sudo install -d -m 0755 /etc/docker
+if write_if_changed "$daemon_json" 0644 "$desired_daemon_json"; then
+	log_info "Updated $daemon_json"
+	changed=1
+else
+	log_info "$daemon_json already up to date"
+fi
+
+log_info "Installing $forward_script"
+if write_if_changed "$forward_script" 0755 "$forward_script_content"; then
+	log_info "Updated $forward_script"
+	changed=1
+else
+	log_info "$forward_script already up to date"
+fi
+
+log_info "Installing $forward_unit"
+if write_if_changed "$forward_unit" 0644 "$forward_unit_content"; then
+	log_info "Updated $forward_unit"
+	changed=1
+else
+	log_info "$forward_unit already up to date"
+fi
+
+log_info "Installing $docker_dropin"
+if write_if_changed "$docker_dropin" 0644 "$docker_dropin_content"; then
+	log_info "Updated $docker_dropin"
+	changed=1
+else
+	log_info "$docker_dropin already up to date"
+fi
+
+sudo systemctl daemon-reload
+sudo systemctl enable docker-libvirt-forward.service
+
+if ((changed)) || ! systemctl is-active --quiet docker.service; then
+	log_warn "Restarting docker (containers will briefly stop)"
+	sudo systemctl reset-failed docker.service 2>/dev/null || true
+	sudo systemctl restart docker.service
+else
+	log_info "Applying DOCKER-USER rules without full docker restart"
+	sudo systemctl start docker-libvirt-forward.service
+fi
+
+sudo systemctl --no-pager --full status docker-libvirt-forward.service || true
+log_info "DOCKER-USER rules:"
+sudo iptables -nL DOCKER-USER -v | sed -n '1,20p'
+log_info "docker0 MASQUERADE (POSTROUTING):"
+sudo iptables -t nat -S POSTROUTING | grep -E '172\.17\.0\.0/16' || true
+log_info "Default bridge:"
+docker network inspect bridge -f 'if={{index .Options "com.docker.network.bridge.name"}} subnet={{range .IPAM.Config}}{{.Subnet}}{{end}}' 2>/dev/null || true

@@ -4,4 +4,4 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # ripgrep-all (rga)
 install_packages ripgrep pandoc poppler-utils ffmpeg
-cargo binstall ripgrep_all
+cargo_binstall ripgrep_all

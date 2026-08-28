@@ -8,7 +8,7 @@ install_packages aria2 wget2 curl rsync nfs-common sshfs openssh-server autossh 
 log_info "Installing tools"
 go install github.com/xjasonlyu/tun2socks/v2@latest
 go install github.com/snowie2000/geoview@latest
-cargo binstall tun2proxy
+cargo_binstall tun2proxy
 
 if [[ "${YADM_IS_WSL:-0}" == "1" ]]; then
     log_info "WSL runner detected; skipping Samba and UFW setup"

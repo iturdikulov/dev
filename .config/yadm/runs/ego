@@ -2,7 +2,7 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-cargo binstall ego
+cargo_binstall ego
 sudo cp ~/.cargo/bin/ego /usr/local/bin/
 sudo useradd ego --uid 155 --create-home
 sudo usermod -aG video ego

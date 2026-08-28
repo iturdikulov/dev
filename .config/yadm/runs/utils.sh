@@ -36,6 +36,26 @@ check_home_set() {
 # Check if a command exists
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
+# Unattended cargo-binstall / cargo install (see BINSTALL_NO_CONFIRM in cargo-binstall --help).
+export BINSTALL_NO_CONFIRM="${BINSTALL_NO_CONFIRM:-1}"
+export CARGO_TERM_COLOR="${CARGO_TERM_COLOR:-never}"
+
+cargo_binstall() {
+    command cargo binstall --no-confirm -q "$@"
+}
+
+cargo_install_if_missing() {
+    local bin="$1"
+    shift
+
+    if command_exists "$bin"; then
+        log_info "$bin is already installed"
+        return 0
+    fi
+
+    command cargo install -q "$@"
+}
+
 # Resolve GitHub "latest" release tag from the redirect (e.g. RivoLink/leaf).
 github_latest_release_tag() {
     local repo="$1"

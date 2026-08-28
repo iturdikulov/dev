@@ -5,4 +5,4 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 install_packages libsqlite3-dev build-essential
 
 go install github.com/bootdotdev/bootdev@latest
-cargo binstall leetcode-cli
+cargo_binstall leetcode-cli
