@@ -7,10 +7,11 @@ runs_dir="$script_dir/runs"
 include_gui=1
 include_ufw=1
 blacklist_value=""
+profile=""
 
 usage() {
     cat <<EOF
-Usage: $0 [--no-gui] [--no-ufw] [--blacklist "name1 name2 ..."]
+Usage: $0 [--no-gui] [--no-ufw] [--blacklist "name1 name2 ..."] [--profile desktop|laptop]
 
 Keys: Enter/y = run or retry, n = skip, p = run previous, q = quit, Ctrl+C = stop active runner.
 EOF
@@ -35,6 +36,15 @@ while (($# > 0)); do
             blacklist_value="$2"
             shift 2
             ;;
+        --profile)
+            if (($# < 2)); then
+                echo "Missing value for --profile" >&2
+                usage >&2
+                exit 2
+            fi
+            profile="$2"
+            shift 2
+            ;;
         -h|--help)
             usage
             exit 0
@@ -51,6 +61,32 @@ declare -A blacklisted=()
 for name in $blacklist_value; do
     blacklisted["$name"]=1
 done
+
+if [[ -z "$profile" ]] && command -v yadm >/dev/null 2>&1; then
+    profile="$(yadm config local.class 2>/dev/null || true)"
+fi
+if [[ -n "$profile" && ! -d "$runs_dir/$profile" ]]; then
+    profile=""
+fi
+
+is_blacklisted() {
+    local name="$1"
+    local base="${name##*/}"
+
+    [[ -n "${blacklisted[$name]:-}" || -n "${blacklisted[$base]:-}" ]]
+}
+
+should_skip_runner() {
+    local name="$1"
+
+    if is_blacklisted "$name"; then
+        return 0
+    fi
+    if ((include_gui == 0)) && [[ "${name##*/}" == *_gui ]]; then
+        return 0
+    fi
+    return 1
+}
 
 run_runner() {
     local name="$1"
@@ -127,16 +163,8 @@ mapfile -t runners < <(
 previous_runner=""
 print_key_note
 
-for name in "${runners[@]}"; do
-    if [[ "$name" == .* || "$name" == "utils.sh" ]]; then
-        continue
-    fi
-    if ((include_gui == 0)) && [[ "$name" == *_gui ]]; then
-        continue
-    fi
-    if [[ -n "${blacklisted[$name]:-}" ]]; then
-        continue
-    fi
+prompt_runner() {
+    local name="$1"
 
     while true; do
         action="$(prompt "Run $name? [Y/n/p/q] ")"
@@ -172,4 +200,37 @@ for name in "${runners[@]}"; do
                 ;;
         esac
     done
+}
+
+for name in "${runners[@]}"; do
+    if [[ "$name" == .* || "$name" == "utils.sh" ]]; then
+        continue
+    fi
+    if should_skip_runner "$name"; then
+        continue
+    fi
+
+    prompt_runner "$name"
 done
+
+if [[ -n "$profile" ]]; then
+    mapfile -t profile_runners < <(
+        find "$runs_dir/$profile" -maxdepth 1 -type f -executable -printf '%f\n' |
+            sort
+    )
+
+    if ((${#profile_runners[@]} > 0)); then
+        echo
+        echo "==> Optional $profile-specific runners"
+        print_key_note
+
+        for base in "${profile_runners[@]}"; do
+            name="$profile/$base"
+            if should_skip_runner "$name"; then
+                continue
+            fi
+
+            prompt_runner "$name"
+        done
+    fi
+fi

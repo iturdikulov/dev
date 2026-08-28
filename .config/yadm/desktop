@@ -34,6 +34,6 @@ if ! [ -e /etc/modules-load.d/i2c-dev.conf ]; then
     echo "modules-load.d i2c-dev linked successfully."
 fi
 
-"$script_dir/run_runner.sh"
+"$script_dir/run_runner.sh" --profile desktop
 
 "$script_dir/sync.sh"
