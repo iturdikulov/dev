@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../utils.sh"
 
 HEROIC_VERSION="2.22.0"
 HEROIC_PACKAGE="heroic"

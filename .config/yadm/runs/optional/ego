@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../utils.sh"
 
 cargo_binstall ego
 sudo cp ~/.cargo/bin/ego /usr/local/bin/

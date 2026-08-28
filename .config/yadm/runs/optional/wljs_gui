@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../utils.sh"
 
 APP_NAME="wljs-notebook"
 REPO="WLJSTeam/wljs-notebook"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+source "$(dirname -- "${BASH_SOURCE[0]}")/../utils.sh"
 
 APP_VERSION="1.8.19"
 DEB_VERSION="2:${APP_VERSION}+dfsg1-3"
