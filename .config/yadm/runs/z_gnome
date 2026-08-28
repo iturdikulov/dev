@@ -119,11 +119,89 @@ set_xkb_ctrl_nocaps() {
     log_info "xkb-options -> $target"
 }
 
+find_telegram_desktop() {
+    local candidate path newest="" newest_name=""
+
+    for candidate in org.telegram.desktop telegram.desktop; do
+        if desktop_file_path "$candidate" >/dev/null; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    while IFS= read -r path; do
+        [[ -f "$path" ]] || continue
+        if [[ -z "$newest" || "$path" -nt "$newest" ]]; then
+            newest="$path"
+            newest_name="$(basename "$path")"
+        fi
+    done < <(find "$HOME/.local/share/applications" /usr/share/applications -maxdepth 1 \
+        \( -name 'org.telegram.desktop*.desktop' -o -name 'telegram.desktop' \) 2>/dev/null)
+
+    if [[ -n "$newest_name" ]]; then
+        printf '%s\n' "$newest_name"
+        return 0
+    fi
+
+    return 1
+}
+
+set_favorite_apps() {
+    local -a favorites=(
+        com.mitchellh.ghostty.desktop
+        microsoft-edge.desktop
+        firefox-esr.desktop
+        obsidian.desktop
+        thunderbird.desktop
+        sioyek.desktop
+        org.kde.krita.desktop
+        blender.desktop
+        Godot_v4.7-beta1_mono_linux_x86_64.desktop
+        org.nomacs.ImageLounge.desktop
+        mpv.desktop
+        libreoffice-writer.desktop
+        libreoffice-calc.desktop
+        spotify.desktop
+        org.gnome.Nautilus.desktop
+    )
+    local telegram_desktop current target desktop
+
+    if telegram_desktop="$(find_telegram_desktop)"; then
+        favorites+=("$telegram_desktop")
+    else
+        log_warn "Telegram desktop not found — skipping pin"
+    fi
+
+    for desktop in "${favorites[@]}"; do
+        if ! desktop_file_path "$desktop" >/dev/null; then
+            log_warn "Favorite desktop missing (pin anyway): $desktop"
+        fi
+    done
+
+    target="["
+    for desktop in "${favorites[@]}"; do
+        [[ "$target" != "[" ]] && target+=", "
+        target+="'$desktop'"
+    done
+    target+="]"
+
+    current="$(gsettings get org.gnome.shell favorite-apps 2>/dev/null || true)"
+    if [[ "$current" == "$target" ]]; then
+        log_info "favorite-apps already up to date"
+        return 0
+    fi
+
+    gsettings set org.gnome.shell favorite-apps "$target"
+    log_info "favorite-apps -> ${#favorites[@]} pins"
+}
+
+
 log_info "Applying GNOME preferences..."
 
 set_xkb_ctrl_nocaps
 set_gsetting_if_different org.gnome.desktop.interface color-scheme prefer-dark
 set_gsetting_if_different org.gnome.desktop.default-applications.office.calendar exec 'thunderbird -calendar'
+set_favorite_apps
 
 log_info "Setting default applications..."
 set_mime_default application/pdf sioyek.desktop
