@@ -7,6 +7,9 @@ cd "$script_dir"
 # shellcheck source=runs/utils.sh
 source "$script_dir/runs/utils.sh"
 
+yadm config local.class laptop
+yadm alt
+
 # AMD
 sudo apt install -y firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon
 
