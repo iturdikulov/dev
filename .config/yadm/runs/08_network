@@ -28,29 +28,6 @@ else
     sudo ufw allow nfs
     sudo ufw allow samba
 
-    # Proxy
-    sudo ufw allow 2080/tcp
-    sudo ufw allow 2080/udp
-
-    # KDE connect rules
-    sudo ufw allow 1716:1764/tcp
-    sudo ufw allow 1716:1764/udp
-
-    # Valutwarden
-    sudo ufw allow 8000/tcp
-
-    # Jellyfin
-    sudo ufw allow 8096/tcp
-    sudo ufw allow 8920/tcp
-    sudo ufw allow 7359/udp
-
-    # Miniflux
-    sudo ufw allow 8082/tcp
-
-    # Custom
-    sudo ufw allow 8080/tcp
-    sudo ufw allow 9090/tcp
-
     sudo ufw enable
     sudo ufw status verbose
 fi

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+if [[ "${YADM_IS_WSL:-0}" == "1" ]]; then
+    log_info "WSL runner detected; skipping UFW cleanup"
+    exit 0
+fi
+
+log_info "Closing service ports in UFW"
+
+# Proxy
+sudo ufw delete allow 2080/tcp || true
+sudo ufw delete allow 2080/udp || true
+
+# Valutwarden
+sudo ufw delete allow 8000/tcp || true
+
+# Jellyfin
+sudo ufw delete allow 8096/tcp || true
+sudo ufw delete allow 8920/tcp || true
+sudo ufw delete allow 7359/udp || true
+
+# Miniflux
+sudo ufw delete allow 8082/tcp || true
+
+# Custom
+sudo ufw delete allow 8080/tcp || true
+sudo ufw delete allow 9090/tcp || true
+
+sudo ufw status verbose

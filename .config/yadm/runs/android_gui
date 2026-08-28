@@ -41,3 +41,9 @@ EOF
 
 
 install_packages kdeconnect android-file-transfer apksigner
+
+if [[ "${YADM_IS_WSL:-0}" != "1" ]]; then
+    # KDE connect rules
+    sudo ufw allow 1716:1764/tcp
+    sudo ufw allow 1716:1764/udp
+fi
