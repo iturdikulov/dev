@@ -271,6 +271,8 @@ set_extension_enabled() {
 }
 
 setup_gnome_extensions() {
+    install_packages gnome-shell-extension-manager
+
     if ! command_exists gnome-extensions; then
         log_warn "gnome-extensions not found — skipping shell extensions"
         return 0
