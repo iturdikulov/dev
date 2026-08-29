@@ -79,6 +79,21 @@ set_gsetting_if_different() {
     log_info "$schema $key -> $quoted"
 }
 
+set_gsetting_bool_if_different() {
+    local schema="$1"
+    local key="$2"
+    local value="$3"
+    local current
+
+    current="$(gsettings get "$schema" "$key" 2>/dev/null || true)"
+    if [[ "$current" == "$value" ]]; then
+        return 0
+    fi
+
+    gsettings set "$schema" "$key" "$value"
+    log_info "$schema $key -> $value"
+}
+
 set_xkb_ctrl_nocaps() {
     local current target raw_output
     local -a kept=()
@@ -507,6 +522,7 @@ set_xkb_ctrl_nocaps
 set_input_source_russian
 set_gsetting_if_different org.gnome.desktop.interface color-scheme prefer-dark
 set_gsetting_if_different org.gnome.desktop.default-applications.office.calendar exec 'thunderbird -calendar'
+set_gsetting_bool_if_different org.gnome.desktop.notifications show-in-lock-screen false
 set_favorite_apps
 setup_gnome_extensions
 
