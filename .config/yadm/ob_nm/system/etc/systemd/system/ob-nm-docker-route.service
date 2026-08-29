@@ -1,0 +1,14 @@
+[Unit]
+Description=Docker routing bypass for Mihomo TUN/auto-redirect
+After=network-online.target docker.service mihomo.service
+Wants=network-online.target
+PartOf=mihomo.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/ob-nm-docker-route.sh
+ExecStop=/bin/sh -c 'ip rule del from 172.16.0.0/12 lookup main priority 100 2>/dev/null || true; ip rule del to 172.16.0.0/12 lookup main priority 98 2>/dev/null || true'
+
+[Install]
+WantedBy=multi-user.target
