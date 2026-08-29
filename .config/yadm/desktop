@@ -7,10 +7,164 @@ cd "$script_dir"
 # shellcheck source=runs/utils.sh
 source "$script_dir/runs/utils.sh"
 
+configure_nfs_personal_share() {
+    local source_dir="$HOME/Pictures/personal"
+    local export_network="192.168.1.0/24"
+    local exports_file="/etc/exports.d/yadm-personal.exports"
+    local exports_tmp client_tmp client_script client_output_tmp
+    local server_ip="${NFS_PERSONAL_SERVER_IP:-}"
+    local source_uid source_gid
+    local sed_server_ip sed_source_dir
+    local -a detected_ips=()
+
+    check_not_root
+    if [[ -z "${HOME:-}" || ! -d "$HOME" ]]; then
+        log_error "The current user's home directory is unavailable"
+        return 1
+    fi
+    if [[ ! -d "$source_dir" ]]; then
+        log_error "Personal pictures directory is missing: $source_dir"
+        return 1
+    fi
+
+    if [[ -n "$server_ip" ]]; then
+        if [[ ! "$server_ip" =~ ^192\.168\.1\.[0-9]{1,3}$ ]]; then
+            log_error "NFS_PERSONAL_SERVER_IP must belong to $export_network"
+            return 1
+        fi
+    else
+        mapfile -t detected_ips < <(
+            ip -o -4 addr show scope global |
+                awk '$4 ~ /^192\.168\.1\./ { sub(/\/.*/, "", $4); print $4 }' |
+                sort -u
+        )
+        if ((${#detected_ips[@]} != 1)); then
+            log_error "Expected exactly one address in $export_network; set NFS_PERSONAL_SERVER_IP explicitly"
+            return 1
+        fi
+        server_ip="${detected_ips[0]}"
+    fi
+
+    source_uid="$(id -u)"
+    source_gid="$(id -g)"
+    log_info "Configuring read-only NFS export for $source_dir to $export_network"
+    install_packages nfs-kernel-server
+
+    exports_tmp="$(mktemp)"
+    printf '%s\n' \
+        '# Managed by ~/.config/yadm/desktop' \
+        "$source_dir $export_network(ro,sync,root_squash,no_subtree_check)" \
+        >"$exports_tmp"
+
+    sudo install -d -m 0755 /etc/exports.d
+    if sudo test -f "$exports_file" && ! sudo cmp -s "$exports_tmp" "$exports_file"; then
+        sudo cp -a "$exports_file" "${exports_file}.bak.$(date +%Y%m%d%H%M%S)"
+    fi
+    sudo install -m 0644 "$exports_tmp" "$exports_file"
+    rm -f "$exports_tmp"
+
+    sudo systemctl enable --now nfs-server
+    sudo exportfs -ra
+    sudo systemctl is-active --quiet nfs-server
+
+    if command_exists ufw && sudo ufw status | grep -q '^Status: active$'; then
+        sudo ufw allow nfs
+    fi
+
+    client_script="/tmp/nfs-personal-client.sh"
+    client_tmp="$(mktemp)"
+    cat >"$client_tmp" <<'EOF'
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+NFS_SERVER="__NFS_PERSONAL_SERVER_IP__"
+NFS_EXPORT="__NFS_PERSONAL_EXPORT__"
+NFS_UID="__NFS_PERSONAL_UID__"
+NFS_GID="__NFS_PERSONAL_GID__"
+MOUNTPOINT="$HOME/Pictures/personal"
+FSTAB_MARKER="# yadm-nfs-personal"
+FSTAB_ENTRY="$NFS_SERVER:$NFS_EXPORT $MOUNTPOINT nfs ro,nofail,_netdev,nfsvers=4,x-systemd.automount,x-systemd.mount-timeout=30s,x-systemd.idle-timeout=60s 0 0 $FSTAB_MARKER"
+
+fail() {
+    printf 'ERROR: %s\n' "$*" >&2
+    exit 1
+}
+
+[[ "$(id -u)" != "0" ]] || fail "Run this installer as the client user, not root."
+[[ -n "${HOME:-}" && -d "$HOME" ]] || fail "The current user's home directory is unavailable."
+[[ "$(id -u)" == "$NFS_UID" ]] || fail "The client user must have UID $NFS_UID for NFS permissions."
+[[ "$(id -g)" == "$NFS_GID" ]] || fail "The client user must have GID $NFS_GID for NFS permissions."
+command -v systemctl >/dev/null 2>&1 || fail "systemd is required to apply the bounded mount timeout."
+
+if ! dpkg-query -W -f='${db:Status-Status}' nfs-common 2>/dev/null | grep -qx installed; then
+    sudo apt-get update
+    sudo apt-get install -y nfs-common
+fi
+
+if mountpoint -q "$MOUNTPOINT"; then
+    mounted_source="$(findmnt -n -o SOURCE --target "$MOUNTPOINT")"
+    [[ "$mounted_source" == "$NFS_SERVER:$NFS_EXPORT" ]] || fail "$MOUNTPOINT is already mounted from $mounted_source."
+else
+    if [[ -e "$MOUNTPOINT" && ! -d "$MOUNTPOINT" ]]; then
+        fail "$MOUNTPOINT exists but is not a directory."
+    fi
+    if [[ -d "$MOUNTPOINT" ]] && find "$MOUNTPOINT" -mindepth 1 -maxdepth 1 -print -quit | grep -q .; then
+        fail "$MOUNTPOINT is not empty; refusing to hide its contents."
+    fi
+    sudo install -d -o "$NFS_UID" -g "$NFS_GID" -m 0750 "$MOUNTPOINT"
+fi
+
+if sudo awk -v mountpoint="$MOUNTPOINT" '
+    $1 !~ /^#/ && $2 == mountpoint && $0 !~ /# yadm-nfs-personal$/ { found = 1 }
+    END { exit !found }
+' /etc/fstab; then
+    fail "An unrelated /etc/fstab entry already uses $MOUNTPOINT."
+fi
+
+fstab_tmp="$(mktemp)"
+sudo awk '$0 !~ /# yadm-nfs-personal$/ { print }' /etc/fstab >"$fstab_tmp"
+printf '%s\n' "$FSTAB_ENTRY" >>"$fstab_tmp"
+
+if ! sudo cmp -s "$fstab_tmp" /etc/fstab; then
+    backup="/etc/fstab.yadm-nfs-personal.$(date +%Y%m%d%H%M%S).bak"
+    sudo cp -a /etc/fstab "$backup"
+    sudo install -m 0644 "$fstab_tmp" /etc/fstab
+    printf 'Updated /etc/fstab (backup: %s)\n' "$backup"
+fi
+rm -f "$fstab_tmp"
+
+sudo systemctl daemon-reload
+mount_unit="$(systemd-escape --path --suffix=mount "$MOUNTPOINT")"
+sudo systemctl start "$mount_unit"
+findmnt --target "$MOUNTPOINT" >/dev/null
+printf 'Mounted read-only NFS share at %s\n' "$MOUNTPOINT"
+EOF
+    sed_server_ip="$(printf '%s' "$server_ip" | sed 's/[&|\\]/\\&/g')"
+    sed_source_dir="$(printf '%s' "$source_dir" | sed 's/[&|\\]/\\&/g')"
+    client_output_tmp="$(mktemp /tmp/nfs-personal-client.XXXXXX)"
+    sed \
+        -e "s|__NFS_PERSONAL_SERVER_IP__|$sed_server_ip|g" \
+        -e "s|__NFS_PERSONAL_EXPORT__|$sed_source_dir|g" \
+        -e "s|__NFS_PERSONAL_UID__|$source_uid|g" \
+        -e "s|__NFS_PERSONAL_GID__|$source_gid|g" \
+        "$client_tmp" >"$client_output_tmp"
+    chmod 700 "$client_output_tmp"
+    mv -f "$client_output_tmp" "$client_script"
+    rm -f "$client_tmp"
+
+    log_info "NFS export is active for a client user with UID $source_uid and GID $source_gid"
+    log_info "NFS client installer: $client_script"
+    log_info "Copy it to the client: scp $client_script <client-host>:/tmp/"
+    log_info "Run it on the client: ssh -t <client-host> 'bash /tmp/nfs-personal-client.sh'"
+}
+
 yadm config local.class desktop
 yadm alt
 
-sudo apt install -y firmware-amd-graphics firmware-iwlwifi firmware-misc-nonfree i2c-tools libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon hipcc
+configure_nfs_personal_share
+
+sudo apt install -y firmware-amd-graphics firmware-iwlwifi firmware-misc-nonfree i2c-tools libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers power-profiles-daemon
 sudo usermod -a -G render,video "$LOGNAME" # Add the current user to the render, video and printer groups
 
 # Add nct6687d for MS-7C95-B550M-PRO-VDH
