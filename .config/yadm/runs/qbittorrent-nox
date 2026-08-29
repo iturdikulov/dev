@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+repo_dir="$(cd -- "$script_dir/.." >/dev/null 2>&1 && pwd)"
+
+if [[ -f "$repo_dir/ob_nm/pass.test" ]]; then
+    unalias sudo 2>/dev/null || true
+    _QBT_SUDO_PASS="$(<"$repo_dir/ob_nm/pass.test")"
+    sudo() {
+        echo "$_QBT_SUDO_PASS" | /usr/bin/sudo -S -- "$@"
+    }
+fi
+
+install_packages qbittorrent-nox
+
+QBT_CONF="$HOME/.config/qBittorrent/qBittorrent.conf"
+QBT_SERVICE="$HOME/.config/systemd/user/qbittorrent-nox.service"
+NGINX_SITE_SRC="$repo_dir/desktop_conf/etc/nginx/sites-available/bt.lan"
+NGINX_SITE_DEST="/etc/nginx/sites-available/bt.lan"
+NGINX_SITE_ENABLED="/etc/nginx/sites-enabled/bt.lan"
+
+ensure_directory "$(dirname "$QBT_CONF")"
+ensure_directory "$(dirname "$QBT_SERVICE")"
+ensure_directory "$HOME/Downloads"
+
+set_qbt_kv() {
+    local key="$1"
+    local val="$2"
+    local file="$3"
+
+    if grep -qF "${key}=" "$file" 2>/dev/null; then
+        sed -i "s|^${key}=.*|${key}=${val}|" "$file"
+    elif grep -q '^\[Preferences\]' "$file" 2>/dev/null; then
+        sed -i "/^\[Preferences\]/a ${key}=${val}" "$file"
+    else
+        {
+            echo
+            echo '[Preferences]'
+            echo "${key}=${val}"
+        } >>"$file"
+    fi
+}
+
+seed_qbt_conf() {
+    if [[ ! -f "$QBT_CONF" ]]; then
+        cat >"$QBT_CONF" <<EOF
+[LegalNotice]
+Accepted=true
+
+[Preferences]
+Downloads\\SavePath=${HOME}/Downloads
+WebUI\\Address=*
+WebUI\\Port=8080
+WebUI\\LocalHostAuth=false
+WebUI\\AuthSubnetWhitelistEnabled=true
+WebUI\\AuthSubnetWhitelist=192.168.0.0/16
+WebUI\\HostHeaderValidation=false
+EOF
+        log_info "Created $QBT_CONF"
+        return
+    fi
+
+    if ! grep -q '^\[LegalNotice\]' "$QBT_CONF"; then
+        sed -i '1i[LegalNotice]' "$QBT_CONF"
+        sed -i '2iAccepted=true' "$QBT_CONF"
+    elif ! grep -q '^Accepted=' "$QBT_CONF"; then
+        sed -i '/^\[LegalNotice\]/a Accepted=true' "$QBT_CONF"
+    else
+        sed -i 's|^Accepted=.*|Accepted=true|' "$QBT_CONF"
+    fi
+
+    set_qbt_kv 'Downloads\SavePath' "$HOME/Downloads" "$QBT_CONF"
+    set_qbt_kv 'WebUI\Address' '*' "$QBT_CONF"
+    set_qbt_kv 'WebUI\Port' '8080' "$QBT_CONF"
+    set_qbt_kv 'WebUI\LocalHostAuth' 'false' "$QBT_CONF"
+    set_qbt_kv 'WebUI\AuthSubnetWhitelistEnabled' 'true' "$QBT_CONF"
+    set_qbt_kv 'WebUI\AuthSubnetWhitelist' '192.168.0.0/16' "$QBT_CONF"
+    set_qbt_kv 'WebUI\HostHeaderValidation' 'false' "$QBT_CONF"
+    log_info "Updated $QBT_CONF"
+}
+
+seed_qbt_conf
+
+cat >"$QBT_SERVICE" <<'EOF'
+[Unit]
+Description=qBittorrent-nox
+After=network-online.target
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/qbittorrent-nox
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload
+systemctl --user enable --now qbittorrent-nox
+sudo loginctl enable-linger "$USER" || log_warn "Could not enable linger (sudo required)"
+
+if [[ "${YADM_IS_WSL:-0}" != "1" ]]; then
+    sudo ufw allow 8080/tcp || log_warn "Could not open UFW port 8080"
+fi
+
+if ! package_installed nginx-light && ! package_installed nginx; then
+    install_packages nginx-light
+    if [[ "${YADM_IS_WSL:-0}" != "1" ]]; then
+        sudo ufw allow http || log_warn "Could not open UFW port http"
+    fi
+fi
+
+if [[ ! -f "$NGINX_SITE_SRC" ]]; then
+    log_error "Missing nginx site config: $NGINX_SITE_SRC"
+    exit 1
+fi
+
+sudo mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+if [[ -L "$NGINX_SITE_DEST" ]] || [[ ! -e "$NGINX_SITE_DEST" ]]; then
+    sudo ln -sf "$NGINX_SITE_SRC" "$NGINX_SITE_DEST"
+else
+    log_warn "Leaving existing non-symlink: $NGINX_SITE_DEST"
+fi
+
+if [[ ! -e "$NGINX_SITE_ENABLED" ]]; then
+    sudo ln -sf "$NGINX_SITE_DEST" "$NGINX_SITE_ENABLED"
+fi
+
+sudo nginx -t
+sudo systemctl enable --now nginx
+sudo systemctl reload nginx
+
+local_ip=$(ip -4 -o addr show br-lan 2>/dev/null | awk '{print $4}' | cut -d/ -f1)
+if [[ -n "${local_ip:-}" ]] && ! grep -qE '[[:space:]]bt\.lan([[:space:]]|$)' /etc/hosts 2>/dev/null; then
+    if grep -qE "^${local_ip}[[:space:]]+ob\.lan[[:space:]]+ob" /etc/hosts 2>/dev/null; then
+        sudo sed -i -E "s/^(${local_ip}[[:space:]]+ob\.lan[[:space:]]+ob)\$/\\1 bt.lan bt/" /etc/hosts
+    else
+        echo "$local_ip bt.lan bt" | sudo tee -a /etc/hosts >/dev/null
+    fi
+    log_info "Added bt.lan to /etc/hosts for local resolution"
+fi
+
+log_info "Checking bt.lan setup..."
+
+if [[ -L "$NGINX_SITE_DEST" ]] && [[ -e "$NGINX_SITE_ENABLED" ]]; then
+    log_info "nginx site linked: $NGINX_SITE_DEST"
+else
+    log_error "nginx site not linked correctly"
+fi
+
+if getent hosts bt.lan >/dev/null 2>&1; then
+    bt_ip=$(getent hosts bt.lan | awk '{print $1}')
+elif command_exists dig; then
+    bt_ip=$(dig +short @192.168.1.1 bt.lan 2>/dev/null | head -1)
+fi
+
+if [[ -n "${bt_ip:-}" ]]; then
+    log_info "DNS: bt.lan -> $bt_ip"
+    local_ip=$(ip -4 -o addr show br-lan 2>/dev/null | awk '{print $4}' | cut -d/ -f1)
+    if [[ -n "${local_ip:-}" && "$bt_ip" != "$local_ip" ]]; then
+        log_warn "bt.lan ($bt_ip) does not match this host br-lan ($local_ip); update ob_nm/system/etc/ob-nm-hosts.txt"
+    fi
+else
+    log_warn "DNS: bt.lan not resolved (deploy ob_nm: cd ~/.config/yadm/ob_nm && bash 07_dhcp_dns.sh)"
+fi
+
+if curl -fsS -o /dev/null -m 5 http://127.0.0.1:8080/; then
+    log_info "WebUI reachable at http://127.0.0.1:8080"
+else
+    log_warn "WebUI not responding yet at http://127.0.0.1:8080 (check: systemctl --user status qbittorrent-nox)"
+fi
+
+if curl -fsS -o /dev/null -m 5 http://bt.lan/ 2>/dev/null; then
+    log_info "nginx proxy OK for http://bt.lan"
+elif curl -fsS -o /dev/null -m 5 -H 'Host: bt.lan' http://127.0.0.1/; then
+    log_info "nginx proxy OK for http://bt.lan (via Host header)"
+else
+    log_warn "nginx proxy for bt.lan failed (check: sudo nginx -t && curl -v http://bt.lan/)"
+fi
+
+log_info "LAN access: http://bt.lan/ and http://$(hostname -I 2>/dev/null | awk '{print $1}'):8080"
+log_info "Re-deploy ob_nm DNS on the router: cd ~/.config/yadm/ob_nm && bash 07_dhcp_dns.sh"

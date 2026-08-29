@@ -3,7 +3,10 @@
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 #
-# Nginx - new server block
+# Nginx - base install; site configs are linked by app runners (e.g. qbittorrent-nox).
 
-sudo apt install -y nginx-light
-sudo ufw allow http
+install_packages nginx-light
+
+if [[ "${YADM_IS_WSL:-0}" != "1" ]]; then
+    sudo ufw allow http
+fi
