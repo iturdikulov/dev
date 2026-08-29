@@ -13,16 +13,20 @@ if [[ -f "$repo_dir/ob_nm/pass.test" ]]; then
     }
 fi
 
-install_packages qbittorrent-nox
+install_packages qbittorrent-nox curl jq
 
 QBT_CONF="$HOME/.config/qBittorrent/qBittorrent.conf"
 QBT_SERVICE="$HOME/.config/systemd/user/qbittorrent-nox.service"
+QBT_SEQUENTIAL_CONFIG="$HOME/.config/qBittorrent/sequential-categories.conf"
+QBT_SEQUENTIAL_HELPER="$HOME/.local/bin/qbittorrent-enable-sequential"
+QBT_SEQUENTIAL_SERVICE="$HOME/.config/systemd/user/qbittorrent-sequential@.service"
 NGINX_SITE_SRC="$repo_dir/desktop_conf/etc/nginx/sites-available/bt.lan"
 NGINX_SITE_DEST="/etc/nginx/sites-available/bt.lan"
 NGINX_SITE_ENABLED="/etc/nginx/sites-enabled/bt.lan"
 
 ensure_directory "$(dirname "$QBT_CONF")"
 ensure_directory "$(dirname "$QBT_SERVICE")"
+ensure_directory "$(dirname "$QBT_SEQUENTIAL_HELPER")"
 ensure_directory "$HOME/Downloads"
 
 set_qbt_kv() {
@@ -83,6 +87,97 @@ EOF
 
 seed_qbt_conf
 
+if [[ ! -f "$QBT_SEQUENTIAL_CONFIG" ]]; then
+    cat >"$QBT_SEQUENTIAL_CONFIG" <<'EOF'
+# Enable sequential download for these qBittorrent categories.
+# One category per line. A category also matches its subcategories.
+Movie
+EOF
+    log_info "Created $QBT_SEQUENTIAL_CONFIG"
+fi
+
+cat >"$QBT_SEQUENTIAL_HELPER" <<'EOF'
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+qbt_url="http://127.0.0.1:8080"
+categories_file="${XDG_CONFIG_HOME:-$HOME/.config}/qBittorrent/sequential-categories.conf"
+torrent_id="${1:-}"
+
+log() {
+    printf 'qbittorrent-sequential: %s\n' "$*"
+}
+
+if [[ ! "$torrent_id" =~ ^[[:xdigit:]]{40}$ ]]; then
+    log "invalid torrent ID: $torrent_id"
+    exit 2
+fi
+
+if [[ ! -r "$categories_file" ]]; then
+    log "category file is not readable: $categories_file"
+    exit 1
+fi
+
+torrent_json=""
+deadline=$((SECONDS + 30))
+while ((SECONDS < deadline)); do
+    response=$(curl -fsS --max-time 3 --get \
+        --data-urlencode "hashes=$torrent_id" \
+        "$qbt_url/api/v2/torrents/info" 2>/dev/null || true)
+    torrent_json=$(jq -c 'if type == "array" and length > 0 then .[0] else empty end' \
+        <<<"$response" 2>/dev/null || true)
+    [[ -n "$torrent_json" ]] && break
+    sleep 1
+done
+
+if [[ -z "$torrent_json" ]]; then
+    log "torrent did not become available through the Web API: $torrent_id"
+    exit 1
+fi
+
+category=$(jq -r '.category // ""' <<<"$torrent_json")
+matched=false
+while IFS= read -r target; do
+    if [[ "$category" == "$target" || "$category" == "$target/"* ]]; then
+        matched=true
+        break
+    fi
+done < <(sed \
+    -e 's/[[:space:]]*#.*$//' \
+    -e 's/^[[:space:]]*//' \
+    -e 's/[[:space:]]*$//' \
+    -e '/^$/d' \
+    "$categories_file")
+
+if [[ "$matched" != true ]]; then
+    log "category '$category' is not configured; leaving $torrent_id unchanged"
+    exit 0
+fi
+
+if [[ $(jq -r '.seq_dl // false' <<<"$torrent_json") == true ]]; then
+    log "sequential download is already enabled for $torrent_id ($category)"
+    exit 0
+fi
+
+curl -fsS --max-time 10 \
+    --data-urlencode "hashes=$torrent_id" \
+    "$qbt_url/api/v2/torrents/toggleSequentialDownload" >/dev/null
+log "enabled sequential download for $torrent_id ($category)"
+EOF
+chmod 755 "$QBT_SEQUENTIAL_HELPER"
+
+cat >"$QBT_SEQUENTIAL_SERVICE" <<EOF
+[Unit]
+Description=Enable qBittorrent sequential download for %i
+Requires=qbittorrent-nox.service
+After=qbittorrent-nox.service
+
+[Service]
+Type=oneshot
+ExecStart=${QBT_SEQUENTIAL_HELPER} %i
+EOF
+
 cat >"$QBT_SERVICE" <<'EOF'
 [Unit]
 Description=qBittorrent-nox
@@ -100,6 +195,30 @@ EOF
 systemctl --user daemon-reload
 systemctl --user enable --now qbittorrent-nox
 sudo loginctl enable-linger "$USER" || log_warn "Could not enable linger (sudo required)"
+
+qbt_api_ready=false
+for ((attempt = 1; attempt <= 30; attempt++)); do
+    if curl -fsS --max-time 3 http://127.0.0.1:8080/api/v2/app/version >/dev/null 2>&1; then
+        qbt_api_ready=true
+        break
+    fi
+    sleep 1
+done
+
+if [[ "$qbt_api_ready" == true ]]; then
+    qbt_hook='/usr/bin/systemctl --user start qbittorrent-sequential@%K.service'
+    qbt_hook_json=$(jq -nc --arg program "$qbt_hook" '{
+        autorun_on_torrent_added_enabled: true,
+        autorun_on_torrent_added_program: $program
+    }')
+    curl -fsS --max-time 10 \
+        --data-urlencode "json=$qbt_hook_json" \
+        http://127.0.0.1:8080/api/v2/app/setPreferences >/dev/null
+    log_info "Configured qBittorrent torrent-added hook for sequential downloads"
+else
+    log_error "WebUI API did not become ready; torrent-added hook was not configured"
+    exit 1
+fi
 
 if [[ "${YADM_IS_WSL:-0}" != "1" ]]; then
     sudo ufw allow 8080/tcp || log_warn "Could not open UFW port 8080"
