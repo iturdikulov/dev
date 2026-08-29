@@ -172,10 +172,6 @@ EOF
     mv -f "$client_output_tmp" "$client_script"
     rm -f "$client_tmp"
 
-    log_info "NFS export is active for a client user with UID $source_uid and GID $source_gid"
-    log_info "NFS client installer: $client_script"
-    log_info "Copy it to the client: scp $client_script <client-host>:/tmp/"
-    log_info "Run it on the client: ssh -t <client-host> 'bash /tmp/nfs-personal-client.sh'"
 }
 
 yadm config local.class desktop
@@ -187,11 +183,27 @@ sudo apt install -y firmware-amd-graphics firmware-iwlwifi firmware-misc-nonfree
 sudo usermod -a -G render,video "$LOGNAME" # Add the current user to the render, video and printer groups
 
 # Add nct6687d for MS-7C95-B550M-PRO-VDH
-cd /tmp || exit 1
-git clone https://github.com/Fred78290/nct6687d
-cd nct6687d || exit 1
-make deb
-sudo dpkg -i ../nct6687d-dkms_*.deb
+kernel_release="$(uname -r)"
+if find "/lib/modules/$kernel_release" -type f -iname 'nct6687d*.ko*' -print -quit 2>/dev/null | grep -q .; then
+    log_info "nct6687d is already available for kernel $kernel_release"
+else
+    cd /tmp || exit 1
+    if [[ ! -d /tmp/nct6687d ]]; then
+        git clone https://github.com/Fred78290/nct6687d /tmp/nct6687d
+    elif [[ ! -d /tmp/nct6687d/.git ]]; then
+        log_error "/tmp/nct6687d exists but is not a Git clone"
+        exit 1
+    fi
+    cd /tmp/nct6687d || exit 1
+    make deb
+    sudo dpkg -i ../nct6687d-dkms_*.deb
+fi
+
+if command_exists modprobe; then
+    sudo modprobe nct6687d || log_warn "Could not load nct6687d for kernel $kernel_release"
+else
+    log_warn "modprobe is unavailable; log in again or reboot after installing nct6687d"
+fi
 
 # Copy config if not exits
 if ! [ -e /etc/sensors.d/MS-7C95-B550M-PRO-VDH.conf ]; then
@@ -210,3 +222,8 @@ fi
 "$script_dir/run_runner.sh" --profile desktop
 
 "$script_dir/sync.sh"
+
+log_info "NFS export is active for a client user with UID $(id -u) and GID $(id -g)"
+log_info "NFS client installer: /tmp/nfs-personal-client.sh"
+log_info "Copy it to the client: scp /tmp/nfs-personal-client.sh <client-host>:/tmp/"
+log_info "Run it on the client: ssh -t <client-host> 'bash /tmp/nfs-personal-client.sh'"
