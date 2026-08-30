@@ -240,3 +240,13 @@ nfs_setup_server() {
 
     nfs_generate_client_installer "$name" "$server_ip" "$access" "$client_script" "$@"
 }
+
+nfs_log_client_instructions() {
+    local name="$1"
+    local client_script="$2"
+
+    log_info "NFS $name export is active for a client user with UID $(id -u) and GID $(id -g)"
+    log_info "Generated NFS client installer: $client_script"
+    log_info "Copy it to the client: scp $client_script <client-host>:/tmp/"
+    log_info "Run it on the client: ssh -t <client-host> 'bash /tmp/$(basename -- "$client_script")'"
+}

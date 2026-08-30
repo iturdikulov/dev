@@ -15,3 +15,5 @@ nfs_setup_server \
     /tmp/nfs-downloads-client.sh \
     rw \
     "$HOME/Downloads:Downloads/server"
+
+nfs_log_client_instructions downloads /tmp/nfs-downloads-client.sh

@@ -65,7 +65,4 @@ fi
 
 "$script_dir/sync.sh"
 
-log_info "NFS export is active for a client user with UID $(id -u) and GID $(id -g)"
-log_info "NFS client installer: /tmp/nfs-personal-client.sh"
-log_info "Copy it to the client: scp /tmp/nfs-personal-client.sh <client-host>:/tmp/"
-log_info "Run it on the client: ssh -t <client-host> 'bash /tmp/nfs-personal-client.sh'"
+nfs_log_client_instructions personal /tmp/nfs-personal-client.sh
