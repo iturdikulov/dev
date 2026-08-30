@@ -14,4 +14,4 @@ nfs_setup_server \
     /etc/exports.d/yadm-downloads.exports \
     /tmp/nfs-downloads-client.sh \
     rw \
-    "$HOME/Downloads:Downloads"
+    "$HOME/Downloads:Downloads/server"
