@@ -203,7 +203,7 @@ prompt_runner() {
 }
 
 for name in "${runners[@]}"; do
-    if [[ "$name" == .* || "$name" == "utils.sh" ]]; then
+    if [[ "$name" == .* || "$name" == "utils.sh" || "$name" == "nfs_utils.sh" ]]; then
         continue
     fi
     if should_skip_runner "$name"; then

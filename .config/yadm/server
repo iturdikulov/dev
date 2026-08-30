@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+# shellcheck source=runs/utils.sh
+source "$script_dir/runs/utils.sh"
+# shellcheck source=runs/nfs_utils.sh
+source "$script_dir/runs/nfs_utils.sh"
+
+nfs_setup_server \
+    downloads \
+    NFS_DOWNLOADS_SERVER_IP \
+    /etc/exports.d/yadm-downloads.exports \
+    /tmp/nfs-downloads-client.sh \
+    rw \
+    "$HOME/Downloads:Downloads"
