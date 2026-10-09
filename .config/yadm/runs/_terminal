@@ -8,4 +8,5 @@ cargo_binstall atuin
 go install github.com/antonmedv/countdown@latest
 go install github.com/charmbracelet/vhs@latest  # terminal recorder
 go install github.com/joshmedeski/sesh/v2@latest
+npm install -g @go-task/cli
 

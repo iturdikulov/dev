@@ -91,6 +91,7 @@ video/x-theora=mpv.desktop;
 video/x-theora+ogg=mpv.desktop;
 x-scheme-handler/http=com.microsoft.Edge.desktop;
 x-scheme-handler/https=com.microsoft.Edge.desktop;
+application/octet-stream=nvim.desktop;
 
 [Default Applications]
 application/epub+zip=sioyek.desktop;

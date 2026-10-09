@@ -110,6 +110,49 @@ set_gsetting_uint_if_different() {
     log_info "$schema $key -> $expected"
 }
 
+set_audio_toggle_shortcut() {
+    local path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+    local schema="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$path"
+    local current target
+
+    current="$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo '@as []')"
+    if [[ "$current" != *"$path"* ]]; then
+        if [[ "$current" == "@as []" || "$current" == "[]" ]]; then
+            target="['$path']"
+        else
+            target="${current%]}, '$path']"
+        fi
+        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$target"
+        log_info "Added GNOME custom shortcut path $path"
+    fi
+
+    set_gsetting_if_different "$schema" name 'Переключить аудиовыход'
+    set_gsetting_if_different "$schema" command "$HOME/.local/scripts/toggle_audio.sh"
+    set_gsetting_if_different "$schema" binding '<Super><Shift>a'
+}
+
+set_vpn_toggle_shortcut() {
+    local path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
+    local schema="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$path"
+    local current target
+    local command="/bin/bash -c 'active=\$(nmcli -t -f NAME,TYPE connection show --active | awk -F: '\''\$2==\"vpn\" {print \$1; exit}'\''); if [[ -n \$active ]]; then nmcli connection down \"\$active\"; else vpn=\$(nmcli -t -f NAME,TYPE connection show | awk -F: '\''\$2==\"vpn\" {name=\$1} END {print name}'\''); [[ -n \$vpn ]] && nmcli connection up \"\$vpn\"; fi'"
+
+    current="$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo '@as []')"
+    if [[ "$current" != *"$path"* ]]; then
+        if [[ "$current" == "@as []" || "$current" == "[]" ]]; then
+            target="['$path']"
+        else
+            target="${current%]}, '$path']"
+        fi
+        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$target"
+        log_info "Added GNOME custom shortcut path $path"
+    fi
+
+    set_gsetting_if_different "$schema" name 'Переключить VPN'
+    set_gsetting_if_different "$schema" command "$command"
+    set_gsetting_if_different "$schema" binding '<Super><Shift>v'
+}
+
 set_xkb_ctrl_nocaps() {
     local current target raw_output
     local -a kept=()
@@ -542,6 +585,8 @@ set_gsetting_bool_if_different org.gnome.desktop.notifications show-in-lock-scre
 set_gsetting_bool_if_different org.gnome.desktop.screensaver lock-enabled true
 set_gsetting_uint_if_different org.gnome.desktop.session idle-delay 1800
 set_gsetting_uint_if_different org.gnome.desktop.screensaver lock-delay 60
+set_audio_toggle_shortcut
+set_vpn_toggle_shortcut
 set_favorite_apps
 setup_gnome_extensions
 

@@ -23,6 +23,7 @@ param(
     [string[]]$AllowedHosts = @('192.168.1.169'),
     # Appended (deduplicated) to C:\ProgramData\ssh\administrators_authorized_keys
     [string]$SshPublicKeyFile,
+    [string]$DotfilesRepo = 'https://github.com/iturdikulov/dev',
     [switch]$SkipApps,
     [switch]$SkipSystem,
     [switch]$SkipSsh
@@ -144,6 +145,7 @@ $Packages = @(
     '7zip.7zip'
     'ajeetdsouza.zoxide'
     'Starship.Starship'
+    'marlocarlo.psmux' # native tmux for Windows (psmux/tmux commands)
 
     # Languages & toolchains
     'Python.Python.3.14'
@@ -311,9 +313,94 @@ function Update-GitRepo([string]$Url, [string]$Path) {
     }
 }
 
+# ---------------------------------------------------------------------------
+# yadm (runs on Git Bash) + dotfiles
+# ---------------------------------------------------------------------------
+
+$YadmVersion = '3.5.0'
+$YadmUrl = "https://raw.githubusercontent.com/yadm-dev/yadm/$YadmVersion/yadm"
+$GitBash = Join-Path $env:ProgramFiles 'Git\bin\bash.exe'
+$LocalBin = Join-Path $HOME '.local\bin'
+$YadmScript = Join-Path $LocalBin 'yadm'
+$YadmRepo = Join-Path $HOME '.local\share\yadm\repo.git'
+
+function Set-UserEnvironment([string]$Name, [string]$Value) {
+    if ([Environment]::GetEnvironmentVariable($Name, 'User') -ne $Value) {
+        Write-LogInfo "Setting user environment variable $Name=$Value"
+        [Environment]::SetEnvironmentVariable($Name, $Value, 'User')
+    }
+    Set-Item -Path "Env:$Name" -Value $Value
+}
+
+function Invoke-Yadm {
+    & $GitBash $YadmScript @args
+}
+
+function Install-Yadm {
+    if (-not (Test-Path $GitBash)) {
+        Write-LogError "Git Bash not found at $GitBash; skipping yadm"
+        return
+    }
+    if (-not (Test-Path $LocalBin)) {
+        New-Item -ItemType Directory -Path $LocalBin -Force | Out-Null
+    }
+
+    if ((Test-Path $YadmScript) -and ((Invoke-Yadm version 2>$null) -match "yadm version $([regex]::Escape($YadmVersion))")) {
+        Write-LogInfo "yadm $YadmVersion is already installed"
+    } else {
+        Write-LogInfo "Installing yadm $YadmVersion to $YadmScript"
+        try {
+            Invoke-WebRequest -Uri $YadmUrl -OutFile $YadmScript -UseBasicParsing
+        } catch {
+            Write-LogError "yadm download failed: $_"
+            return
+        }
+    }
+
+    # Lets PowerShell/cmd call yadm; Git Bash finds ~/.local/bin/yadm via PATH
+    Set-Content -Path (Join-Path $LocalBin 'yadm.cmd') -Encoding Ascii -Value `
+        "@`"$GitBash`" `"%USERPROFILE%\.local\bin\yadm`" %*"
+
+    $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+    if (($userPath -split ';') -notcontains $LocalBin) {
+        Write-LogInfo "Adding $LocalBin to user PATH"
+        [Environment]::SetEnvironmentVariable('Path', "$LocalBin;$userPath", 'User')
+    }
+
+    # Most tools (nvim, git, lazygit, starship, ...) then read ~/.config like on Linux
+    Set-UserEnvironment 'XDG_CONFIG_HOME' (Join-Path $HOME '.config')
+    # Real symlinks for yadm alternates (allowed by Developer Mode)
+    Set-UserEnvironment 'MSYS' 'winsymlinks:nativestrict'
+    Update-SessionPath
+
+    if (Test-Path $YadmRepo) {
+        Write-LogInfo "Dotfiles are already cloned ($YadmRepo); update with: yadm pull"
+        return
+    }
+    Write-LogInfo "Cloning dotfiles from $DotfilesRepo (bootstrap is Linux-only, skipped)"
+    Invoke-Yadm clone --no-bootstrap $DotfilesRepo
+    if ($LASTEXITCODE -ne 0) {
+        Write-LogError "yadm clone $DotfilesRepo failed"
+        return
+    }
+    # Submodules use git@github.com: URLs; no GitHub SSH key on a fresh machine
+    $env:GIT_CONFIG_COUNT = '1'
+    $env:GIT_CONFIG_KEY_0 = 'url.https://github.com/.insteadOf'
+    $env:GIT_CONFIG_VALUE_0 = 'git@github.com:'
+    try {
+        Invoke-Yadm submodule update --init --recursive
+    } finally {
+        Remove-Item Env:GIT_CONFIG_COUNT, Env:GIT_CONFIG_KEY_0, Env:GIT_CONFIG_VALUE_0
+    }
+    if ($LASTEXITCODE -ne 0) {
+        Write-LogWarn "yadm submodule update failed; retry later with: yadm submodule update --init --recursive"
+    }
+}
+
 function Install-Extras {
     Install-Winutil
     Update-GitRepo $PowershellisfunUrl (Join-Path $ProjectsDir 'Powershellisfun')
+    Install-Yadm
 }
 
 # ---------------------------------------------------------------------------

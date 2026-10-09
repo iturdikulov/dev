@@ -8,5 +8,33 @@ install_packages mesa-vulkan-drivers libglx-mesa0:i386 mesa-vulkan-drivers:i386 
 
 # protontricks to tune proton prefixes and protontricks-launch to launch games
 # gamemode to tune hardware while playing games
-install_packages winetricks gamemode gamescope vkbasalt
+install_packages winetricks gamemode vkbasalt
 sudo usermod -aG gamemode $USER
+
+# gamescope — not packaged for trixie, built from source per the official README
+# Pinned: 3.16.26+ bundle wlroots 0.20, which needs wayland >= 1.24 (trixie has 1.23.1)
+GAMESCOPE_VERSION="3.16.25"
+GAMESCOPE_SRC_DIR="/tmp/gamescope"
+
+if command_exists gamescope && gamescope --version 2>&1 | grep -Fq "$GAMESCOPE_VERSION"; then
+    log_info "gamescope $GAMESCOPE_VERSION is already installed"
+else
+    # README deps + ones it omits (libdecor, udev, drm, xi, eis, xcb-errors)
+    install_packages git meson ninja-build pkg-config cmake libpipewire-0.3-dev hwdata libx11-dev \
+        libwayland-dev libvulkan-dev wayland-protocols libx11-xcb-dev libxdamage-dev libxcomposite-dev \
+        libxcursor-dev libxxf86vm-dev libxtst-dev libxres-dev libxmu-dev libxkbcommon-dev libcap-dev \
+        libsdl2-dev libavif-dev libpixman-1-dev liblcms2-dev libseat-dev libinput-dev xwayland \
+        libxcb-composite0-dev libxcb-ewmh-dev libxcb-icccm4-dev libxcb-res0-dev glslang-tools \
+        libluajit-5.1-dev libcatch2-dev \
+        libdecor-0-dev libudev-dev libdrm-dev libxi-dev libeis-dev libxcb-errors-dev
+
+    rm -rf "$GAMESCOPE_SRC_DIR"
+    git clone --branch "$GAMESCOPE_VERSION" https://github.com/ValveSoftware/gamescope.git "$GAMESCOPE_SRC_DIR"
+    cd_or_exit "$GAMESCOPE_SRC_DIR"
+    git submodule update --init
+    meson setup build/
+    ninja -C build/
+    sudo meson install -C build/ --skip-subprojects
+    cd_or_exit /tmp
+    rm -rf "$GAMESCOPE_SRC_DIR"
+fi

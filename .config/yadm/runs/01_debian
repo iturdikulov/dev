@@ -43,9 +43,13 @@ done
 log_info "Update system && install core packages"
 sudo apt update && sudo apt upgrade
 
-log_info "Updating kernel from trixie-backports, do not forget to re-run xone/scrcpy runners"
-LINUX_VERSION="6.19.14+deb13-amd64"
-install_packages "linux-image-$LINUX_VERSION/trixie-backports" "linux-headers-$LINUX_VERSION/trixie-backports"
+# Stable trixie kernel via metapackages; drop holds left from the old pinned kernel (needed by nvidia 550)
+mapfile -t held_kernels < <(apt-mark showhold | grep -E '^linux-(image|headers)-' || true)
+if ((${#held_kernels[@]} > 0)); then
+    sudo apt-mark unhold "${held_kernels[@]}"
+fi
+log_info "Installing stable kernel, do not forget to re-run nvidia/xone runners if DKMS modules fail to build"
+install_packages linux-image-amd64 linux-headers-amd64
 
 log_info "Remove discover update notifier"
 sudo rm -f "/etc/xdg/autostart/org.kde.discover.notifier.desktop"

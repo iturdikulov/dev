@@ -4,7 +4,7 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # F3D and FreeCAD
 log_info "Setting up 3D tools..."
-install_packages f3d
+install_packages f3d # OptiX for Blender (libnvoptix1) comes with nvidia-open, see runs/nvidia
 
 FREECAD_VERSION="1.1.1"
 FREECAD_URL="https://github.com/FreeCAD/FreeCAD/releases/download/$FREECAD_VERSION/FreeCAD_$FREECAD_VERSION-Linux-x86_64-py311.AppImage"

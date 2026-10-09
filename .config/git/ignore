@@ -76,3 +76,14 @@ tmp
 **/.claude/settings.local.json
 .codex
 inom_only
+
+# AZ, maybe need to remove this later
+.agents
+.devcontainer/
+local.*.sh
+local.*.py
+docker-compose.override.yml
+az-completion.zsh
+.opencode
+i18n-audit/
+TODO.md

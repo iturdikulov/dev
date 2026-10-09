@@ -34,6 +34,8 @@ addToPathFront() {
     fi
 }
 
+addToPathFront /usr/sbin
+
 # Init tools (also inside Neovim :terminal / Snacks)
 if (( $+commands[fzf] )); then
     source <(fzf --zsh)
@@ -64,6 +66,7 @@ fi
 
 export GOPATH=$HOME/.local/go
 addToPathFront /usr/local/go/bin
+addToPathFront $HOME/.cargo/bin
 
 addToPathFront $HOME/.local/whisper/bin
 addToPathFront $HOME/.local/tmux/bin
@@ -75,6 +78,8 @@ addToPathFront $HOME/.local/bin
 if [[ -d "$HOME/az" ]]; then
     addToPathFront "$HOME/az"
 fi
+[ -f "$HOME/az/az-completion.zsh" ] && source "$HOME/az/az-completion.zsh"
+[ -f "$HOME/az/scripts/agent-sandbox/agent.zsh" ] && source "$HOME/az/scripts/agent-sandbox/agent.zsh"
 addToPathFront $HOME/.local/go/bin
 addToPathFront $HOME/.local/npm/bin
 addToPathFront $HOME/.local/cling/bin
@@ -84,7 +89,7 @@ addToPath /opt/idea-IU-262.8665.337/bin/
 addToPath /usr/local/games
 addToPath /usr/games
 
-alias sudo='sudo '
+alias sudo=$'nocorrect sudo\t'
 alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
@@ -475,9 +480,17 @@ if [[ -s "$NVM_DIR/alias/default" ]]; then
     (( ${#_nvm_matches} )) && addToPathFront "${_nvm_matches[-1]}/bin"
     unset _nvm_default _nvm_matches
 fi
+
 nvm() {
     unset -f nvm
     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
     [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
     nvm "$@"
 }
+
+# task CLI via npm (@go-task/cli) — после nvm PATH, иначе $+commands[task] пуст
+# при холодном старте (после exec zsh PATH уже унаследован и срабатывало раньше).
+if (( $+commands[task] )); then
+  alias t='task'
+  eval "$(task --completion zsh)"
+fi

@@ -21,6 +21,7 @@ main() {
     fi
 
     local head source_commit merge_base next_version answer duplicate_output
+    local repository_root package_name service_name monorepo_root branch_name ticket
     local -a duplicate_files renamed_files
     head=$(command git rev-parse --verify HEAD) || return
     source_commit=$(command git rev-parse --verify "${merge_source}^{commit}") || return
@@ -31,12 +32,13 @@ main() {
     duplicate_output=$(LC_ALL=C comm -12 \
         <(
             {
-                command git diff --name-only "$merge_base" -- migrations
+                # Старые миграции нельзя перенумеровывать: они могли уже выполниться.
+                command git diff --diff-filter=A --name-only "$merge_base" -- migrations
                 command git ls-files --others --exclude-standard -- migrations
             } | sed -nE '/^migrations\/v[0-9]+\.py$/p' | LC_ALL=C sort -u
         ) \
         <(
-            command git ls-tree -r --name-only "$source_commit" -- migrations \
+            command git diff --diff-filter=A --name-only "$merge_base" "$source_commit" -- migrations \
                 | sed -nE '/^migrations\/v[0-9]+\.py$/p' \
                 | LC_ALL=C sort -u
         ))
@@ -49,11 +51,11 @@ main() {
 
     next_version=$(
         {
-            command git ls-tree -r --name-only "$head" -- migrations
+            command git ls-files --cached --others --exclude-standard -- migrations
             command git ls-tree -r --name-only "$source_commit" -- migrations
         } | sed -nE 's|^migrations/v([0-9]+)\.py$|\1|p' | sort -n | tail -n 1 | awk '{ print $1 + 1 }'
     )
-    print -u2 "Merge отменён: обе ветки изменяют миграции:"
+    print -u2 "Найдены новые миграции с одинаковыми номерами в обеих ветках:"
     print -u2 -- "${(F)duplicate_files}"
     print -u2 "Будут выполнены:"
     local file new_file
@@ -72,12 +74,54 @@ main() {
     read -r "answer?Выполнить переименование и git add? [Y/n] "
     print
     if [[ -z "$answer" || "$answer" == [Yy] ]]; then
+        if ! command git diff --cached --quiet; then
+            print -u2 "Переименование не выполнено: индекс уже содержит изменения. Закоммитьте или уберите их из индекса."
+            return 1
+        fi
+        branch_name=$(command git symbolic-ref --quiet --short HEAD) || {
+            print -u2 "Переименование не выполнено: HEAD не указывает на ветку с меткой AS-..."
+            return 1
+        }
+        ticket=$(print -r -- "$branch_name" | sed -nE 's/.*(AS-[0-9]+).*/\1/p' | head -n 1)
+        if [[ -z "$ticket" ]]; then
+            print -u2 "Переименование не выполнено: в имени ветки '$branch_name' не найдена метка AS-..."
+            return 1
+        fi
         local index
         for ((index = 1; index <= ${#duplicate_files[@]}; index++)); do
             command git mv -- "${duplicate_files[$index]}" "${renamed_files[$index]}" || return
         done
         command git add -- "${renamed_files[@]}" || return
-        print "Миграции переименованы и добавлены в индекс. Повторите: git merge $*"
+        command git commit -m "$ticket - переименование пересекающихся миграций" || return
+        # Промежуточный commit освобождает номер до merge, --no-edit не открывает редактор в этом сценарии.
+        command git merge --no-edit "$@" || return
+
+        repository_root=$(command git rev-parse --show-toplevel) || return
+        package_name=${repository_root:t}
+        service_name=${package_name%-backend}
+        monorepo_root=${repository_root:h:h}
+
+        if command git rev-parse --verify -q MERGE_HEAD >/dev/null; then
+            print -u2 "Merge ожидает коммита; dc:renumber не запущен. После commit выполните:"
+            print -u2 "  cd $monorepo_root && task dc:renumber -- $merge_source $service_name"
+            return 1
+        fi
+
+        if [[ "$package_name" != *-backend ]]; then
+            print -u2 "dc:renumber не запущен: текущий репозиторий не является packages/<service>-backend."
+            return 1
+        fi
+        if [[ ! -f "$monorepo_root/taskfile.yml" ]]; then
+            print -u2 "dc:renumber не запущен: не найден $monorepo_root/taskfile.yml."
+            return 1
+        fi
+
+        print "Merge завершён. Запускается dc:renumber для $service_name."
+        (
+            cd "$monorepo_root" || exit
+            command task dc:renumber -- "$merge_source" "$service_name"
+        )
+        return
     fi
     return 1
 }

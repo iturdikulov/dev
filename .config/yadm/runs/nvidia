@@ -1,24 +1,55 @@
-#!/bin/sh
-cd /tmp || exit 1
+#!/usr/bin/env bash
+# NVIDIA open driver from the NVIDIA CUDA apt repo, pinned to one driver branch.
+# Remove the Debian packaged driver first: runs/nvidia_debian_uninstall
 
-sudo apt install -y firmware-linux  firmware-linux-nonfree  firmware-misc-nonfree linux-headers-generic
-sudo add-apt-repository contrib
-sudo dpkg --add-architecture i386
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-wget2 --progress=bar https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb
-sudo dpkg -i cuda-keyring_1.1-1_all.deb
-sudo apt update
-rm -f cuda-keyring_1.1-1_all.deb
-sudo apt install -y cuda nvidia-kernel-open-dkms nvidia-open
+check_not_root
+
+NVIDIA_DRIVER_BRANCH=595
+# Newest CUDA supported by the 595 branch (cuda-compat-13-2); cuda-toolkit would pull 13.4 needing 615
+CUDA_TOOLKIT_PACKAGE=cuda-toolkit-13-2
+
+installed_driver="$(dpkg-query -W -f='${Version}' nvidia-driver 2>/dev/null || true)"
+if [[ -n "$installed_driver" && "$installed_driver" != "$NVIDIA_DRIVER_BRANCH".* ]]; then
+    log_error "nvidia-driver $installed_driver is installed, run runs/nvidia_debian_uninstall first"
+    exit 1
+fi
+
+if ! dpkg --print-foreign-architectures | grep -qx i386; then
+    sudo dpkg --add-architecture i386
+    sudo apt-get update
+fi
+
+if ! package_installed cuda-keyring; then
+    download_file https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb /tmp/cuda-keyring.deb
+    sudo dpkg -i /tmp/cuda-keyring.deb && rm -f /tmp/cuda-keyring.deb
+    sudo apt-get update
+fi
+
+# Pinning first: otherwise apt picks the newest branch from the repo
+install_packages linux-image-amd64 linux-headers-amd64 "nvidia-driver-pinning-$NVIDIA_DRIVER_BRANCH"
+# nvidia-open includes nvidia-kernel-open-dkms, CUDA libs, OptiX (libnvoptix1) and the suspend services
+install_packages nvidia-open nvidia-driver-libs:i386 "$CUDA_TOOLKIT_PACKAGE" firmware-misc-nonfree
 
 echo 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX nvidia-drm.modeset=1 nvidia-drm.fbdev=1"' | sudo tee /etc/default/grub.d/nvidia-modeset.cfg
-echo 'options nvidia NVreg_PreserveVideoMemoryAllocations=1' | sudo tee /etc/modprobe.d/nvidia-power-management.conf
-
-echo "Check after reboot cat /sys/module/nvidia_drm/parameters/modeset, cat /proc/driver/nvidia/params | grep PreserveVideoMemoryAllocations should return Y and 1"
+echo 'options nvidia NVreg_PreserveVideoMemoryAllocations=1 NVreg_TemporaryFilePath=/var/tmp' | sudo tee /etc/modprobe.d/nvidia-power-management.conf
 
 # Enable power-management services
-sudo systemctl enable nvidia-suspend.service
-sudo systemctl enable nvidia-hibernate.service
-sudo systemctl enable nvidia-resume.service
+sudo systemctl enable nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service
 
-echo "Check https://docs.coolercontrol.org/installation/debian.html for coolercontrol"
+sudo update-grub
+sudo update-initramfs -u -k all
+
+# Newest kernel from the linux-image-amd64 metapackage - the one grub boots by default
+kernel_version="$(dpkg-query -W -f='${Depends}' linux-image-amd64 | sed -E 's/^linux-image-([^ ,]+).*/\1/')"
+# Capture first: grep -q closing the pipe early makes dkms fail with SIGPIPE under pipefail
+dkms_status="$(dkms status -m nvidia -k "$kernel_version" 2>/dev/null || true)"
+if [[ "$dkms_status" == *": installed"* ]]; then
+    log_info "nvidia open DKMS module is built for $kernel_version"
+else
+    log_error "nvidia open DKMS module is not built for $kernel_version, check dkms status before reboot"
+fi
+
+log_info "Check after reboot: nvidia-smi (driver $NVIDIA_DRIVER_BRANCH.x), cat /sys/module/nvidia_drm/parameters/modeset (Y), grep PreserveVideoMemoryAllocations /proc/driver/nvidia/params (1)"
+log_info "Check https://docs.coolercontrol.org/installation/debian.html for coolercontrol"

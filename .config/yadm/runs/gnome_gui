@@ -2,4 +2,48 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
+# GNOME Shell ScreenShield (idle blank/lock) requires GDM, not SDDM.
+ensure_gdm3_display_manager() {
+    local gdm_bin="/usr/sbin/gdm3"
+    local current
+
+    install_packages gdm3
+
+    if [[ ! -x "$gdm_bin" ]]; then
+        log_error "gdm3 binary missing after install ($gdm_bin)"
+        return 1
+    fi
+
+    echo "gdm3 shared/default-x-display-manager select gdm3" | sudo debconf-set-selections
+    if package_installed sddm; then
+        echo "sddm shared/default-x-display-manager select gdm3" | sudo debconf-set-selections
+    fi
+
+    current="$(cat /etc/X11/default-display-manager 2>/dev/null || true)"
+    if [[ "$current" != "$gdm_bin" ]]; then
+        printf '%s\n' "$gdm_bin" | sudo tee /etc/X11/default-display-manager >/dev/null
+        log_info "default-display-manager -> $gdm_bin"
+    else
+        log_info "default-display-manager already $gdm_bin"
+    fi
+
+    # dpkg-reconfigure updates display-manager.service symlink to gdm3.
+    sudo DEBIAN_FRONTEND=noninteractive dpkg-reconfigure -f noninteractive gdm3 >/dev/null
+
+    if systemctl is-enabled sddm.service &>/dev/null; then
+        sudo systemctl disable sddm.service >/dev/null
+        log_info "Disabled sddm.service"
+    fi
+
+    local dm_link
+    dm_link="$(readlink -f /etc/systemd/system/display-manager.service 2>/dev/null || true)"
+    if [[ "$dm_link" == *gdm* ]]; then
+        log_info "display-manager.service -> $dm_link (reboot to leave SDDM session)"
+    else
+        log_warn "display-manager.service is not gdm ($dm_link); check dpkg-reconfigure gdm3"
+        return 1
+    fi
+}
+
 install_packages gnome-core gnome-tweaks
+ensure_gdm3_display_manager
