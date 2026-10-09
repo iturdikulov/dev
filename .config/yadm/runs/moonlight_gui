@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+# Moonlight - game stream client for Sunshine (see desktop/sunshine_gui).
+# https://github.com/moonlight-stream/moonlight-qt/releases
+
+MOONLIGHT_VERSION="6.2.0"
+MOONLIGHT_SHA256="787b0dcbd42ae90620e76fb8d77d7c441ba6473a91c2d7fc3a0fc2466f992437"
+MOONLIGHT_URL="https://github.com/moonlight-stream/moonlight-qt/releases/download/v${MOONLIGHT_VERSION}/Moonlight-${MOONLIGHT_VERSION}-x86_64.AppImage"
+MOONLIGHT_APPIMAGE="$HOME/.local/bin/Moonlight_${MOONLIGHT_VERSION}.AppImage"
+MOONLIGHT_LAUNCHER="$HOME/.local/bin/moonlight"
+MOONLIGHT_ICON_URL="https://raw.githubusercontent.com/moonlight-stream/moonlight-qt/v${MOONLIGHT_VERSION}/app/res/moonlight.svg"
+MOONLIGHT_ICON="$HOME/.local/bin/icons/moonlight.svg"
+
+if [[ "$(dpkg --print-architecture)" != "amd64" ]]; then
+    log_warn "Moonlight AppImage is x86_64-only; skipping on $(dpkg --print-architecture)"
+    exit 0
+fi
+
+# libfuse2t64 to mount the AppImage; VA-API/VDPAU for hardware decoding (AMD/Intel, nvidia via its driver).
+install_packages libfuse2t64 mesa-va-drivers mesa-vdpau-drivers vainfo
+
+ensure_directory "$HOME/.local/bin"
+if [ "$(readlink -- "$MOONLIGHT_LAUNCHER" 2>/dev/null)" = "$MOONLIGHT_APPIMAGE" ] && [ -x "$MOONLIGHT_APPIMAGE" ]; then
+    log_info "Moonlight $MOONLIGHT_VERSION is already installed"
+else
+    ensure_verified_file "$MOONLIGHT_URL" "$MOONLIGHT_APPIMAGE" "$MOONLIGHT_SHA256"
+    chmod +x "$MOONLIGHT_APPIMAGE"
+    ln -sf "$MOONLIGHT_APPIMAGE" "$MOONLIGHT_LAUNCHER"
+fi
+
+ensure_directory "$(dirname "$MOONLIGHT_ICON")"
+download_file "$MOONLIGHT_ICON_URL" "$MOONLIGHT_ICON" || log_warn "Could not download Moonlight icon"
+
+create_desktop_entry "com.moonlight_stream.Moonlight" "[Desktop Entry]
+Version=$MOONLIGHT_VERSION
+Name=Moonlight
+Comment=Stream games and desktop from Sunshine
+GenericName=Game Streaming Client
+Exec=$MOONLIGHT_LAUNCHER
+Icon=$MOONLIGHT_ICON
+Terminal=false
+Type=Application
+Categories=Qt;Game;
+Keywords=sunshine;nvidia;gamestream;stream;
+StartupWMClass=moonlight
+StartupNotify=true"
+
+old_appimages=$(find "$HOME/.local/bin" -maxdepth 1 -type f -name 'Moonlight_*.AppImage' ! -path "$MOONLIGHT_APPIMAGE")
+if [[ -n "$old_appimages" ]]; then
+    log_warn "Old Moonlight AppImages (remove manually):"
+    echo "$old_appimages"
+fi

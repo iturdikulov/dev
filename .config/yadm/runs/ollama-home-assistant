@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# shellcheck source=runs/utils.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+readonly lan_cidr="192.168.1.0/24"
+readonly api_port="11434"
+readonly config_file="${XDG_CONFIG_HOME:-$HOME/.config}/ollama.conf"
+
+set_ollama_env() {
+    local key="$1"
+    local value="$2"
+
+    if grep -qE "^${key}=" "$config_file" 2>/dev/null; then
+        sed -i "s|^${key}=.*|${key}=${value}|" "$config_file"
+    else
+        printf '%s=%s\n' "$key" "$value" >>"$config_file"
+    fi
+}
+
+check_not_root
+check_home_set
+
+if ! command_exists systemctl; then
+    log_error "systemctl is required to manage the Ollama service"
+    exit 1
+fi
+
+if ! systemctl cat ollama.service >/dev/null 2>&1; then
+    log_error "ollama.service is not installed; run ollama_v2026 first"
+    exit 1
+fi
+
+if ! command_exists ufw; then
+    log_error "UFW is required to restrict Ollama to ${lan_cidr}"
+    exit 1
+fi
+
+if ! sudo ufw status | grep -q '^Status: active$'; then
+    log_error "UFW is inactive; refusing to expose the unauthenticated Ollama API"
+    exit 1
+fi
+
+# Add the firewall rule before binding Ollama to all interfaces. UFW treats an
+# existing matching rule as a no-op, so rerunning this runner is safe.
+sudo ufw allow from "$lan_cidr" to any port "$api_port" proto tcp
+
+ensure_directory "$(dirname -- "$config_file")"
+touch "$config_file"
+
+# Keep one 26B model resident on the RTX 3090. One parallel request avoids
+# VRAM contention and keeps Home Assistant responses predictable.
+set_ollama_env OLLAMA_HOST "0.0.0.0:${api_port}"
+set_ollama_env OLLAMA_NUM_CTX 4096
+set_ollama_env OLLAMA_NUM_PARALLEL 1
+set_ollama_env OLLAMA_MAX_LOADED_MODELS 1
+set_ollama_env OLLAMA_KEEP_ALIVE 24h
+
+sudo systemctl restart ollama.service
+sudo systemctl is-active --quiet ollama.service
+
+ollama_ready=false
+for ((attempt = 1; attempt <= 30; attempt++)); do
+    if curl --fail --silent --max-time 2 \
+        "http://127.0.0.1:${api_port}/api/tags" >/dev/null 2>&1; then
+        ollama_ready=true
+        break
+    fi
+    sleep 1
+done
+
+if [[ "$ollama_ready" != true ]]; then
+    log_error "Ollama did not answer its local API after restart"
+    exit 1
+fi
+
+log_info "Ollama API is ready on TCP ${api_port} for ${lan_cidr} only"
+log_info "Home Assistant: http://<this-host-LAN-IP>:${api_port}"
+log_info "Model: VladimirGav/gemma4-26b-16GB-VRAM-Uncensored:latest; context: 4096"

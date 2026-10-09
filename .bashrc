@@ -8,6 +8,38 @@ case $- in
       *) return;;
 esac
 
+addToPath() {
+    if [[ ":$PATH:" != *":$1:"* ]]; then
+        export PATH="$PATH:$1"
+    fi
+}
+
+addToPathFront() {
+    if [[ -n "${2:-}" ]] || [[ ":$PATH:" != *":$1:"* ]]; then
+        export PATH="$1:$PATH"
+    fi
+}
+
+addToPathFront /usr/sbin
+
+addToPathFront /usr/local/games
+addToPathFront /usr/games
+addToPathFront /bin
+addToPathFront /usr/bin
+addToPathFront /usr/local/bin
+addToPathFront "$HOME/.cargo/bin"
+addToPathFront /usr/local/go/bin
+addToPathFront "$HOME/.local/tmux/bin"
+addToPathFront "$HOME/.local/scripts"
+addToPathFront "$HOME/.config/nnn/plugins"
+addToPathFront "$HOME/.local/.npm-global/bin"
+addToPathFront "$HOME/.local/bin"
+addToPathFront "$HOME/.local/go/bin"
+addToPathFront "$HOME/.local/npm/bin"
+addToPathFront "$HOME/.local/cling/bin"
+addToPathFront "$HOME/.local/scrcpy"
+addToPathFront "$HOME/.local/whisper/bin"
+
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
