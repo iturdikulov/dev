@@ -449,6 +449,19 @@ function Set-SystemTweaks {
     Set-RegistryValue $explorer 'HideFileExt' 0
     Set-RegistryValue $explorer 'Hidden' 1
 
+    # Scancode Map: header (8 zero bytes), 2 entries (1 mapping + terminator),
+    # Caps Lock (0x3A) -> Left Ctrl (0x1D). Applied by the kernel after reboot.
+    $keyboardLayout = 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout'
+    [byte[]]$capsToCtrl = 0,0,0,0, 0,0,0,0, 2,0,0,0, 0x1D,0x00,0x3A,0x00, 0,0,0,0
+    $current = (Get-ItemProperty -Path $keyboardLayout -Name 'Scancode Map' -ErrorAction SilentlyContinue).'Scancode Map'
+    if ($current -and (@(Compare-Object $current $capsToCtrl -SyncWindow 0).Count -eq 0)) {
+        Write-LogInfo "Caps Lock is already mapped to Ctrl"
+    } else {
+        Write-LogInfo "Mapping Caps Lock to Ctrl (takes effect after reboot)"
+        Set-RegistryValue $keyboardLayout 'Scancode Map' $capsToCtrl 'Binary'
+        $script:RebootRequired = $true
+    }
+
     $projects = $ProjectsDir
     if (Test-Command Add-MpPreference) {
         try {
