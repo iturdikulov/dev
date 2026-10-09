@@ -7,18 +7,22 @@
 .DESCRIPTION
     Idempotent: safe to re-run. Compatible with built-in Windows PowerShell 5.1.
 
-    SSH key: put the public key(s) of the trusted hosts (e.g. volga's
-    ~/.ssh/id_ed25519.pub) into "authorized_keys" next to this script.
-    Password authentication is disabled only when that file exists.
+    SSH key: pass the public key(s) of the trusted hosts (e.g. volga's
+    ~/.ssh/id_ed25519.pub from a USB stick) with -SshPublicKeyFile, now or on
+    a later re-run. Password authentication stays enabled until
+    administrators_authorized_keys contains at least one key.
 
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File .\setup.ps1
+    powershell -ExecutionPolicy Bypass -File .\setup.ps1 -SkipApps -SkipSystem -SshPublicKeyFile E:\id_ed25519.pub
     powershell -ExecutionPolicy Bypass -File .\setup.ps1 -SkipApps -AllowedHosts 192.168.1.169,192.168.1.50
 #>
 [CmdletBinding()]
 param(
     # volga (static lease in ob_nm/system/etc/dnsmasq.d/ob-nm-hosts.conf)
     [string[]]$AllowedHosts = @('192.168.1.169'),
+    # Appended (deduplicated) to C:\ProgramData\ssh\administrators_authorized_keys
+    [string]$SshPublicKeyFile,
     [switch]$SkipApps,
     [switch]$SkipSystem,
     [switch]$SkipSsh
@@ -383,7 +387,6 @@ function Set-SystemTweaks {
 $SshDataDir = Join-Path $env:ProgramData 'ssh'
 $SshdConfig = Join-Path $SshDataDir 'sshd_config'
 $AdminKeys = Join-Path $SshDataDir 'administrators_authorized_keys'
-$LocalKeys = Join-Path $PSScriptRoot 'authorized_keys'
 $SshFirewallRule = 'yadm-ssh-allowed-hosts'
 
 # Sets "Key Value" in the global section of sshd_config (before the first Match block)
@@ -435,15 +438,28 @@ function Enable-SshServer {
     Set-RegistryValue 'HKLM:\SOFTWARE\OpenSSH' 'DefaultShell' `
         "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" 'String'
 
-    $keyInstalled = $false
-    if (Test-Path $LocalKeys) {
-        Write-LogInfo "Installing $LocalKeys to $AdminKeys"
-        Copy-Item -Path $LocalKeys -Destination $AdminKeys -Force
-        icacls.exe $AdminKeys /inheritance:r /grant 'Administrators:F' /grant 'SYSTEM:F' | Out-Null
-        $keyInstalled = $true
-    } elseif ((Test-Path $AdminKeys) -and (Get-Item $AdminKeys).Length -gt 0) {
-        Write-LogInfo "$AdminKeys already present"
-        $keyInstalled = $true
+    if ($SshPublicKeyFile) {
+        if (-not (Test-Path $SshPublicKeyFile)) {
+            throw "SSH public key file not found: $SshPublicKeyFile"
+        }
+        $existing = if (Test-Path $AdminKeys) { @(Get-Content -Path $AdminKeys) } else { @() }
+        foreach ($key in Get-Content -Path $SshPublicKeyFile) {
+            $key = $key.Trim()
+            if (-not $key -or $key.StartsWith('#')) { continue }
+            if ($existing -contains $key) {
+                Write-LogInfo "SSH key already authorized: $key"
+            } else {
+                Write-LogInfo "Authorizing SSH key: $key"
+                Add-Content -Path $AdminKeys -Value $key -Encoding Ascii
+            }
+        }
+    }
+
+    $keyInstalled = (Test-Path $AdminKeys) -and @(Get-Content -Path $AdminKeys | Where-Object { $_.Trim() }).Count -gt 0
+    if ($keyInstalled) {
+        # sshd ignores the file unless only Administrators and SYSTEM can access it
+        # (SIDs instead of names: group names are localized)
+        icacls.exe $AdminKeys /inheritance:r /grant '*S-1-5-32-544:F' /grant '*S-1-5-18:F' | Out-Null
     }
 
     $lines = @(Get-Content -Path $SshdConfig)
@@ -451,7 +467,8 @@ function Enable-SshServer {
     if ($keyInstalled) {
         $lines = Set-SshdOption $lines 'PasswordAuthentication' 'no'
     } else {
-        Write-LogWarn "No SSH key found ($LocalKeys); password authentication left enabled to avoid lockout"
+        Write-LogWarn ("No SSH keys in $AdminKeys; password authentication left enabled to avoid lockout. " +
+            "Run add-ssh-key.ps1 to authorize a key.")
     }
     # sshd cannot parse a UTF-8 BOM, which Windows PowerShell 5.1 would add
     Set-Content -Path $SshdConfig -Value $lines -Encoding Ascii
