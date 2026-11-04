@@ -131,5 +131,78 @@
                 "description": "Pass Alt+key as Esc+key (tmux/nvim)"
             }
         ]
+    },
+    {
+        "name": "Pi agent",
+        "shortcuts": [
+            {
+                "key": "Enter / Shift + Enter",
+                "description": "Submit / new line"
+            },
+            {
+                "key": "Esc",
+                "description": "Cancel / abort"
+            },
+            {
+                "key": "Ctrl + C / Ctrl + D",
+                "description": "Clear (then exit) / exit when empty"
+            },
+            {
+                "key": "Ctrl + G",
+                "description": "Open prompt in external editor"
+            },
+            {
+                "key": "Ctrl + V",
+                "description": "Paste image / files / text"
+            },
+            {
+                "key": "Ctrl + L",
+                "description": "Model selector"
+            },
+            {
+                "key": "Ctrl + P / Ctrl + Shift + P",
+                "description": "Cycle next / previous model"
+            },
+            {
+                "key": "Shift + Tab",
+                "description": "Cycle thinking level"
+            },
+            {
+                "key": "Ctrl + T",
+                "description": "Collapse / expand thinking"
+            },
+            {
+                "key": "Ctrl + O",
+                "description": "Collapse / expand tool output"
+            },
+            {
+                "key": "Ctrl + X",
+                "description": "Copy last assistant message"
+            },
+            {
+                "key": "Alt + Enter",
+                "description": "Queue follow-up message"
+            },
+            {
+                "key": "Alt + Up",
+                "description": "Restore queued messages to editor"
+            },
+            {
+                "key": "Alt + O",
+                "description": "Previous prompt"
+            },
+            {
+                "key": "Alt + Shift + O",
+                "description": "Next prompt, or bottom if none"
+            },
+            {
+                "key": "Ctrl + End",
+                "description": "Scroll to end and follow"
+            },
+            {
+                "key": "/hotkeys",
+                "description": "Show all active Pi shortcuts"
+            }
+        ]
     }
 ]
