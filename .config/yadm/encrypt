@@ -1,7 +1,6 @@
 .ssh/config
 .config/kwalletrc
 .config/environment.d/git_askpass.conf
-.config/io.datasette.llm/keys.json
 .config/lazygit/config.yml
 .config/yadm/universal_sys/etc/sing-box/config.json
 .config/yadm/runs/marshmellow

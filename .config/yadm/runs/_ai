@@ -2,17 +2,6 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-for tool in llm \
-	files-to-prompt; do
-	uv tool install --upgrade $tool
-done
-
-uv tool run llm install \
-	llm-openrouter \
-	llm-ollama \
-	llm-gemini \
-	llm-mistral
-
 # Agents
 packages=(
     @openai/codex
@@ -25,4 +14,57 @@ npm config set allow-scripts=opencode-ai --location=user
 for package in "${packages[@]}"; do
     npm install -g "$package"
 done
+
+# Pi coding agent (official npm; no lifecycle scripts required)
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+pi install npm:@netandreus/pi-cursor-provider
+pi install npm:pi-plan
+pi install npm:pi-claude-bridge
+
+# Cursor Agent CLI — latest version from https://cursor.com/install (no curl|bash)
+case "$(dpkg --print-architecture)" in
+	amd64) CURSOR_AGENT_ARCH=x64 ;;
+	arm64) CURSOR_AGENT_ARCH=arm64 ;;
+	*)
+		log_warn "Cursor Agent CLI unsupported on $(dpkg --print-architecture); skipping"
+		CURSOR_AGENT_ARCH=
+		;;
+esac
+
+if [[ -n "$CURSOR_AGENT_ARCH" ]]; then
+	CURSOR_AGENT_VERSION="$(
+		curl -fsSL https://cursor.com/install |
+			grep -oE 'lab/[0-9]{4}\.[0-9]{2}\.[0-9]{2}-[a-f0-9]+' |
+			head -1 |
+			cut -d/ -f2
+	)"
+	if [[ -z "$CURSOR_AGENT_VERSION" ]]; then
+		log_error "Could not parse Cursor Agent version from https://cursor.com/install"
+		exit 1
+	fi
+
+	CURSOR_AGENT_DIR="$HOME/.local/share/cursor-agent/versions/$CURSOR_AGENT_VERSION"
+	CURSOR_AGENT_BIN="$CURSOR_AGENT_DIR/cursor-agent"
+	CURSOR_AGENT_URL="https://downloads.cursor.com/lab/${CURSOR_AGENT_VERSION}/linux/${CURSOR_AGENT_ARCH}/agent-cli-package.tar.gz"
+
+	if [[ -x "$CURSOR_AGENT_BIN" ]]; then
+		log_info "cursor-agent $CURSOR_AGENT_VERSION already installed; skipping download"
+	else
+		log_info "Installing cursor-agent $CURSOR_AGENT_VERSION"
+		tmp_archive="$(mktemp)"
+		tmp_extract="$(mktemp -d)"
+		trap 'rm -rf -- "$tmp_archive" "$tmp_extract"' EXIT
+		download_file "$CURSOR_AGENT_URL" "$tmp_archive"
+		tar --strip-components=1 -xzf "$tmp_archive" -C "$tmp_extract"
+		ensure_directory "$(dirname "$CURSOR_AGENT_DIR")"
+		rm -rf -- "$CURSOR_AGENT_DIR"
+		mv "$tmp_extract" "$CURSOR_AGENT_DIR"
+		rm -f -- "$tmp_archive"
+		trap - EXIT
+	fi
+
+	ensure_directory "$HOME/.local/bin"
+	ln -sfn "$CURSOR_AGENT_BIN" "$HOME/.local/bin/cursor-agent"
+	ln -sfn "$CURSOR_AGENT_BIN" "$HOME/.local/bin/agent"
+fi
 
