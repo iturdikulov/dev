@@ -153,6 +153,32 @@ set_vpn_toggle_shortcut() {
     set_gsetting_if_different "$schema" binding '<Super><Shift>v'
 }
 
+set_vt_bounce_hotkey() {
+    # Evdev hotkeys — work when GNOME shortcuts / the screen are dead.
+    # Super+Esc / ScrollLock → VT bounce; Ctrl+Alt+Backspace → reboot
+    # (needs /etc/sudoers.d/reboot-hotkey from reboot-hotkey.sudoers).
+    local unit_dir="$HOME/.config/systemd/user"
+    local unit="$unit_dir/vt-bounce-hotkey.service"
+    mkdir -p "$unit_dir"
+    cat >"$unit" <<EOF
+[Unit]
+Description=Recovery hotkeys via evdev (VT bounce / reboot)
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=$HOME/.local/scripts/vt-bounce-hotkey.py
+Restart=on-failure
+RestartSec=1
+
+[Install]
+WantedBy=default.target
+EOF
+    systemctl --user daemon-reload
+    systemctl --user enable --now vt-bounce-hotkey.service
+    log_info "vt-bounce-hotkey.service enabled (Super+Esc bounce, Ctrl+Alt+Backspace reboot)"
+}
+
 set_xkb_ctrl_nocaps() {
     local current target raw_output
     local -a kept=()
@@ -267,35 +293,61 @@ find_godot_desktop() {
     return 1
 }
 
+# Telegram names its .desktop org.telegram.desktop._<hash>.desktop; the
+# hash differs per install, so resolve the newest match at runtime.
+find_telegram_desktop() {
+    local path newest=""
+
+    while IFS= read -r path; do
+        if [[ -z "$newest" || "$path" -nt "$newest" ]]; then
+            newest="$path"
+        fi
+    done < <(find "$HOME/.local/share/applications" /usr/share/applications -maxdepth 1 \
+        -name 'org.telegram.desktop*.desktop' 2>/dev/null)
+
+    [[ -n "$newest" ]] || return 1
+    basename "$newest"
+}
+
 set_favorite_apps() {
+    # Order mirrored from live dock (gsettings org.gnome.shell favorite-apps), 2026-11-01.
+    # Win+1…0/-/= bindings live in ~/.config/run-or-raise/shortcuts.conf (yadm).
+    # Godot desktop basename can change — resolve at runtime.
     local -a favorites=(
         com.mitchellh.ghostty.desktop
         microsoft-edge.desktop
+        com.mitchellh.ghostty.wiki.desktop
         md.obsidian.Obsidian.desktop
-        thunderbird.desktop
         sioyek.desktop
-        org.kde.krita.desktop
-        blender.desktop
-        org.nomacs.ImageLounge.desktop
-        mpv.desktop
-        libreoffice-writer.desktop
-        libreoffice-calc.desktop
-        spotify.desktop
-        org.gnome.Nautilus.desktop
+        thunderbird.desktop
     )
-    local telegram_desktop godot_desktop current target desktop
+    local godot_desktop current target desktop
 
     if godot_desktop="$(find_godot_desktop)"; then
-        favorites=( "${favorites[@]:0:8}" "$godot_desktop" "${favorites[@]:8}" )
+        favorites+=("$godot_desktop")
     else
         log_warn "Godot desktop not found — skipping pin"
     fi
 
+    favorites+=(
+        blender.desktop
+        org.kde.krita.desktop
+        org.nomacs.ImageLounge.desktop
+        mpv.desktop
+        spotify.desktop
+    )
+
+    local telegram_desktop
     if telegram_desktop="$(find_telegram_desktop)"; then
         favorites+=("$telegram_desktop")
     else
         log_warn "Telegram desktop not found — skipping pin"
     fi
+
+    favorites+=(
+        org.zealdocs.zeal.desktop
+        org.freecad.FreeCAD.desktop
+    )
 
     for desktop in "${favorites[@]}"; do
         if ! desktop_file_path "$desktop" >/dev/null; then
@@ -454,7 +506,7 @@ restart_gnome_shell_if_needed() {
 
 install_gnome_extension() {
     local uuid="$1"
-    local shell_version info version_tag target_version installed_version tmp url
+    local shell_version info version_tag target_version installed_version tmp url uuid_enc
 
     shell_version="$(gnome_shell_version)"
     if [[ -z "$shell_version" ]]; then
@@ -462,7 +514,10 @@ install_gnome_extension() {
         return 0
     fi
 
-    if ! info="$(curl -fsSL "https://extensions.gnome.org/extension-info/?uuid=${uuid}&shell_version=${shell_version}")"; then
+    # extensions.gnome.org expects @ → %40 in the uuid query/path.
+    uuid_enc="$(printf '%s' "$uuid" | sed 's/@/%40/g')"
+
+    if ! info="$(curl -fsSL "https://extensions.gnome.org/extension-info/?uuid=${uuid_enc}&shell_version=${shell_version}")"; then
         log_warn "Failed to fetch extension info for $uuid"
         return 0
     fi
@@ -483,7 +538,7 @@ install_gnome_extension() {
         log_info "Updating $uuid ($installed_version -> $target_version)"
     fi
 
-    url="https://extensions.gnome.org/download-extension/${uuid}.shell-extension.zip?version_tag=${version_tag}"
+    url="https://extensions.gnome.org/download-extension/${uuid_enc}.shell-extension.zip?version_tag=${version_tag}"
     tmp="$(mktemp --suffix=.shell-extension.zip)"
     if ! curl -fsSL -o "$tmp" "$url"; then
         rm -f "$tmp"
@@ -563,7 +618,9 @@ setup_gnome_extensions() {
         appindicatorsupport@rgcjonas.gmail.com \
         run-or-raise@edvard.cz \
         color-picker@tuberry \
-        copyous@boerdereinar.dev; do
+        copyous@boerdereinar.dev \
+        deja-window@mcast.gnomext.com \
+        draw-on-gnome@daveprowse.github.io; do
         install_gnome_extension "$uuid"
     done
 
@@ -571,7 +628,104 @@ setup_gnome_extensions() {
     set_extension_enabled run-or-raise@edvard.cz enable
     set_extension_enabled color-picker@tuberry enable
     set_extension_enabled copyous@boerdereinar.dev disable
+    # Remembers monitor/size/maximize per WM_CLASS (needed for Ghostty az-right on DP-2).
+    set_extension_enabled deja-window@mcast.gnomext.com enable
+    # Annotate desktop: Super+Alt+D (https://github.com/daveprowse/Draw-On-Gnome).
+    set_extension_enabled draw-on-gnome@daveprowse.github.io enable
+    ensure_run_or_raise_dbus
+    ensure_deja_window_rules
     restart_gnome_shell_if_needed
+}
+
+# Enables run-or-raise DBus Call (raise existing window by class without re-Exec).
+ensure_run_or_raise_dbus() {
+    local uuid="run-or-raise@edvard.cz"
+    local src="$HOME/.local/share/gnome-shell/extensions/$uuid/schemas/org.gnome.shell.extensions.run-or-raise.gschema.xml"
+    local dest_dir="$HOME/.local/share/glib-2.0/schemas"
+    local dest="$dest_dir/org.gnome.shell.extensions.run-or-raise.gschema.xml"
+    local schema="org.gnome.shell.extensions.run-or-raise"
+
+    if [[ ! -f "$src" ]]; then
+        log_warn "run-or-raise schema missing — skip dbus enable"
+        return 0
+    fi
+
+    ensure_directory "$dest_dir"
+    if [[ ! -f "$dest" ]] || ! cmp -s "$src" "$dest"; then
+        cp "$src" "$dest"
+        glib-compile-schemas "$dest_dir"
+    fi
+
+    if ! gsettings list-schemas 2>/dev/null | grep -qxF "$schema"; then
+        log_warn "run-or-raise schema not visible — skip dbus enable"
+        return 0
+    fi
+
+    if [[ "$(gsettings get "$schema" dbus 2>/dev/null || true)" == "true" ]]; then
+        log_info "run-or-raise dbus already enabled"
+        return 0
+    fi
+
+    gsettings set "$schema" dbus true
+    log_info "run-or-raise dbus enabled (toggle extension once to export D-Bus)"
+}
+
+# Deja ships a private schema; compile into user glib store so gsettings works.
+ensure_deja_window_schema() {
+    local uuid="deja-window@mcast.gnomext.com"
+    local src="$HOME/.local/share/gnome-shell/extensions/$uuid/schemas/org.gnome.shell.extensions.deja-window.gschema.xml"
+    local dest_dir="$HOME/.local/share/glib-2.0/schemas"
+    local dest="$dest_dir/org.gnome.shell.extensions.deja-window.gschema.xml"
+
+    if [[ ! -f "$src" ]]; then
+        log_warn "Deja Window schema missing ($src) — skip rule setup"
+        return 1
+    fi
+
+    ensure_directory "$dest_dir"
+    if [[ ! -f "$dest" ]] || ! cmp -s "$src" "$dest"; then
+        cp "$src" "$dest"
+        glib-compile-schemas "$dest_dir"
+        log_info "Compiled Deja Window gsettings schema"
+    fi
+    return 0
+}
+
+# Apply ~/.config/deja-window/rules.json (yadm) → gsettings. Overwrites
+# window-app-configs; window-app-states (geometry) stay runtime-only.
+# Telegram class embeds a per-install hash → regex in the rules file.
+ensure_deja_window_rules() {
+    local schema="org.gnome.shell.extensions.deja-window"
+    local rules="$HOME/.config/deja-window/rules.json"
+
+    ensure_deja_window_schema || return 0
+
+    if [[ ! -f "$rules" ]]; then
+        log_warn "Deja rules missing ($rules) — skip"
+        return 0
+    fi
+
+    if ! gsettings list-schemas 2>/dev/null | grep -qxF "$schema"; then
+        log_warn "Deja Window schema not visible to gsettings — skip rules"
+        return 0
+    fi
+
+    python3 -I - "$schema" "$rules" <<'PY'
+import ast, json, subprocess, sys
+from pathlib import Path
+
+schema, path = sys.argv[1], Path(sys.argv[2])
+desired = json.loads(path.read_text())
+raw = subprocess.check_output(
+    ["gsettings", "get", schema, "window-app-configs"], text=True).strip()
+current = json.loads(ast.literal_eval(raw))
+if current == desired:
+    print("up to date")
+else:
+    payload = json.dumps(desired, ensure_ascii=False)
+    subprocess.check_call(["gsettings", "set", schema, "window-app-configs", payload])
+    print(f"applied {len(desired)} rules from {path}")
+PY
 }
 
 
@@ -582,11 +736,18 @@ set_input_source_russian
 set_gsetting_if_different org.gnome.desktop.interface color-scheme prefer-dark
 set_gsetting_if_different org.gnome.desktop.default-applications.office.calendar exec 'thunderbird -calendar'
 set_gsetting_bool_if_different org.gnome.desktop.notifications show-in-lock-screen false
+set_gsetting_bool_if_different org.gnome.desktop.interface enable-hot-corners false
 set_gsetting_bool_if_different org.gnome.desktop.screensaver lock-enabled true
-set_gsetting_uint_if_different org.gnome.desktop.session idle-delay 1800
+# Default true: auto-download + install non-reboot updates (locks dpkg vs apt).
+set_gsetting_bool_if_different org.gnome.software download-updates false
+# Never blank the screen on idle; suspend after 1h20 instead.
+set_gsetting_uint_if_different org.gnome.desktop.session idle-delay 0
 set_gsetting_uint_if_different org.gnome.desktop.screensaver lock-delay 60
+set_gsetting_uint_if_different org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 4800
+set_gsetting_if_different org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type suspend
 set_audio_toggle_shortcut
 set_vpn_toggle_shortcut
+set_vt_bounce_hotkey
 set_favorite_apps
 setup_gnome_extensions
 

@@ -1,0 +1,47 @@
+[
+  {
+    "wm_class": "com.mitchellh.ghostty",
+    "restore_size": true,
+    "restore_pos": true,
+    "restore_maximized": true,
+    "restore_workspace": false,
+    "is_regex": false,
+    "match_mode": "wm_class"
+  },
+  {
+    "wm_class": "org.gnome.TextEditor",
+    "restore_size": false,
+    "restore_pos": true,
+    "restore_maximized": true,
+    "restore_workspace": false,
+    "is_regex": false,
+    "match_mode": "wm_class"
+  },
+  {
+    "wm_class": "com.mitchellh.ghostty.az",
+    "restore_size": true,
+    "restore_pos": true,
+    "restore_maximized": true,
+    "restore_workspace": false,
+    "is_regex": false,
+    "match_mode": "wm_class"
+  },
+  {
+    "wm_class": "org.zealdocs.zeal",
+    "restore_size": true,
+    "restore_pos": true,
+    "restore_maximized": true,
+    "restore_workspace": false,
+    "is_regex": false,
+    "match_mode": "wm_class"
+  },
+  {
+    "wm_class": "^org\\.telegram\\.desktop",
+    "restore_size": true,
+    "restore_pos": true,
+    "restore_maximized": true,
+    "restore_workspace": false,
+    "is_regex": true,
+    "match_mode": "wm_class"
+  }
+]

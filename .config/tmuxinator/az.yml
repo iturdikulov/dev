@@ -1,0 +1,13 @@
+name: az
+root: ~/az
+
+windows:
+  - az:
+      panes:
+        - nvim
+  - ltms-backend:
+      panes:
+        - cd packages/ltms-backend && nvim
+  - ltms-frontend:
+      panes:
+        - cd packages/ltms-frontend && nvim

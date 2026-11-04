@@ -137,6 +137,7 @@ $Packages = @(
     'sharkdp.bat'
     'dandavison.delta'
     'Wilfred.difftastic'
+    'uutils.coreutils'
     'jqlang.jq'
     'MikeFarah.yq'
     'JesseDuffield.lazygit'
@@ -146,10 +147,12 @@ $Packages = @(
     'ajeetdsouza.zoxide'
     'Starship.Starship'
     'marlocarlo.psmux' # native tmux for Windows (psmux/tmux commands)
+    'chrisant996.Clink'
 
     # Languages & toolchains
     'Python.Python.3.14'
     'astral-sh.uv'
+    'zig.zig'
     'Schniz.fnm'
     'pnpm.pnpm'
     # Microsoft.VisualStudio.2022.BuildTools is installed separately (needs --override)
@@ -191,6 +194,55 @@ $VsBuildToolsOverride = '--quiet --wait --norestart --nocache ' +
     '--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended'
 
 $ProfileMarker = '# yadm-windows: shell integrations'
+$ClinkTerminalProfileGuid = '{2af866a8-12bc-4d79-9ef8-47ca39dcf9ac}'
+
+function Get-ClinkExecutable {
+    $candidates = @(
+        (Join-Path ${env:ProgramFiles(x86)} 'clink\clink_x64.exe'),
+        (Join-Path $env:ProgramFiles 'clink\clink_x64.exe')
+    )
+    foreach ($candidate in $candidates) {
+        if (Test-Path $candidate) { return $candidate }
+    }
+
+    $command = Get-Command clink_x64.exe -ErrorAction SilentlyContinue
+    if ($command) { return $command.Source }
+    return $null
+}
+
+function Install-ClinkWindowsTerminalProfile {
+    $clink = Get-ClinkExecutable
+    if (-not $clink) {
+        Write-LogError 'Clink is unavailable; skipping its Windows Terminal profile'
+        return
+    }
+
+    # A fragment adds an isolated profile and avoids rewriting the user's
+    # JSONC settings file (which may contain comments and trailing commas).
+    $fragmentDir = Join-Path $env:LOCALAPPDATA 'Microsoft\Windows Terminal\Fragments\yadm'
+    $launcherDir = Join-Path $env:LOCALAPPDATA 'clink'
+    $launcher = Join-Path $launcherDir 'windows-terminal.cmd'
+    New-Item -ItemType Directory -Path $fragmentDir, $launcherDir -Force | Out-Null
+    Set-Content -Path $launcher -Encoding Ascii -Value @(
+        '@echo off'
+        ('"{0}" inject' -f $clink)
+    )
+
+    $profile = @{
+        '$schema' = 'https://aka.ms/terminal-profiles-schema'
+        profiles = @(
+            @{
+                guid = $ClinkTerminalProfileGuid
+                name = 'Command Prompt (Clink)'
+                commandline = 'cmd.exe /d /k "%LOCALAPPDATA%\clink\windows-terminal.cmd"'
+                startingDirectory = '%USERPROFILE%'
+            }
+        )
+    }
+    $fragmentPath = Join-Path $fragmentDir 'clink.json'
+    $profile | ConvertTo-Json -Depth 4 | Set-Content -Path $fragmentPath -Encoding UTF8
+    Write-LogInfo "Windows Terminal profile configured: Command Prompt (Clink)"
+}
 
 function Install-Apps {
     Initialize-Winget
@@ -226,6 +278,8 @@ function Install-Apps {
     } else {
         Write-LogError "fnm is unavailable; skipping Node.js LTS"
     }
+
+    Install-ClinkWindowsTerminalProfile
 
     # fnm/zoxide/starship need shell hooks to be usable
     $profilePath = $PROFILE.CurrentUserAllHosts
@@ -453,7 +507,8 @@ function Set-SystemTweaks {
     # Caps Lock (0x3A) -> Left Ctrl (0x1D). Applied by the kernel after reboot.
     $keyboardLayout = 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout'
     [byte[]]$capsToCtrl = 0,0,0,0, 0,0,0,0, 2,0,0,0, 0x1D,0x00,0x3A,0x00, 0,0,0,0
-    $current = (Get-ItemProperty -Path $keyboardLayout -Name 'Scancode Map' -ErrorAction SilentlyContinue).'Scancode Map'
+    # GetValue returns $null for a missing value (property access would throw under StrictMode)
+    $current = (Get-Item -Path $keyboardLayout).GetValue('Scancode Map')
     if ($current -and (@(Compare-Object $current $capsToCtrl -SyncWindow 0).Count -eq 0)) {
         Write-LogInfo "Caps Lock is already mapped to Ctrl"
     } else {

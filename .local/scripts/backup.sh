@@ -42,6 +42,7 @@ borg create \
     --exclude "home/*/.cache/*" \
     --exclude "home/*/.npm" \
     --exclude "home/*/.steam" \
+    --exclude "home/*/Downloads/server" \
     --exclude "home/*/Media/archive" \
     --exclude "home/*/Media/games/RetroArch" \
     --exclude "home/*/Media/games/SteamLibrary" \

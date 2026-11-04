@@ -1,0 +1,6 @@
+# Separate app for DP-2. Loaded via config-file = "?az-right.conf" in config.
+maximize = false
+quit-after-last-window-closed = true
+command = tmux attach-session -t az-right
+initial-command = tmux attach-session -t az-right
+config-file = "?latin-keys.conf"

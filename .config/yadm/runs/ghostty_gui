@@ -2,20 +2,83 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
-chmod 755 "$TMP_DIR"
+WIKI_DIR="${WIKI_DIR:-$HOME/Wiki}"
+WIKI_DESKTOP_ID="com.mitchellh.ghostty.wiki"
+WIKI_CLASS="com.mitchellh.ghostty.wiki"
+AZ_DESKTOP_ID="com.mitchellh.ghostty.az"
+AZ_CLASS="com.mitchellh.ghostty.az"
+AZ_MONITOR="${HOME}/.config/tmuxinator/az-right-monitor.sh"
+GHOSTTY_ICON="$HOME/.local/bin/icons/ghostty.png"
 
-download_file \
-    "https://github.com/dariogriffo/ghostty-debian/releases/download/1.3.1%2B3/ghostty-dbgsym_1.3.1-3+trixie_amd64.deb" \
-    "$TMP_DIR/ghostty-dbgsym_1.3.1-3+trixie_amd64.deb"
-download_file \
-    "https://github.com/dariogriffo/ghostty-debian/releases/download/1.3.1%2B3/ghostty_1.3.1-3+trixie_amd64.deb" \
-    "$TMP_DIR/ghostty_1.3.1-3+trixie_amd64.deb"
-chmod a+r \
-    "$TMP_DIR/ghostty-dbgsym_1.3.1-3+trixie_amd64.deb" \
-    "$TMP_DIR/ghostty_1.3.1-3+trixie_amd64.deb"
+install_ghostty_deb() {
+    local tmp_dir
+    tmp_dir="$(mktemp -d)"
+    trap 'rm -rf "'"$tmp_dir"'"' RETURN
+    chmod 755 "$tmp_dir"
 
-sudo apt install -y -f \
-    "$TMP_DIR/ghostty-dbgsym_1.3.1-3+trixie_amd64.deb" \
-    "$TMP_DIR/ghostty_1.3.1-3+trixie_amd64.deb"
+    download_file \
+        "https://github.com/dariogriffo/ghostty-debian/releases/download/1.3.1%2B3/ghostty-dbgsym_1.3.1-3+trixie_amd64.deb" \
+        "$tmp_dir/ghostty-dbgsym_1.3.1-3+trixie_amd64.deb"
+    download_file \
+        "https://github.com/dariogriffo/ghostty-debian/releases/download/1.3.1%2B3/ghostty_1.3.1-3+trixie_amd64.deb" \
+        "$tmp_dir/ghostty_1.3.1-3+trixie_amd64.deb"
+    chmod a+r \
+        "$tmp_dir/ghostty-dbgsym_1.3.1-3+trixie_amd64.deb" \
+        "$tmp_dir/ghostty_1.3.1-3+trixie_amd64.deb"
+
+    sudo apt install -y -f \
+        "$tmp_dir/ghostty-dbgsym_1.3.1-3+trixie_amd64.deb" \
+        "$tmp_dir/ghostty_1.3.1-3+trixie_amd64.deb"
+}
+
+ensure_ghostty_icon() {
+    local src="/usr/share/icons/hicolor/256x256/apps/com.mitchellh.ghostty.png"
+    ensure_directory "$(dirname -- "$GHOSTTY_ICON")"
+    if [[ -f "$src" ]]; then
+        cp -f "$src" "$GHOSTTY_ICON"
+    elif [[ ! -f "$GHOSTTY_ICON" ]]; then
+        log_warn "Ghostty icon missing at $src — install deb first"
+    fi
+}
+
+# Own GTK class so Wiki does not join the main --gtk-single-instance terminal.
+# Hotkeys: run-or-raise shortcuts.conf (Win+3).
+create_wiki_desktop() {
+    create_desktop_entry "$WIKI_DESKTOP_ID" "[Desktop Entry]
+Version=1.0
+Name=Wiki (Neovim)
+Comment=Edit ~/Wiki in Neovim (Ghostty)
+TryExec=/usr/bin/ghostty
+Exec=/usr/bin/ghostty --gtk-single-instance=false --class=${WIKI_CLASS} --title=Wiki --working-directory=${WIKI_DIR} -e nvim TODO.md
+Icon=${GHOSTTY_ICON}
+Type=Application
+Categories=Utility;TextEditor;
+Keywords=wiki;neovim;nvim;notes;obsidian;
+StartupNotify=true
+StartupWMClass=${WIKI_CLASS}
+Terminal=false
+"
+}
+
+# az-right tmux on second monitor. Hotkeys: run-or-raise shortcuts.conf (Win+R).
+create_az_desktop() {
+    create_desktop_entry "$AZ_DESKTOP_ID" "[Desktop Entry]
+Version=1.0
+Name=az right (Ghostty)
+Comment=tmux session az-right on the second monitor
+TryExec=/usr/bin/ghostty
+Exec=${AZ_MONITOR} --foreground
+Icon=${GHOSTTY_ICON}
+Type=Application
+Categories=Utility;TerminalEmulator;
+Keywords=az;tmux;lazydocker;ghostty;
+StartupNotify=true
+StartupWMClass=${AZ_CLASS}
+Terminal=false
+"
+}
+
+install_ghostty_deb
+ensure_ghostty_icon
+create_wiki_desktop
+create_az_desktop

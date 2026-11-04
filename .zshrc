@@ -36,21 +36,25 @@ addToPathFront() {
 
 addToPathFront /usr/sbin
 
-# Init tools (also inside Neovim :terminal / Snacks)
-if (( $+commands[fzf] )); then
-    source <(fzf --zsh)
-fi
-if (( $+commands[starship] )); then
-    eval "$(starship init zsh)"
-fi
-if (( $+commands[zoxide] )); then
-    eval "$(zoxide init zsh)"
-fi
-if (( $+commands[atuin] )); then
-    eval "$(atuin init zsh)"
-fi
-if (( $+commands[direnv] )); then
-    eval "$(direnv hook zsh)"
+# Init tools (also inside Neovim :terminal / Snacks).
+# Skip when stdout is not a tty — nvim :! uses -lic without ZLE/tty, and
+# fzf/atuin then fail with: (eval):1: can't change option: zle
+if [[ -t 1 ]]; then
+    if (( $+commands[fzf] )); then
+        source <(fzf --zsh)
+    fi
+    if (( $+commands[starship] )); then
+        eval "$(starship init zsh)"
+    fi
+    if (( $+commands[zoxide] )); then
+        eval "$(zoxide init zsh)"
+    fi
+    if (( $+commands[atuin] )); then
+        eval "$(atuin init zsh)"
+    fi
+    if (( $+commands[direnv] )); then
+        eval "$(direnv hook zsh)"
+    fi
 fi
 
 export STARDICT_DATA_DIR="$HOME/Library/dictionary"
@@ -77,6 +81,7 @@ addToPathFront $HOME/.local/.npm-global/bin
 addToPathFront $HOME/.local/bin
 if [[ -d "$HOME/az" ]]; then
     addToPathFront "$HOME/az"
+    addToPathFront "$HOME/az/scripts/agent-sandbox/host"
 fi
 [ -f "$HOME/az/az-completion.zsh" ] && source "$HOME/az/az-completion.zsh"
 [ -f "$HOME/az/scripts/agent-sandbox/agent.zsh" ] && source "$HOME/az/scripts/agent-sandbox/agent.zsh"
@@ -493,4 +498,6 @@ nvm() {
 if (( $+commands[task] )); then
   alias t='task'
   eval "$(task --completion zsh)"
+  # ветки для switch:/branches:/push: — az-completion.zsh (source выше)
+  (( $+functions[_az_install_task_branch_completion] )) && _az_install_task_branch_completion
 fi
