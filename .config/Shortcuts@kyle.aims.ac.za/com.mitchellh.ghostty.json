@@ -1,0 +1,135 @@
+[
+    {
+        "name": "Window / tabs",
+        "shortcuts": [
+            {
+                "key": "Ctrl + Shift + N",
+                "description": "New window"
+            },
+            {
+                "key": "Ctrl + Shift + W",
+                "description": "Close tab"
+            },
+            {
+                "key": "Ctrl + Shift + Q",
+                "description": "Quit Ghostty"
+            },
+            {
+                "key": "Ctrl + Tab / Ctrl + Shift + Tab",
+                "description": "Next / previous tab"
+            },
+            {
+                "key": "Alt + 1…8 / Alt + 9",
+                "description": "Go to tab 1–8 / last tab"
+            },
+            {
+                "key": "Ctrl + Enter",
+                "description": "Toggle fullscreen"
+            }
+        ]
+    },
+    {
+        "name": "Splits",
+        "shortcuts": [
+            {
+                "key": "Ctrl + Shift + O",
+                "description": "Split right"
+            },
+            {
+                "key": "Ctrl + Shift + E",
+                "description": "Split down"
+            },
+            {
+                "key": "Super + Ctrl + [ / ]",
+                "description": "Previous / next split"
+            },
+            {
+                "key": "Ctrl + Alt + Arrows",
+                "description": "Focus split in direction"
+            },
+            {
+                "key": "Ctrl + Shift + Enter",
+                "description": "Zoom current split"
+            }
+        ]
+    },
+    {
+        "name": "Clipboard / font",
+        "shortcuts": [
+            {
+                "key": "Ctrl + Shift + C / V",
+                "description": "Copy / paste"
+            },
+            {
+                "key": "Ctrl + Shift + A",
+                "description": "Select all"
+            },
+            {
+                "key": "Ctrl + = / −",
+                "description": "Increase / decrease font size"
+            },
+            {
+                "key": "Ctrl + 0",
+                "description": "Reset font size"
+            }
+        ]
+    },
+    {
+        "name": "Config / tools",
+        "shortcuts": [
+            {
+                "key": "Ctrl + ,",
+                "description": "Open config"
+            },
+            {
+                "key": "Ctrl + Shift + ,",
+                "description": "Reload config"
+            },
+            {
+                "key": "Ctrl + Shift + P",
+                "description": "Command palette"
+            },
+            {
+                "key": "Ctrl + Shift + F",
+                "description": "Start search"
+            },
+            {
+                "key": "Ctrl + Alt + Shift + I",
+                "description": "Toggle inspector"
+            }
+        ]
+    },
+    {
+        "name": "Custom (this config)",
+        "shortcuts": [
+            {
+                "key": "Ctrl + Shift + T",
+                "description": "tmux new-window (CSI-u → nvim/tmux)"
+            },
+            {
+                "key": "Ctrl + Shift + I",
+                "description": "nvim PasteImage (CSI-u)"
+            },
+            {
+                "key": "Ctrl + .",
+                "description": "nvim Sidekick focus (CSI-u)"
+            },
+            {
+                "key": "Super + Ctrl + Shift + J",
+                "description": "Screen file → clipboard"
+            },
+            {
+                "key": "Ctrl + Shift + J",
+                "description": "Paste screen file"
+            },
+            {
+                "key": "Ctrl + Alt + Shift + J",
+                "description": "Open screen file"
+            },
+            {
+                "key": "Alt + letter (layout-safe)",
+                "description": "Pass Alt+key as Esc+key (tmux/nvim)"
+            }
+        ]
+    }
+]

@@ -637,6 +637,7 @@ setup_gnome_extensions() {
     set_extension_enabled Shortcuts@kyle.aims.ac.za enable
     ensure_run_or_raise_dbus
     ensure_deja_window_rules
+    ensure_shortcuts_appspecific
     restart_gnome_shell_if_needed
 }
 
@@ -692,6 +693,35 @@ ensure_deja_window_schema() {
         log_info "Compiled Deja Window gsettings schema"
     fi
     return 0
+}
+
+# Per-app cheat sheets: ~/.config/Shortcuts@kyle.aims.ac.za/<desktop-id>.json
+# (e.g. com.mitchellh.ghostty.json). focus_app.id minus ".desktop".
+ensure_shortcuts_appspecific() {
+    local uuid="Shortcuts@kyle.aims.ac.za"
+    local schema="org.gnome.shell.extensions.shortcuts"
+    local src="$HOME/.local/share/gnome-shell/extensions/$uuid/schemas/org.gnome.shell.extensions.shortcuts.gschema.xml"
+    local dest_dir="$HOME/.local/share/glib-2.0/schemas"
+    local dest="$dest_dir/org.gnome.shell.extensions.shortcuts.gschema.xml"
+
+    if [[ ! -f "$src" ]]; then
+        log_warn "Shortcuts schema missing — skip appspecific"
+        return 0
+    fi
+
+    ensure_directory "$dest_dir"
+    if [[ ! -f "$dest" ]] || ! cmp -s "$src" "$dest"; then
+        cp "$src" "$dest"
+        glib-compile-schemas "$dest_dir"
+        log_info "Compiled Shortcuts gsettings schema"
+    fi
+
+    if ! gsettings list-schemas 2>/dev/null | grep -qxF "$schema"; then
+        log_warn "Shortcuts schema not visible to gsettings — skip appspecific"
+        return 0
+    fi
+
+    set_gsetting_bool_if_different "$schema" enable-appspecific-files true
 }
 
 # Apply ~/.config/deja-window/rules.json (yadm) → gsettings. Overwrites
