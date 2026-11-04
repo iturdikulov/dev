@@ -6,13 +6,14 @@ source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 check_not_root
 
-NVIDIA_DRIVER_BRANCH=595
-# Newest CUDA supported by the 595 branch (cuda-compat-13-2); cuda-toolkit would pull 13.4 needing 615
-CUDA_TOOLKIT_PACKAGE=cuda-toolkit-13-2
+NVIDIA_DRIVER_BRANCH=610
+# 610 pairs with cuda-toolkit-13-3 (cuda-compat-13-3); 13-4 needs 615
+CUDA_TOOLKIT_PACKAGE=cuda-toolkit-13-3
 
 installed_driver="$(dpkg-query -W -f='${Version}' nvidia-driver 2>/dev/null || true)"
-if [[ -n "$installed_driver" && "$installed_driver" != "$NVIDIA_DRIVER_BRANCH".* ]]; then
-    log_error "nvidia-driver $installed_driver is installed, run runs/nvidia_debian_uninstall first"
+# Debian-packaged driver without the CUDA repo: wipe it first. CUDA→CUDA branch bumps are fine.
+if [[ -n "$installed_driver" && "$installed_driver" != "$NVIDIA_DRIVER_BRANCH".* ]] && ! package_installed cuda-keyring; then
+    log_error "nvidia-driver $installed_driver is installed (Debian stack), run runs/nvidia_debian_uninstall first"
     exit 1
 fi
 
@@ -29,14 +30,35 @@ fi
 
 # Pinning first: otherwise apt picks the newest branch from the repo
 install_packages linux-image-amd64 linux-headers-amd64 "nvidia-driver-pinning-$NVIDIA_DRIVER_BRANCH"
-# nvidia-open includes nvidia-kernel-open-dkms, CUDA libs, OptiX (libnvoptix1) and the suspend services
+# nvidia-open includes nvidia-kernel-open-dkms, CUDA libs, OptiX (libnvoptix1)
 install_packages nvidia-open nvidia-driver-libs:i386 "$CUDA_TOOLKIT_PACKAGE" firmware-misc-nonfree
 
-echo 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX nvidia-drm.modeset=1 nvidia-drm.fbdev=1"' | sudo tee /etc/default/grub.d/nvidia-modeset.cfg
-echo 'options nvidia NVreg_PreserveVideoMemoryAllocations=1 NVreg_TemporaryFilePath=/var/tmp' | sudo tee /etc/modprobe.d/nvidia-power-management.conf
+installed_driver="$(dpkg-query -W -f='${Version}' nvidia-driver 2>/dev/null || true)"
+if [[ "$installed_driver" != "$NVIDIA_DRIVER_BRANCH".* ]]; then
+    log_error "nvidia-driver is $installed_driver, expected $NVIDIA_DRIVER_BRANCH.x after install"
+    exit 1
+fi
+log_info "nvidia-driver $installed_driver"
 
-# Enable power-management services
-sudo systemctl enable nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service
+echo 'GRUB_CMDLINE_LINUX="$GRUB_CMDLINE_LINUX nvidia-drm.modeset=1 nvidia-drm.fbdev=1"' | sudo tee /etc/default/grub.d/nvidia-modeset.cfg
+# Open modules: kernel suspend notifiers replace the old nvidia-suspend/hibernate/resume units
+# (gone since the 615 packaging; nvidia-suspend-common is only a transitional dummy).
+echo 'options nvidia NVreg_PreserveVideoMemoryAllocations=1 NVreg_TemporaryFilePath=/var/tmp NVreg_UseKernelSuspendNotifiers=1' | sudo tee /etc/modprobe.d/nvidia-power-management.conf
+
+# Drop stale enables from older driver packages that pointed at removed unit files
+for unit in nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service nvidia-suspend-then-hibernate.service; do
+    if systemctl cat "$unit" &>/dev/null; then
+        sudo systemctl enable "$unit"
+    else
+        sudo systemctl disable --now "$unit" 2>/dev/null || true
+        sudo rm -f \
+            "/etc/systemd/system/systemd-suspend.service.wants/$unit" \
+            "/etc/systemd/system/systemd-hibernate.service.wants/$unit" \
+            "/etc/systemd/system/systemd-suspend-then-hibernate.service.wants/$unit" \
+            "/etc/systemd/system/systemd-hybrid-sleep.service.wants/$unit"
+    fi
+done
+sudo systemctl daemon-reload
 
 sudo update-grub
 sudo update-initramfs -u -k all

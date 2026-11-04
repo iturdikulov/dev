@@ -163,25 +163,18 @@ apt_update_if_needed() {
     fi
 }
 
-# Install packages if not already installed (missing ones in one apt call).
+# Ensure packages are present at the current apt candidate (install or upgrade).
+# apt itself is a no-op when already at the newest version — no dpkg pre-check.
 install_packages() {
     local pkg_names=("$@")
-    local pkg_name to_install=()
+
+    ((${#pkg_names[@]} > 0)) || return 0
 
     apt_update_if_needed
 
-    for pkg_name in "${pkg_names[@]}"; do
-        if package_installed "$pkg_name"; then
-            log_info "$pkg_name is already installed"
-        else
-            to_install+=("$pkg_name")
-        fi
-    done
-
-    if ((${#to_install[@]} > 0)); then
-        log_info "Installing ${to_install[*]}..."
-        sudo apt install -y "${to_install[@]}"
-    fi
+    log_info "Installing ${pkg_names[*]}..."
+    # --allow-downgrades: pin branch rollbacks (e.g. nvidia 615→610) need it
+    sudo apt install -y --allow-downgrades "${pkg_names[@]}"
 }
 
 # Remove package if installed

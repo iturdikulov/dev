@@ -12,9 +12,14 @@ tar --extract --file $downloaded_file -av -C ~/.local \
 && rm "$downloaded_file"
 
 APP_NAME=telegram
+APP_BIN="$HOME/.local/Telegram/Telegram"
+APP_LAUNCHER="$HOME/.local/bin/telegram"
 APP_DESKTOP_NAME=Telegram
 APP_DESKTOP_DESCRIPTION="A messaging application for fast and secure communication."
 APP_DESKTOP_CATEGORIES="InstantMessaging;Chat"
+
+ensure_directory "$HOME/.local/bin"
+ln -sfn "$APP_BIN" "$APP_LAUNCHER"
 
 mkdir -p "$HOME/.local/share/applications"
 cat > "$HOME/.local/share/applications/$APP_NAME.desktop" << EOF
@@ -23,7 +28,7 @@ Version=$pkgver
 Name=$APP_DESKTOP_NAME
 Comment=$APP_DESKTOP_DESCRIPTION
 GenericName=$APP_DESKTOP_NAME
-Exec=$HOME/.local/Telegram/Telegram
+Exec=$APP_LAUNCHER
 Icon=$HOME/.local/bin/icons/$APP_NAME.svg
 Terminal=false
 Type=Application

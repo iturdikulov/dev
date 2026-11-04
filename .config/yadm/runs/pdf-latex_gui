@@ -2,4 +2,8 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-install_packages sioyek zathura zathura-cb zathura-djvu mupdf
+# sioyek is Qt5. Dark chrome needs qgnomeplatform (QT_QPA_PLATFORMTHEME=gnome
+# in ~/.config/environment.d/qt.conf) — the Qt5 xdgdesktopportal plugin has
+# no Appearance/color-scheme support.
+install_packages sioyek zathura zathura-cb zathura-djvu mupdf \
+    qgnomeplatform-qt5

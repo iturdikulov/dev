@@ -7,7 +7,23 @@ TPM_DIR="$HOME/.tmux/plugins/tpm"
 TMUX_CONF="$HOME/.tmux.conf"
 TPM_MARKER="# yadm-runs: tmux-plugins/tpm"
 
-install_packages tmux tmuxinator git
+# trixie ships 3.5a; with extended-keys + csi-u it re-encodes paste LFs as
+# ESC[106;5u (Ctrl+J). Fixed in 3.6+ — take backports (3.7c).
+# https://github.com/tmux/tmux/issues/4163
+# https://github.com/neovim/neovim/issues/38021
+TMUX_MIN_VERSION="3.6"
+tmux_upgraded=
+tmux_ver="$(dpkg-query -W -f='${Version}' tmux 2>/dev/null || true)"
+if [[ -n "$tmux_ver" ]] && dpkg --compare-versions "$tmux_ver" ge "$TMUX_MIN_VERSION"; then
+    log_info "tmux $tmux_ver already >= $TMUX_MIN_VERSION"
+else
+    apt_update_if_needed
+    log_info "Installing tmux from trixie-backports (>= $TMUX_MIN_VERSION; paste CSI-u fix)"
+    sudo apt install -y -t trixie-backports tmux
+    tmux_upgraded=1
+fi
+
+install_packages tmuxinator git
 
 if git -C "$TPM_DIR" rev-parse --git-dir >/dev/null 2>&1; then
     log_info "TPM already present; pulling updates"
@@ -47,7 +63,9 @@ EOF
     fi
 fi
 
-if command_exists tmux && tmux list-sessions &>/dev/null; then
+if [[ -n "$tmux_upgraded" ]] && tmux list-sessions &>/dev/null; then
+    log_warn "tmux upgraded — running server still on old binary. Restart: tmux kill-server"
+elif command_exists tmux && tmux list-sessions &>/dev/null; then
     log_info "Reloading tmux config (active sessions)"
     tmux source-file "$TMUX_CONF" || log_warn "tmux source-file failed — run: tmux source $TMUX_CONF"
 fi
