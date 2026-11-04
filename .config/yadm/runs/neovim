@@ -57,38 +57,50 @@ fi
 log_info "Latest Neovim version: $latest_version"
 
 if [[ "$installed_version" == "$latest_version" ]]; then
-  log_info "Neovim $installed_version is already installed; skipping installation."
-  exit 0
+  log_info "Neovim $installed_version is already installed; skipping binary install."
+else
+  downloaded_file="/tmp/nvim-linux-x86_64-$latest_version.tar.gz"
+  remove_packages neovim kate
+
+  download_file "$archive_url" "$downloaded_file"
+
+  # Was the last command ok?
+  if [ $? -ne 0 ]; then
+    echo "Error downloading Neovim"
+    exit 1
+  fi
+
+  echo Neovim downloaded
+
+  if [ "$backup" = true ]; then
+    # Keep full paths under backup_dir so bin/lib/share don't collide on basename "nvim"
+    # (was: mv /usr/bin/nvim → …/nvim then mv /usr/lib/nvim fails: file vs directory)
+    echo Backing up old Neovim
+    stamp="$(date +%Y%m%d%H%M%S)"
+    this_backup="$backup_dir/$stamp"
+    mkdir --parents "$this_backup"
+    for path in /usr/bin/nvim /usr/lib/nvim /usr/share/nvim; do
+      if [ -e "$path" ]; then
+        dest="$this_backup$path"
+        sudo mkdir --parents "$(dirname -- "$dest")"
+        sudo mv "$path" "$dest"
+      fi
+    done
+    log_info "Old Neovim backed up to $this_backup"
+  fi
+
+  echo Installing Neovim
+  # --strip-components=1 removes the first directory from the tarball.
+  sudo tar -xzvf "$downloaded_file" -C /usr/ --strip-components=1
+  echo Neovim installed!
+  nvim --version
 fi
 
-downloaded_file="/tmp/nvim-linux-x86_64-$latest_version.tar.gz"
-remove_packages neovim kate
+# install scripts: tree-sitter-cli downloads native binary; puppeteer (mermaid) downloads Chromium
+npm config set allow-scripts=tree-sitter-cli,puppeteer --location=user
 
-download_file "$archive_url" "$downloaded_file"
-
-# Was the last command ok?
-if [ $? -ne 0 ]; then
-  echo "Error downloading Neovim"
-  exit 1
-fi
-
-echo Neovim downloaded
-
-if [ "$backup" = true ]; then
-  echo Backing up old Neovim
-  mkdir --parents "$backup_dir"
-  for path in /usr/bin/nvim /usr/lib/nvim /usr/share/nvim; do
-    if [ -e "$path" ]; then
-      sudo mv "$path" "$backup_dir/"
-    fi
-  done
-fi
-
-echo Installing Neovim
-# --strip-components=1 removes the first directory from the tarball.
-sudo tar -xzvf "$downloaded_file" -C /usr/ --strip-components=1
-echo Neovim installed!
-nvim --version
-
-echo Installing tree-sitter
+echo "Installing tree-sitter"
 npm install -g tree-sitter-cli
+
+echo "Installing mermaid-cli (mmdc for snacks.image)"
+npm install -g @mermaid-js/mermaid-cli
