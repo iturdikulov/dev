@@ -460,7 +460,24 @@ nvm() {
 # task CLI via npm (@go-task/cli) — после nvm PATH, иначе $+commands[task] пуст
 # при холодном старте (после exec zsh PATH уже унаследован и срабатывало раньше).
 if (( $+commands[task] )); then
-  alias t='task'
+  # t: вне ~/az (и без своего Taskfile вверх по дереву) — работаем с ~/az
+  t() {
+    local a
+    for a in "$@"; do
+      case $a in
+        -d|--dir|-d=*|--dir=*|-g|--global|-t|--taskfile|-t=*|--taskfile=*)
+          task "$@"; return ;;
+      esac
+    done
+    local root=$HOME/az
+    (( $+functions[_az_repo_root] )) && root=$(_az_repo_root)
+    local pwd=${PWD:A}
+    if [[ -n $root && $pwd != $root && $pwd != $root/* ]]; then
+      task -d "$root" "$@"
+    else
+      task "$@"
+    fi
+  }
   eval "$(task --completion zsh)"
   # ветки для switch:/branches:/push: — az-completion.zsh (source выше)
   (( $+functions[_az_install_task_branch_completion] )) && _az_install_task_branch_completion

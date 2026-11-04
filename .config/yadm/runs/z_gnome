@@ -620,7 +620,8 @@ setup_gnome_extensions() {
         color-picker@tuberry \
         copyous@boerdereinar.dev \
         deja-window@mcast.gnomext.com \
-        draw-on-gnome@daveprowse.github.io; do
+        draw-on-gnome@daveprowse.github.io \
+        Shortcuts@kyle.aims.ac.za; do
         install_gnome_extension "$uuid"
     done
 
@@ -632,6 +633,8 @@ setup_gnome_extensions() {
     set_extension_enabled deja-window@mcast.gnomext.com enable
     # Annotate desktop: Super+Alt+D (https://github.com/daveprowse/Draw-On-Gnome).
     set_extension_enabled draw-on-gnome@daveprowse.github.io enable
+    # Keyboard shortcuts cheat sheet: Ctrl+Alt+Super+S by default.
+    set_extension_enabled Shortcuts@kyle.aims.ac.za enable
     ensure_run_or_raise_dbus
     ensure_deja_window_rules
     restart_gnome_shell_if_needed
@@ -727,7 +730,6 @@ else:
     print(f"applied {len(desired)} rules from {path}")
 PY
 }
-
 
 log_info "Applying GNOME preferences..."
 

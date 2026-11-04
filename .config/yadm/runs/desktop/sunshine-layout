@@ -1,0 +1,375 @@
+#!/usr/bin/env python3
+"""Sunshine prep-cmd: per-client display layout for Moonlight streams.
+
+Matches SUNSHINE_CLIENT_NAME (paired device in
+~/.config/sunshine/sunshine_state.json → named_devices) against CLIENTS,
+then applies a temporary Mutter layout for the stream and restores on undo.
+
+Usage (from Sunshine prep-cmd):
+  sunshine-layout do    # apply stream layout for a matched client
+  sunshine-layout undo  # restore saved layout (fallback: preferred @ SCALE_UNDO)
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import sys
+from pathlib import Path
+
+import gi
+
+gi.require_version("Gio", "2.0")
+from gi.repository import Gio, GLib  # noqa: E402
+
+# Client names (and FQDNs) that get a custom stream layout.
+CLIENTS = {"kama", "kama.lan"}
+SCALE_DO = 1.5
+SCALE_UNDO = 2.0
+# Host desktop default is 4K; laptop stream wants Full HD.
+RES_DO = (1920, 1080)
+
+# Mutter DisplayConfig: temporary apply (session; permanent stays in monitors.xml).
+CONFIG_TEMPORARY = 1
+
+STATE_TYPE = GLib.VariantType.new(
+    "(ua((ssss)a(siiddada{sv})a{sv})a(iiduba(ssss)a{sv})a{sv})"
+)
+
+STATE_PATH = Path(
+    os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")
+) / "sunshine-layout-state.json"
+
+
+def client_matches() -> bool:
+    name = os.environ.get("SUNSHINE_CLIENT_NAME", "").strip().lower()
+    if not name:
+        return False
+    if name in CLIENTS:
+        return True
+    return name.split(".", 1)[0] in {c.split(".", 1)[0] for c in CLIENTS}
+
+
+def display_proxy() -> Gio.DBusProxy:
+    return Gio.DBusProxy.new_for_bus_sync(
+        Gio.BusType.SESSION,
+        Gio.DBusProxyFlags.NONE,
+        None,
+        "org.gnome.Mutter.DisplayConfig",
+        "/org/gnome/Mutter/DisplayConfig",
+        "org.gnome.Mutter.DisplayConfig",
+        None,
+    )
+
+
+def get_state(proxy: Gio.DBusProxy):
+    variant = proxy.call_sync(
+        "GetCurrentState",
+        None,
+        Gio.DBusCallFlags.NO_AUTO_START,
+        -1,
+        None,
+    )
+    assert variant.get_type().equal(STATE_TYPE)
+    return variant.unpack()
+
+
+def closest_scale(supported: list[float], wanted: float) -> float:
+    best = None
+    best_dist = None
+    for scale in supported:
+        dist = abs(scale - wanted)
+        if dist > 0.1:
+            continue
+        if best is None or dist < best_dist:
+            best, best_dist = scale, dist
+    if best is None:
+        raise SystemExit(f"scale {wanted} not supported (have {supported})")
+    return best
+
+
+def pick_mode(
+    modes: list,
+    *,
+    want_wh: tuple[int, int] | None,
+    want_mode_id: str | None = None,
+) -> tuple[str, int, int, list[float]]:
+    """Return mode_id, width, height, supported_scales."""
+    current = None
+    preferred = None
+    matching: list = []
+    best_any = None
+    by_id = None
+
+    for mode in modes:
+        mode_id, w, h, rr, _pref, supported, mode_props = mode
+        entry = (mode_id, w, h, rr, list(supported))
+        if want_mode_id and mode_id == want_mode_id:
+            by_id = entry
+        if mode_props.get("is-current"):
+            current = entry
+        if mode_props.get("is-preferred"):
+            preferred = entry
+        if want_wh and (w, h) == want_wh:
+            matching.append(entry)
+        if best_any is None or (w * h, rr) > (
+            best_any[1] * best_any[2],
+            best_any[3],
+        ):
+            best_any = entry
+
+    if want_mode_id is not None:
+        if by_id is None:
+            raise SystemExit(f"mode {want_mode_id!r} not found")
+        return by_id[0], by_id[1], by_id[2], by_id[4]
+
+    if want_wh is not None:
+        if matching:
+            matching.sort(key=lambda e: e[3], reverse=True)
+            m = matching[0]
+            return m[0], m[1], m[2], m[4]
+        if current is None:
+            raise SystemExit(f"no {want_wh[0]}x{want_wh[1]} mode and no current")
+        return current[0], current[1], current[2], current[4]
+
+    chosen = preferred or current or best_any
+    if chosen is None:
+        raise SystemExit("no modes available")
+    return chosen[0], chosen[1], chosen[2], chosen[4]
+
+
+def snapshot_layout(serial, monitors, logical_monitors, props) -> dict:
+    modes_by_connector = {
+        info[0]: modes for info, modes, _ in monitors
+    }
+    monitors_out = []
+    for x, y, scale, transform, primary, lm_monitors, _lm_props in logical_monitors:
+        for connector, vendor, product, serial_no in lm_monitors:
+            modes = modes_by_connector[connector]
+            mode_id = next(
+                m[0] for m in modes if m[6].get("is-current")
+            )
+            monitors_out.append(
+                {
+                    "connector": connector,
+                    "vendor": vendor,
+                    "product": product,
+                    "serial": serial_no,
+                    "x": x,
+                    "y": y,
+                    "scale": scale,
+                    "transform": transform,
+                    "primary": primary,
+                    "mode_id": mode_id,
+                }
+            )
+    return {
+        "layout_mode": props.get("layout-mode"),
+        "supports_layout_mode": bool(
+            props.get("supports-changing-layout-mode")
+        ),
+        "monitors": monitors_out,
+    }
+
+
+def pack_left_to_right(
+    entries: list[dict],
+) -> list[tuple[int, int, float, int, bool, list]]:
+    """Place monitors left-to-right (sorted by old x,y) so Mutter adjacency checks pass."""
+    ordered = sorted(entries, key=lambda e: (e["old_x"], e["old_y"], e["connector"]))
+    x = 0
+    apply_logical = []
+    for e in ordered:
+        apply_logical.append(
+            (
+                x,
+                0,
+                e["scale"],
+                e["transform"],
+                e["primary"],
+                [(e["connector"], e["mode_id"], {})],
+            )
+        )
+        x += int(round(e["width"] / e["scale"]))
+    return apply_logical
+
+
+def apply_logical_monitors(
+    proxy: Gio.DBusProxy,
+    serial: int,
+    apply_logical: list,
+    props: dict,
+) -> None:
+    properties = {}
+    if props.get("supports-changing-layout-mode"):
+        layout_mode = props.get("layout-mode", 1)
+        properties["layout-mode"] = GLib.Variant("u", layout_mode)
+
+    parameters = GLib.Variant(
+        "(uua(iiduba(ssa{sv}))a{sv})",
+        (serial, CONFIG_TEMPORARY, apply_logical, properties),
+    )
+    proxy.call_sync(
+        "ApplyMonitorsConfig",
+        parameters,
+        Gio.DBusCallFlags.NO_AUTO_START,
+        -1,
+        None,
+    )
+
+
+def apply_stream_layout(proxy: Gio.DBusProxy) -> None:
+    serial, monitors, logical_monitors, props = get_state(proxy)
+    STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    STATE_PATH.write_text(
+        json.dumps(
+            snapshot_layout(serial, monitors, logical_monitors, props),
+            indent=2,
+        )
+        + "\n"
+    )
+
+    modes_by_connector = {
+        info[0]: modes for info, modes, _ in monitors
+    }
+    entries = []
+    applied = []
+    for x, y, _scale, transform, primary, lm_monitors, _lm_props in logical_monitors:
+        for connector, _vendor, _product, _serial in lm_monitors:
+            mode_id, w, h, supported = pick_mode(
+                modes_by_connector[connector], want_wh=RES_DO
+            )
+            scale = closest_scale(supported, SCALE_DO)
+            entries.append(
+                {
+                    "connector": connector,
+                    "mode_id": mode_id,
+                    "width": w,
+                    "height": h,
+                    "scale": scale,
+                    "transform": transform,
+                    "primary": primary,
+                    "old_x": x,
+                    "old_y": y,
+                }
+            )
+            applied.append(f"{connector}:{mode_id}@{scale}")
+
+    apply_logical = pack_left_to_right(entries)
+    apply_logical_monitors(proxy, serial, apply_logical, props)
+    client = os.environ.get("SUNSHINE_CLIENT_NAME", "")
+    print(
+        f"sunshine-layout: client={client!r} "
+        f"scale={SCALE_DO} modes=[{', '.join(applied)}] (layout saved)"
+    )
+
+
+def restore_saved_layout(proxy: Gio.DBusProxy) -> bool:
+    if not STATE_PATH.is_file():
+        return False
+    try:
+        saved = json.loads(STATE_PATH.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"sunshine-layout: bad state file: {exc}", file=sys.stderr)
+        return False
+
+    serial, monitors, _logical, props = get_state(proxy)
+    modes_by_connector = {
+        info[0]: modes for info, modes, _ in monitors
+    }
+    apply_logical = []
+    applied = []
+    for mon in saved.get("monitors", []):
+        connector = mon["connector"]
+        if connector not in modes_by_connector:
+            print(
+                f"sunshine-layout: {connector} missing; fallback",
+                file=sys.stderr,
+            )
+            return False
+        mode_id, w, h, supported = pick_mode(
+            modes_by_connector[connector],
+            want_wh=None,
+            want_mode_id=mon["mode_id"],
+        )
+        scale = closest_scale(supported, float(mon["scale"]))
+        apply_logical.append(
+            (
+                int(mon["x"]),
+                int(mon["y"]),
+                scale,
+                int(mon["transform"]),
+                bool(mon["primary"]),
+                [(connector, mode_id, {})],
+            )
+        )
+        applied.append(f"{connector}:{mode_id}@{scale}@({mon['x']},{mon['y']})")
+
+    # Saved positions are already adjacent for the saved modes; apply as-is.
+    apply_logical_monitors(proxy, serial, apply_logical, props)
+    STATE_PATH.unlink(missing_ok=True)
+    client = os.environ.get("SUNSHINE_CLIENT_NAME", "")
+    print(
+        f"sunshine-layout: client={client!r} restored [{', '.join(applied)}]"
+    )
+    return True
+
+
+def apply_fallback_undo(proxy: Gio.DBusProxy) -> None:
+    serial, monitors, logical_monitors, props = get_state(proxy)
+    modes_by_connector = {
+        info[0]: modes for info, modes, _ in monitors
+    }
+    entries = []
+    applied = []
+    for x, y, _scale, transform, primary, lm_monitors, _lm_props in logical_monitors:
+        for connector, _vendor, _product, _serial in lm_monitors:
+            mode_id, w, h, supported = pick_mode(
+                modes_by_connector[connector], want_wh=None
+            )
+            scale = closest_scale(supported, SCALE_UNDO)
+            entries.append(
+                {
+                    "connector": connector,
+                    "mode_id": mode_id,
+                    "width": w,
+                    "height": h,
+                    "scale": scale,
+                    "transform": transform,
+                    "primary": primary,
+                    "old_x": x,
+                    "old_y": y,
+                }
+            )
+            applied.append(f"{connector}:{mode_id}@{scale}")
+
+    apply_logical = pack_left_to_right(entries)
+    apply_logical_monitors(proxy, serial, apply_logical, props)
+    client = os.environ.get("SUNSHINE_CLIENT_NAME", "")
+    print(
+        f"sunshine-layout: client={client!r} "
+        f"fallback undo scale={SCALE_UNDO} modes=[{', '.join(applied)}]"
+    )
+
+
+def main() -> int:
+    if len(sys.argv) != 2 or sys.argv[1] not in ("do", "undo"):
+        print(f"usage: {sys.argv[0]} do|undo", file=sys.stderr)
+        return 2
+    if not client_matches():
+        print(
+            f"sunshine-layout: skip "
+            f"(client={os.environ.get('SUNSHINE_CLIENT_NAME', '')!r})"
+        )
+        return 0
+
+    proxy = display_proxy()
+    if sys.argv[1] == "do":
+        apply_stream_layout(proxy)
+    elif not restore_saved_layout(proxy):
+        apply_fallback_undo(proxy)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

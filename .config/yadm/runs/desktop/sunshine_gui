@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+source "$(dirname -- "${BASH_SOURCE[0]}")/../utils.sh"
+
+# Sunshine - self-hosted game stream host for Moonlight.
+# https://github.com/LizardByte/Sunshine/releases
+
+SUNSHINE_VERSION="2026.914.233613"
+SUNSHINE_PACKAGE="sunshine"
+SUNSHINE_SERVICE="app-dev.lizardbyte.app.Sunshine.service"
+
+arch="$(dpkg --print-architecture)"
+case "$arch" in
+    amd64) SUNSHINE_SHA256="a86f858cbae57f60ecebd445402ee0295c1c057b857bd45d44c2ea2d255cbbfb" ;;
+    arm64) SUNSHINE_SHA256="45f250a6bae3629bd67d6856356e5d838569fbe4f6128440124c727a3d5fef5e" ;;
+    *)
+        log_warn "Sunshine .deb is not published for $arch; skipping"
+        exit 0
+        ;;
+esac
+
+SUNSHINE_DEB_NAME="sunshine_${SUNSHINE_VERSION}-1+debiantrixie_${arch}.deb"
+SUNSHINE_URL="https://github.com/LizardByte/Sunshine/releases/download/v${SUNSHINE_VERSION}/${SUNSHINE_DEB_NAME}"
+SUNSHINE_DEB="/tmp/${SUNSHINE_DEB_NAME}"
+
+# postinst needs setcap (KMS capture) and udevadm (uinput/uhid rules) up front;
+# VA-API/Vulkan drivers are for hardware encoding on AMD/Intel (NVENC comes with the nvidia driver).
+install_packages libcap2-bin udev mesa-va-drivers mesa-vulkan-drivers vainfo
+
+pinned_ver="${SUNSHINE_VERSION}-1+debiantrixie"
+# Also catches "iU" (unpacked after a bare `dpkg -i` that is missing dependencies).
+installed_ver=$(dpkg-query -W -f='${db:Status-Abbrev} ${Version}' "$SUNSHINE_PACKAGE" 2>/dev/null || true)
+[[ "$installed_ver" == i* ]] && installed_ver="${installed_ver##* }" || installed_ver=""
+
+if [[ -n "$installed_ver" ]] && dpkg --compare-versions "$installed_ver" ge "$pinned_ver"; then
+    log_info "Sunshine ${installed_ver} is already installed; skipping download"
+    if ! package_installed "$SUNSHINE_PACKAGE"; then
+        log_info "Sunshine is not fully configured; installing missing dependencies"
+        sudo apt-get install -y -f
+    fi
+else
+    if [[ -n "$installed_ver" ]]; then
+        log_info "Sunshine ${installed_ver} installed; upgrading to ${SUNSHINE_VERSION}"
+    fi
+    ensure_verified_file "$SUNSHINE_URL" "$SUNSHINE_DEB" "$SUNSHINE_SHA256"
+    # apt resolves the package's runtime dependencies (Qt6, libva, pipewire, miniupnpc, ...).
+    sudo apt install -y "$SUNSHINE_DEB"
+    rm -f "$SUNSHINE_DEB"
+fi
+
+# Virtual keyboard/mouse/gamepads go through /dev/uinput and /dev/uhid.
+if ! id -nG "$LOGNAME" | tr ' ' '\n' | grep -qx input; then
+    sudo usermod -a -G input "$LOGNAME"
+    log_warn "Added $LOGNAME to the input group; log in again for it to take effect"
+fi
+
+# Per-client stream layout via Mutter (see CLIENTS in sunshine-layout).
+SUNSHINE_LAYOUT_SRC="$(dirname -- "${BASH_SOURCE[0]}")/sunshine-layout"
+SUNSHINE_LAYOUT_BIN="$HOME/.local/bin/sunshine-layout"
+ensure_directory "$HOME/.local/bin"
+install -m 0755 "$SUNSHINE_LAYOUT_SRC" "$SUNSHINE_LAYOUT_BIN"
+rm -f "$HOME/.local/bin/sunshine-kama-scale"
+
+SUNSHINE_CONF_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/sunshine"
+SUNSHINE_CONF="$SUNSHINE_CONF_DIR/sunshine.conf"
+ensure_directory "$SUNSHINE_CONF_DIR"
+touch "$SUNSHINE_CONF"
+# Drop any previous managed block (incl. former sunshine-kama-scale name), then append.
+for _block in sunshine-layout sunshine-kama-scale; do
+    if grep -q "^# BEGIN yadm ${_block}\$" "$SUNSHINE_CONF" 2>/dev/null; then
+        sed -i "/^# BEGIN yadm ${_block}\$/,/^# END yadm ${_block}\$/d" "$SUNSHINE_CONF"
+    fi
+done
+cat >>"$SUNSHINE_CONF" <<EOF
+# BEGIN yadm sunshine-layout
+# Client match + layout rules live in sunshine-layout (CLIENTS / SCALE_* / RES_*).
+global_prep_cmd = [{"do":"$SUNSHINE_LAYOUT_BIN do","undo":"$SUNSHINE_LAYOUT_BIN undo"}]
+# END yadm sunshine-layout
+EOF
+log_info "Sunshine prep-cmd: per-client layout via sunshine-layout"
+
+# Run as a user service inside the graphical session.
+systemctl --user daemon-reload
+systemctl --user enable "$SUNSHINE_SERVICE"
+
+if [[ "${YADM_IS_WSL:-0}" == "1" ]]; then
+    log_info "Skipping UFW rules for Sunshine"
+elif command_exists ufw; then
+    sudo ufw allow 47984,47989,47990,48010/tcp comment 'Sunshine'
+    sudo ufw allow 47998:48000/udp comment 'Sunshine'
+else
+    log_warn "ufw not found; open TCP 47984,47989,47990,48010 and UDP 47998-48000 manually"
+fi
+
+log_info "Start: systemctl --user start $SUNSHINE_SERVICE"
+log_info "Web UI: https://localhost:47990 (create admin user, then pair Moonlight)"
