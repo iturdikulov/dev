@@ -2,8 +2,156 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-# sioyek is Qt5. Dark chrome needs qgnomeplatform (QT_QPA_PLATFORMTHEME=gnome
-# in ~/.config/environment.d/qt.conf) — the Qt5 xdgdesktopportal plugin has
-# no Appearance/color-scheme support.
-install_packages sioyek zathura zathura-cb zathura-djvu mupdf \
-    qgnomeplatform-qt5
+# sioyek — build development against system Qt6 (same idea as zeal_gui).
+# Debian trixie ships 2.0.0 on Qt5; on GNOME Wayland it dies with
+# "The Wayland connection experienced a fatal error: Protocol error".
+# Upstream development needs Qt 6.7+ (FAQ); Debian has 6.8.2. Qt6 stops
+# the protocol crash, but QOpenGLWidget still fails with EGL_BAD_MATCH on
+# NVIDIA+GNOME Wayland (blank PDF). Launcher keeps QT_QPA_PLATFORM=xcb
+# only — Qt6 already reads scale from Xft.dpi/DPR (do not force QT_SCALE_FACTOR).
+#
+# Installs to ~/.local/opt/sioyek-<sha>, launcher ~/.local/bin/sioyek.
+# Portable (linux_app_image) layout: shaders/prefs next to the binary;
+# user config stays in ~/.config/sioyek, DBs in ~/.local/share/sioyek.
+# Desktop id stays sioyek.desktop for the dock pin / Super+5 / mime in
+# z_gnome.
+#
+# Pin: SIOYEK_REF=<branch|tag|sha> pdf-latex_gui
+# Rebuild: SIOYEK_REBUILD=1 pdf-latex_gui
+
+SIOYEK_REPO="https://github.com/ahrm/sioyek.git"
+SIOYEK_REF="${SIOYEK_REF:-development}"
+
+install_packages zathura zathura-cb zathura-djvu mupdf \
+    git make g++ \
+    qt6-base-dev qt6-declarative-dev qt6-svg-dev \
+    qt6-speech-dev qt6-multimedia-dev \
+    libharfbuzz-dev zlib1g-dev \
+    qt6-wayland qt6-gtk-platformtheme qgnomeplatform-qt6 \
+    kf6-breeze-icon-theme
+
+if [[ "$SIOYEK_REF" =~ ^[0-9a-f]{7,40}$ ]]; then
+    SIOYEK_SHA="$SIOYEK_REF"
+else
+    SIOYEK_SHA="$(git ls-remote --refs "$SIOYEK_REPO" \
+        "refs/heads/${SIOYEK_REF}" "refs/tags/${SIOYEK_REF}" "refs/tags/v${SIOYEK_REF}" |
+        awk 'NR==1 {print $1; exit}')"
+    if [[ -z "$SIOYEK_SHA" ]]; then
+        log_error "Could not resolve sioyek ref: $SIOYEK_REF"
+        exit 1
+    fi
+fi
+SIOYEK_SHORT="${SIOYEK_SHA:0:12}"
+SIOYEK_PREFIX="$HOME/.local/opt/sioyek-${SIOYEK_SHORT}"
+SIOYEK_BIN="$SIOYEK_PREFIX/sioyek"
+SIOYEK_LAUNCHER="$HOME/.local/bin/sioyek"
+
+# Prefer the Qt6 build over the crashing Debian Qt5 package.
+if package_installed sioyek; then
+    if sudo -n true 2>/dev/null; then
+        remove_packages sioyek
+    else
+        log_warn "Debian sioyek still installed; run with sudo later: sudo apt remove -y sioyek"
+    fi
+fi
+
+# Require a real ELF at $SIOYEK_BIN (a leftover wrapper script must not skip rebuild).
+if [[ -x "$SIOYEK_BIN" && -z "${SIOYEK_REBUILD:-}" ]] &&
+    file -b "$SIOYEK_BIN" | grep -q '^ELF'; then
+    log_info "sioyek $SIOYEK_SHORT already built at $SIOYEK_PREFIX"
+else
+    work="$(mktemp -d "${TMPDIR:-/tmp}/sioyek-build.XXXXXX")"
+    trap 'rm -rf -- "$work"' EXIT
+
+    log_info "Building sioyek ${SIOYEK_REF} (${SIOYEK_SHORT}) against system Qt6"
+    src="$work/sioyek"
+    if [[ "$SIOYEK_REF" =~ ^[0-9a-f]{7,40}$ ]]; then
+        git clone --recursive --filter=blob:none "$SIOYEK_REPO" "$src" || exit 1
+        git -C "$src" checkout --detach "$SIOYEK_SHA" || exit 1
+        git -C "$src" submodule update --init --recursive || exit 1
+    else
+        git clone --recursive --depth 1 --branch "$SIOYEK_REF" \
+            "$SIOYEK_REPO" "$src" || exit 1
+        SIOYEK_SHA="$(git -C "$src" rev-parse HEAD)"
+        SIOYEK_SHORT="${SIOYEK_SHA:0:12}"
+        SIOYEK_PREFIX="$HOME/.local/opt/sioyek-${SIOYEK_SHORT}"
+        SIOYEK_BIN="$SIOYEK_PREFIX/sioyek"
+    fi
+
+    # HAVE_GLUT/X11=no: only need libmupdf.a (viewer tools need libglu).
+    make -C "$src/mupdf" USE_SYSTEM_HARFBUZZ=yes HAVE_GLUT=no HAVE_X11=no \
+        -j"$(nproc)" libs || exit 1
+
+    (
+        cd_or_exit "$src"
+        qmake6="${QMAKE:-qmake6}"
+        "$qmake6" "CONFIG+=linux_app_image" pdf_viewer_build_config.pro || exit 1
+        make -j"$(nproc)" || exit 1
+    ) || exit 1
+
+    if [[ ! -x "$src/sioyek" ]]; then
+        log_error "sioyek binary missing after build"
+        exit 1
+    fi
+
+    rm -rf -- "$SIOYEK_PREFIX"
+    ensure_directory "$SIOYEK_PREFIX"
+    # Portable layout: binary + shaders + default configs beside it.
+    cp -a "$src/sioyek" "$SIOYEK_PREFIX/"
+    cp -a "$src/pdf_viewer/prefs.config" "$src/pdf_viewer/keys.config" "$SIOYEK_PREFIX/"
+    cp -a "$src/pdf_viewer/shaders" "$SIOYEK_PREFIX/"
+    cp -a "$src/tutorial.pdf" "$SIOYEK_PREFIX/"
+    # Icon for the desktop entry (Debian package icon goes away on remove).
+    if [[ -f "$src/resources/sioyek-icon-linux.png" ]]; then
+        cp -a "$src/resources/sioyek-icon-linux.png" "$SIOYEK_PREFIX/"
+    fi
+
+    trap - EXIT
+    rm -rf -- "$work"
+fi
+
+if [[ ! -x "$SIOYEK_BIN" ]]; then
+    log_error "sioyek binary missing at $SIOYEK_BIN (build failed?)"
+    exit 1
+fi
+
+ensure_directory "$HOME/.local/bin"
+# Wrapper must be a real file (not a symlink into $SIOYEK_PREFIX): writing
+# through a symlink would clobber the ELF. XWayland only — Qt6 already
+# picks up GNOME scale via Xft.dpi / screen DPR (do not set QT_SCALE_FACTOR).
+rm -f -- "$SIOYEK_LAUNCHER"
+cat >"$SIOYEK_LAUNCHER" <<EOF
+#!/usr/bin/env bash
+# Qt6 sioyek still needs XWayland on NVIDIA+GNOME (EGL_BAD_MATCH on
+# Wayland QOpenGLWidget). Leave scale to Qt; only force xcb.
+export QT_QPA_PLATFORM=xcb
+exec "$SIOYEK_BIN" "\$@"
+EOF
+chmod +x "$SIOYEK_LAUNCHER"
+
+SIOYEK_ICON="$SIOYEK_PREFIX/sioyek-icon-linux.png"
+[[ -f "$SIOYEK_ICON" ]] || SIOYEK_ICON="sioyek-icon-linux"
+
+create_desktop_entry "sioyek" "[Desktop Entry]
+Name=Sioyek
+Comment=PDF viewer for reading research papers and technical books
+Keywords=pdf;viewer;reader;research;
+TryExec=$SIOYEK_LAUNCHER
+Exec=$SIOYEK_LAUNCHER %f
+StartupNotify=true
+Terminal=false
+Type=Application
+Icon=$SIOYEK_ICON
+Categories=Development;Viewer;
+MimeType=application/pdf;
+StartupWMClass=sioyek"
+
+leftovers="$(
+    find "$HOME/.local/opt" -maxdepth 1 -type d -name 'sioyek-*' ! -path "$SIOYEK_PREFIX" 2>/dev/null || true
+)"
+if [[ -n "$leftovers" ]]; then
+    log_warn "Old sioyek builds (remove manually):"
+    echo "$leftovers"
+fi
+
+log_info "sioyek ${SIOYEK_SHORT} (Qt6, xcb) -> $SIOYEK_LAUNCHER"
