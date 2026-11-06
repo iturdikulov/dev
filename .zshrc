@@ -105,7 +105,7 @@ fi
 
 alias ls='ls --color=auto'
 if (( $+commands[eza] )); then
-  IGNORE_GLOB="UnrealEngine"
+  IGNORE_GLOB="${(j:|:)${(f)"$(<$HOME/.config/eza/ignore)"}}"
   alias eza_ls="eza --group-directories-first --git";
   alias l="eza_ls -bl -I $IGNORE_GLOB";
   alias ls="eza"

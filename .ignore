@@ -1,0 +1,8 @@
+# не игнорировать для rg/fd/telescope search.
+!plans/
+!plans/**
+!.agents/
+!.agents/**
+!docker-compose.override.yml
+!runtime/agent-sandbox/
+!runtime/agent-sandbox/**
