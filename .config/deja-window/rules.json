@@ -27,6 +27,15 @@
     "match_mode": "wm_class"
   },
   {
+    "wm_class": "com.mitchellh.ghostty.wiki",
+    "restore_size": true,
+    "restore_pos": true,
+    "restore_maximized": true,
+    "restore_workspace": false,
+    "is_regex": false,
+    "match_mode": "wm_class"
+  },
+  {
     "wm_class": "org.zealdocs.zeal",
     "restore_size": true,
     "restore_pos": true,
