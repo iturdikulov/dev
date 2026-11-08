@@ -1,0 +1,97 @@
+[
+    {
+        "name": "Chats",
+        "shortcuts": [
+            {
+                "key": "Ctrl + F",
+                "description": "Search"
+            },
+            {
+                "key": "Alt + Up / Down",
+                "description": "Previous / next chat"
+            },
+            {
+                "key": "Ctrl + PgUp / PgDn",
+                "description": "Previous / next chat"
+            },
+            {
+                "key": "Ctrl + Alt + Home / End",
+                "description": "First / last chat"
+            },
+            {
+                "key": "Ctrl + 1…8",
+                "description": "Folder / pinned chat"
+            },
+            {
+                "key": "Ctrl + Shift + Up / Down",
+                "description": "Previous / next folder"
+            },
+            {
+                "key": "Ctrl + 0 / Ctrl + 9",
+                "description": "Saved messages / archive"
+            },
+            {
+                "key": "Ctrl + J",
+                "description": "Contacts"
+            },
+            {
+                "key": "Ctrl + R",
+                "description": "Mark chat read"
+            }
+        ]
+    },
+    {
+        "name": "Messages",
+        "shortcuts": [
+            {
+                "key": "Up",
+                "description": "Edit last message"
+            },
+            {
+                "key": "Ctrl + Up / Down",
+                "description": "Reply to message"
+            },
+            {
+                "key": "Shift + Enter",
+                "description": "New line"
+            },
+            {
+                "key": "Ctrl + B / I / U",
+                "description": "Bold / italic / underline"
+            },
+            {
+                "key": "Ctrl + Shift + X / Ctrl + Shift + M",
+                "description": "Strikethrough / monospace"
+            },
+            {
+                "key": "Ctrl + Shift + P / Ctrl + Shift + .",
+                "description": "Spoiler / quote"
+            },
+            {
+                "key": "Ctrl + Shift + N",
+                "description": "Clear formatting"
+            },
+            {
+                "key": "Ctrl + K",
+                "description": "Insert link"
+            }
+        ]
+    },
+    {
+        "name": "Window",
+        "shortcuts": [
+            {
+                "key": "Ctrl + L",
+                "description": "Lock"
+            },
+            {
+                "key": "Ctrl + M / Ctrl + W",
+                "description": "Minimize / close"
+            },
+            {
+                "key": "Ctrl + Q",
+                "description": "Quit"
+            }
+        ]
+    }
+]

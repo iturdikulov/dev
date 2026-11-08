@@ -694,7 +694,7 @@ setup_gnome_extensions() {
     set_extension_enabled deja-window@mcast.gnomext.com enable
     # Annotate desktop: Super+Alt+D (https://github.com/daveprowse/Draw-On-Gnome).
     set_extension_enabled draw-on-gnome@daveprowse.github.io enable
-    # Keyboard shortcuts cheat sheet: Ctrl+Alt+Super+S by default.
+    # Keyboard shortcuts cheat sheet: Super+Alt+S (ensure_shortcuts_appspecific).
     set_extension_enabled Shortcuts@kyle.aims.ac.za enable
     ensure_run_or_raise_dbus
     ensure_deja_window_rules
@@ -783,6 +783,30 @@ ensure_shortcuts_appspecific() {
     fi
 
     set_gsetting_bool_if_different "$schema" enable-appspecific-files true
+    if [[ "$(gsettings get "$schema" shortcuts-toggle-overview)" != "['<Super><Alt>s']" ]]; then
+        gsettings set "$schema" shortcuts-toggle-overview "['<Super><Alt>s']"
+        log_info "$schema shortcuts-toggle-overview -> <Super><Alt>s"
+    fi
+
+    link_shortcuts_json godot.json find_godot_desktop
+    link_shortcuts_json telegram.json find_telegram_desktop
+}
+
+# Godot/Telegram desktop-id нестабилен (версия/хэш) → в yadm лежит
+# godot.json/telegram.json, а симлинк <текущий-id>.json указывает на него.
+link_shortcuts_json() {
+    local json="$1"
+    local finder="$2"
+    local dir="$HOME/.config/Shortcuts@kyle.aims.ac.za"
+    local desktop link
+
+    [[ -f "$dir/$json" ]] || return 0
+    desktop="$("$finder")" || return 0
+    link="$dir/${desktop%.desktop}.json"
+    if [[ "$(readlink "$link" 2>/dev/null)" != "$json" ]]; then
+        ln -sfn "$json" "$link"
+        log_info "Shortcuts: ${link##*/} -> $json"
+    fi
 }
 
 # Apply ~/.config/deja-window/rules.json (yadm) → gsettings. Overwrites

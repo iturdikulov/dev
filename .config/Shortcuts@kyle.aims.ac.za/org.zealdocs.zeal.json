@@ -1,0 +1,77 @@
+[
+    {
+        "name": "Search",
+        "shortcuts": [
+            {
+                "key": "Ctrl + K / Ctrl + L",
+                "description": "Focus search"
+            },
+            {
+                "key": "Alt + Up / Down",
+                "description": "Move in results"
+            },
+            {
+                "key": "Enter / Ctrl + Enter",
+                "description": "Open / open in new tab"
+            },
+            {
+                "key": "Ctrl + F",
+                "description": "Find in page"
+            },
+            {
+                "key": "Esc",
+                "description": "Clear / hide"
+            }
+        ]
+    },
+    {
+        "name": "Tabs / navigation",
+        "shortcuts": [
+            {
+                "key": "Ctrl + T / Ctrl + W",
+                "description": "New / close tab"
+            },
+            {
+                "key": "Ctrl + Tab / Ctrl + Shift + Tab",
+                "description": "Next / previous tab"
+            },
+            {
+                "key": "Alt + 1…8 / Alt + 9",
+                "description": "Go to tab / last tab"
+            },
+            {
+                "key": "Ctrl + Alt + T",
+                "description": "Duplicate tab"
+            },
+            {
+                "key": "Alt + Left / Right",
+                "description": "Back / forward"
+            },
+            {
+                "key": "F6",
+                "description": "Switch focus"
+            }
+        ]
+    },
+    {
+        "name": "View / app",
+        "shortcuts": [
+            {
+                "key": "Ctrl + B / Ctrl + M",
+                "description": "Sidebar / menu bar"
+            },
+            {
+                "key": "Ctrl + = / − / 0",
+                "description": "Zoom in / out / reset"
+            },
+            {
+                "key": "Ctrl + ,",
+                "description": "Preferences"
+            },
+            {
+                "key": "Super + Z",
+                "description": "Show Zeal (run-or-raise)"
+            }
+        ]
+    }
+]

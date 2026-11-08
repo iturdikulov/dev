@@ -90,6 +90,7 @@ Never perform the following actions without explicit confirmation:
 - `git push` or any other operation that publishes changes remotely.
 - Deleting files or directories.
 - Editing `.env` files.
+- Docker commands that delete or interrupt state (`rm -f`, `kill`, `stop`, any `prune`, `rmi`, `volume rm`, `compose down -v`): state what will be lost first; see the `docker-destructive-guardrails` skill.
 
 Other local changes can be made as needed to complete the task.
 

@@ -14,6 +14,6 @@ fi
 
 # Code & Cursor
 install_packages cursor
-# Sandbox tools for codex
+# Sandbox tools for agents
 install_packages seccomp bubblewrap
 

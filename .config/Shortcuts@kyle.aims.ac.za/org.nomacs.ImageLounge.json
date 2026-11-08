@@ -1,0 +1,98 @@
+[
+    {
+        "name": "Browse",
+        "shortcuts": [
+            {
+                "key": "Left / Right",
+                "description": "Previous / next image"
+            },
+            {
+                "key": "Home / End",
+                "description": "First / last image"
+            },
+            {
+                "key": "PgUp / PgDn",
+                "description": "Skip back / forward"
+            },
+            {
+                "key": "Space",
+                "description": "Slideshow"
+            },
+            {
+                "key": "F11 / F10",
+                "description": "Fullscreen / frameless"
+            }
+        ]
+    },
+    {
+        "name": "Zoom",
+        "shortcuts": [
+            {
+                "key": "+ / − (Up / Down)",
+                "description": "Zoom in / out"
+            },
+            {
+                "key": "Ctrl + 0",
+                "description": "Reset view"
+            },
+            {
+                "key": "Ctrl + 1 / Ctrl + 2",
+                "description": "100% / fit to window"
+            }
+        ]
+    },
+    {
+        "name": "Edit / file",
+        "shortcuts": [
+            {
+                "key": "R / Shift + R",
+                "description": "Rotate CW / CCW"
+            },
+            {
+                "key": "C / Ctrl + R",
+                "description": "Crop / transform"
+            },
+            {
+                "key": "D",
+                "description": "Image editor"
+            },
+            {
+                "key": "F2 / F5",
+                "description": "Rename / reload"
+            },
+            {
+                "key": "Del / Shift + Del",
+                "description": "Delete / delete silently"
+            },
+            {
+                "key": "0…5",
+                "description": "Star rating"
+            }
+        ]
+    },
+    {
+        "name": "Panels",
+        "shortcuts": [
+            {
+                "key": "I / M",
+                "description": "Info / EXIF"
+            },
+            {
+                "key": "E / F",
+                "description": "Explorer / toggle panels"
+            },
+            {
+                "key": "T / Shift + T",
+                "description": "Preview / thumbnails"
+            },
+            {
+                "key": "Ctrl + Shift + O / Ctrl + H",
+                "description": "Open folder / recent"
+            },
+            {
+                "key": "Ctrl + Shift + P / Ctrl + K",
+                "description": "Settings / shortcuts"
+            }
+        ]
+    }
+]

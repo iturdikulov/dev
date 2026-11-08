@@ -1,0 +1,110 @@
+[
+    {
+        "name": "Compose",
+        "shortcuts": [
+            {
+                "key": "Ctrl + N / Ctrl + M",
+                "description": "New message"
+            },
+            {
+                "key": "Ctrl + R / Ctrl + Shift + R",
+                "description": "Reply / reply all"
+            },
+            {
+                "key": "Ctrl + Shift + L",
+                "description": "Reply to list"
+            },
+            {
+                "key": "Ctrl + L",
+                "description": "Forward"
+            },
+            {
+                "key": "Ctrl + E",
+                "description": "Edit as new"
+            },
+            {
+                "key": "Ctrl + Enter",
+                "description": "Send"
+            }
+        ]
+    },
+    {
+        "name": "Message",
+        "shortcuts": [
+            {
+                "key": "A",
+                "description": "Archive"
+            },
+            {
+                "key": "M",
+                "description": "Toggle read"
+            },
+            {
+                "key": "S",
+                "description": "Toggle star"
+            },
+            {
+                "key": "J",
+                "description": "Mark as junk"
+            },
+            {
+                "key": "Del",
+                "description": "Delete"
+            }
+        ]
+    },
+    {
+        "name": "Navigation",
+        "shortcuts": [
+            {
+                "key": "F / B",
+                "description": "Next / previous message"
+            },
+            {
+                "key": "N / P",
+                "description": "Next / previous unread message"
+            },
+            {
+                "key": "T / R",
+                "description": "Next unread thread / mark thread read"
+            },
+            {
+                "key": "Ctrl + K",
+                "description": "Search"
+            },
+            {
+                "key": "Ctrl + Shift + K",
+                "description": "Quick filter"
+            },
+            {
+                "key": "F8",
+                "description": "Toggle message pane"
+            },
+            {
+                "key": "F5",
+                "description": "Get new messages"
+            }
+        ]
+    },
+    {
+        "name": "Tabs / calendar",
+        "shortcuts": [
+            {
+                "key": "Alt + 1…8 / Alt + 9",
+                "description": "Go to tab / last tab"
+            },
+            {
+                "key": "Ctrl + Tab",
+                "description": "Next tab"
+            },
+            {
+                "key": "Ctrl + Shift + T",
+                "description": "Reopen closed tab"
+            },
+            {
+                "key": "Ctrl + I / Ctrl + D",
+                "description": "New event / task"
+            }
+        ]
+    }
+]

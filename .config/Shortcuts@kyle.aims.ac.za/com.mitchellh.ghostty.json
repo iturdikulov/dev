@@ -29,31 +29,6 @@
         ]
     },
     {
-        "name": "Splits",
-        "shortcuts": [
-            {
-                "key": "Ctrl + Shift + O",
-                "description": "Split right"
-            },
-            {
-                "key": "Ctrl + Shift + E",
-                "description": "Split down"
-            },
-            {
-                "key": "Super + Ctrl + [ / ]",
-                "description": "Previous / next split"
-            },
-            {
-                "key": "Ctrl + Alt + Arrows",
-                "description": "Focus split in direction"
-            },
-            {
-                "key": "Ctrl + Shift + Enter",
-                "description": "Zoom current split"
-            }
-        ]
-    },
-    {
         "name": "Clipboard / font",
         "shortcuts": [
             {

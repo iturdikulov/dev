@@ -1,0 +1,98 @@
+[
+    {
+        "name": "Move",
+        "shortcuts": [
+            {
+                "key": "j / k",
+                "description": "Scroll down / up"
+            },
+            {
+                "key": "Space / Shift + Space",
+                "description": "Screen down / up"
+            },
+            {
+                "key": "Ctrl + PgDn / Ctrl + PgUp",
+                "description": "Next / previous page"
+            },
+            {
+                "key": "gg / G",
+                "description": "Start / end"
+            },
+            {
+                "key": "<N> gg / Home",
+                "description": "Go to page N"
+            },
+            {
+                "key": "t / gc / gC",
+                "description": "TOC / next / previous chapter"
+            },
+            {
+                "key": "Backspace / Shift + Backspace",
+                "description": "Back / forward in history"
+            }
+        ]
+    },
+    {
+        "name": "Search / links",
+        "shortcuts": [
+            {
+                "key": "/ or Ctrl + F",
+                "description": "Search"
+            },
+            {
+                "key": "n / N",
+                "description": "Next / previous match"
+            },
+            {
+                "key": "f",
+                "description": "Open link (keyboard hints)"
+            },
+            {
+                "key": "F",
+                "description": "Smart jump to reference"
+            }
+        ]
+    },
+    {
+        "name": "Marks",
+        "shortcuts": [
+            {
+                "key": "b / gb / gB / db",
+                "description": "Bookmark: add / go / go all docs / delete"
+            },
+            {
+                "key": "h / gh / dh",
+                "description": "Highlight: add / go / delete"
+            },
+            {
+                "key": "m + letter / ` + letter",
+                "description": "Set / go to mark"
+            }
+        ]
+    },
+    {
+        "name": "View / files",
+        "shortcuts": [
+            {
+                "key": "+ / − / =",
+                "description": "Zoom in / out / fit width"
+            },
+            {
+                "key": "F8",
+                "description": "Dark mode"
+            },
+            {
+                "key": "F5 / F11",
+                "description": "Presentation / fullscreen"
+            },
+            {
+                "key": "o / O / Ctrl + O",
+                "description": "Open doc / previous doc / file dialog"
+            },
+            {
+                "key": "q",
+                "description": "Quit"
+            }
+        ]
+    }
+]

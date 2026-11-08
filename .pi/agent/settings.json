@@ -2,7 +2,7 @@
   "packages": [
     "npm:pi-claude-bridge",
     "vendor/pi-cursor-provider",
-    "npm:@jerryan/pi-subagent-lite"
+    "git:github.com/1broseidon/ketch"
   ],
   "defaultProvider": "claude-bridge",
   "defaultModel": "claude-opus-5-5",
@@ -15,6 +15,7 @@
     "llama-server/occamy"
   ],
   "extensionChangelogVersions": {
-    "{\"source\":\"vendor/pi-cursor-provider\",\"scope\":\"user\"}": "0.1.5"
+    "{\"source\":\"vendor/pi-cursor-provider\",\"scope\":\"user\"}": "0.1.5",
+    "{\"source\":\"git:github.com/1broseidon/ketch\",\"scope\":\"user\"}": "0.20.5"
   }
 }

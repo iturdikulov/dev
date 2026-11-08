@@ -161,7 +161,6 @@ $Packages = @(
     'Anysphere.Cursor'
     'JetBrains.PyCharm'
     'Anthropic.ClaudeCode'
-    'OpenAI.Codex'
 
     # DB
     'DBeaver.DBeaver.Community'

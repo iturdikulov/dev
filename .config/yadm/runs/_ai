@@ -3,24 +3,81 @@
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # Agents
-packages=(
-    @openai/codex
-	opencode-ai@latest
-)
-
 # Allow scripts to run for opencode-ai package
 npm config set allow-scripts=opencode-ai --location=user
 
-for package in "${packages[@]}"; do
-    npm install -g "$package"
-done
+# Ketch search
+npm install -g ketch-cli
+npm install -g opencode-ai@latest
 
 # Pi coding agent (official npm; no lifecycle scripts required)
 npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 pi install npm:@netandreus/pi-cursor-provider
 pi install npm:pi-plan
 pi install npm:pi-claude-bridge
-pi install npm:@jerryan/pi-subagent-lite
+
+# Ketch для pi: нативные инструменты ketch_* + research skill вместо MCP (см. plugins/pi в репо ketch)
+pi install git:github.com/1broseidon/ketch
+# Убираем старую MCP-запись, чтобы инструменты не дублировались
+if pi mcp list --json 2>/dev/null | grep -q '"ketch"'; then
+	pi mcp remove ketch
+fi
+
+# Скиллы агентов: ставим и обновляем через npx skills, в yadm не храним.
+# Формат записи: "источник|скилл скилл ...". Повторный add подтягивает свежую версию.
+# Во вложенных репах ancestor `.agents/skills` подхватывает ~/.pi/agent/extensions/ancestor-agents-skills.ts
+global_skills=(
+	"bsisduck/video-analyzer-skill|analyzing-video"
+	"docker/skills|docker-build-strategies docker-compose-patterns docker-destructive-guardrails docker-project-foundations"
+	"mattpocock/skills|ask-matt chief-of-staff claude-handoff code-review codebase-design diagnosing-bugs domain-modeling grill-me grill-with-docs grilling handoff implement implement-spec improve-codebase-architecture loop-me pr prototype research retro setup-matt-pocock-skills tdd teach to-questionnaire to-spec to-tickets triage wait-what wayfinder wizard writing-beats writing-for-agents writing-fragments writing-shape"
+	"samber/cc-skills-golang|golang-testing"
+	"vercel-labs/skills|find-skills"
+)
+az_skills=(
+	"antfu/skills|pinia"
+	"vuejs-ai/skills|vue-best-practices"
+)
+gamedev_skills=(
+	"gamedev-skills/awesome-gamedev-agent-skills|ai-behavior-trees-utility-ai audio-design camera-systems create-game-assets game-ai game-feel game-ui-ux godot-2d-movement godot-3d-essentials godot-animation godot-audio godot-export godot-gdscript godot-gdscript-headless-testing godot-multiplayer godot-nodes-scenes godot-physics godot-resources godot-shaders godot-signals-groups godot-tilemap godot-ui-control input-systems level-design performance-optimization physics-tuning procedural-gen prototype-fast rpg save-systems shader-programming"
+)
+
+# $1 — "-g" или "" (проект в текущей папке), дальше записи списка
+skills_add() {
+	local scope=$1 entry source name args
+	shift
+	for entry in "$@"; do
+		source=${entry%%|*}
+		args=()
+		for name in ${entry#*|}; do args+=(-s "$name"); done
+		npx -y skills add "$source" $scope "${args[@]}" -y >/dev/null ||
+			log_warn "skills: не удалось поставить $source в ${scope:-$PWD}"
+	done
+}
+
+# $1 — папка проекта, дальше записи списка
+project_skills_add() {
+	local dir=$1
+	shift
+	if [[ ! -d "$dir" ]]; then
+		log_warn "skills: нет $dir — проектные скиллы пропущены"
+		return
+	fi
+	log_info "skills: $dir"
+	(cd "$dir" && skills_add "" "$@")
+	# CLI кладёт в корень skills-lock.json, .claude/skills и .agents/skills —
+	# прячем локально через exclude, не трогая .gitignore проекта (если .git нет — нечего).
+	if [[ -d "$dir/.git" ]]; then
+		local pattern exclude="$dir/.git/info/exclude"
+		for pattern in /skills-lock.json /.claude/skills/ /.agents/; do
+			grep -qxF "$pattern" "$exclude" 2>/dev/null || echo "$pattern" >>"$exclude"
+		done
+	fi
+}
+
+log_info "skills: глобальные"
+skills_add -g "${global_skills[@]}"
+project_skills_add "$HOME/az" "${az_skills[@]}"
+project_skills_add "$HOME/Media/games/gamedev" "${gamedev_skills[@]}"
 
 # Cursor Agent CLI — latest version from https://cursor.com/install (no curl|bash)
 case "$(dpkg --print-architecture)" in

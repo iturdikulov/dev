@@ -1,0 +1,176 @@
+[
+    {
+        "name": "Navigation",
+        "shortcuts": [
+            {
+                "key": "Alt + F",
+                "description": "Quick switcher"
+            },
+            {
+                "key": "Ctrl + Alt + Shift + F",
+                "description": "Search vault"
+            },
+            {
+                "key": "Ctrl + Shift + F",
+                "description": "Search in file"
+            },
+            {
+                "key": "Ctrl + O / Ctrl + I",
+                "description": "Back / forward"
+            },
+            {
+                "key": "Ctrl + 1…8 / Alt + 1…8",
+                "description": "Go to tab"
+            },
+            {
+                "key": "Ctrl + T / Ctrl + W / Ctrl + Tab",
+                "description": "New / close / next tab"
+            },
+            {
+                "key": "F3 / F4",
+                "description": "Left / right sidebar"
+            },
+            {
+                "key": "Alt + H / L / J",
+                "description": "Focus left / right pane / editor"
+            },
+            {
+                "key": "Ctrl + G / Alt + B",
+                "description": "Graph / backlinks"
+            }
+        ]
+    },
+    {
+        "name": "Notes",
+        "shortcuts": [
+            {
+                "key": "Ctrl + N",
+                "description": "New note from template"
+            },
+            {
+                "key": "Alt + V / W / I",
+                "description": "Template: permanent / wbr / flashcard"
+            },
+            {
+                "key": "Ctrl + Shift + 1 / 2 / 3",
+                "description": "TODO / QuickNote / TODO archive"
+            },
+            {
+                "key": "Ctrl + Alt + Shift + 1 / 2 / 3",
+                "description": "Same in new tab"
+            },
+            {
+                "key": "Ctrl + Alt + E",
+                "description": "Open in default app"
+            }
+        ]
+    },
+    {
+        "name": "Editor",
+        "shortcuts": [
+            {
+                "key": "Ctrl + E",
+                "description": "Toggle reading / editing view"
+            },
+            {
+                "key": "Ctrl + Enter",
+                "description": "Toggle checkbox"
+            },
+            {
+                "key": "Ctrl + K",
+                "description": "Insert link"
+            },
+            {
+                "key": "Ctrl + Shift + L",
+                "description": "Cycle list / checklist"
+            },
+            {
+                "key": "Ctrl + Alt + I",
+                "description": "Insert tag"
+            },
+            {
+                "key": "Ctrl + =",
+                "description": "Lint file"
+            },
+            {
+                "key": "Ctrl + Shift + A",
+                "description": "Archive done tasks"
+            },
+            {
+                "key": "Ctrl + Shift + C",
+                "description": "PDF++: copy link to selection"
+            }
+        ]
+    },
+    {
+        "name": "Spaced repetition",
+        "shortcuts": [
+            {
+                "key": "Ctrl + Alt + A",
+                "description": "Review flashcards"
+            },
+            {
+                "key": "Ctrl + Alt + Shift + A",
+                "description": "Review flashcards in note"
+            },
+            {
+                "key": "Ctrl + Alt + 1 / 2 / 3",
+                "description": "Note review: easy / good / hard"
+            },
+            {
+                "key": "Alt + S",
+                "description": "SRS statistics"
+            }
+        ]
+    },
+    {
+        "name": "Agent / app",
+        "shortcuts": [
+            {
+                "key": "Alt + A / Alt + R",
+                "description": "Agent: approve / reject permission"
+            },
+            {
+                "key": "Alt + K",
+                "description": "Agent: next chat view"
+            },
+            {
+                "key": "Ctrl + Shift + P",
+                "description": "Command palette"
+            },
+            {
+                "key": "Ctrl + Alt + S",
+                "description": "Settings"
+            },
+            {
+                "key": "Ctrl + Shift + R",
+                "description": "Reload app"
+            }
+        ]
+    },
+    {
+        "name": "Vim (.obsidian.vimrc)",
+        "shortcuts": [
+            {
+                "key": "Space f s / Space f k",
+                "description": "Search vault / command palette"
+            },
+            {
+                "key": "Space t f / Space g g",
+                "description": "Switcher / graph"
+            },
+            {
+                "key": "Space p v / p o / p s",
+                "description": "Files / outline / sidebar"
+            },
+            {
+                "key": "g d",
+                "description": "Follow link under cursor"
+            },
+            {
+                "key": "H / L",
+                "description": "Line start / end"
+            }
+        ]
+    }
+]

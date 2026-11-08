@@ -1,0 +1,89 @@
+[
+    {
+        "name": "Playback",
+        "shortcuts": [
+            {
+                "key": "Space",
+                "description": "Play / pause"
+            },
+            {
+                "key": "Ctrl + Right / Left",
+                "description": "Next / previous track"
+            },
+            {
+                "key": "Shift + Right / Left",
+                "description": "Seek forward / back"
+            },
+            {
+                "key": "Ctrl + Up / Down",
+                "description": "Volume up / down"
+            },
+            {
+                "key": "Ctrl + Shift + Down / Up",
+                "description": "Volume to zero / max"
+            },
+            {
+                "key": "M",
+                "description": "Mute"
+            },
+            {
+                "key": "Ctrl + S / Ctrl + R",
+                "description": "Shuffle / repeat"
+            },
+            {
+                "key": "Alt + Shift + B",
+                "description": "Like song"
+            }
+        ]
+    },
+    {
+        "name": "Navigation",
+        "shortcuts": [
+            {
+                "key": "Ctrl + K / Ctrl + L",
+                "description": "Search"
+            },
+            {
+                "key": "Ctrl + F",
+                "description": "Filter"
+            },
+            {
+                "key": "Alt + Left / Right",
+                "description": "Back / forward"
+            },
+            {
+                "key": "Alt + Shift + J",
+                "description": "Now playing"
+            },
+            {
+                "key": "Alt + Shift + Q",
+                "description": "Queue"
+            },
+            {
+                "key": "Alt + Shift + S",
+                "description": "Liked songs"
+            },
+            {
+                "key": "Alt + Shift + 0 / 1",
+                "description": "Library / playlists"
+            },
+            {
+                "key": "Alt + Shift + R / L",
+                "description": "Now playing / library sidebar"
+            }
+        ]
+    },
+    {
+        "name": "App",
+        "shortcuts": [
+            {
+                "key": "Ctrl + ,",
+                "description": "Preferences"
+            },
+            {
+                "key": "Ctrl + /",
+                "description": "Shortcuts help"
+            }
+        ]
+    }
+]

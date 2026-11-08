@@ -1,0 +1,146 @@
+[
+    {
+        "name": "General",
+        "shortcuts": [
+            {
+                "key": "F3",
+                "description": "Search"
+            },
+            {
+                "key": "Tab",
+                "description": "Object / Edit mode"
+            },
+            {
+                "key": "N / T",
+                "description": "Sidebar / toolbar"
+            },
+            {
+                "key": "Ctrl + Space",
+                "description": "Maximize area"
+            },
+            {
+                "key": "Shift + A",
+                "description": "Add"
+            },
+            {
+                "key": "X / Del",
+                "description": "Delete"
+            },
+            {
+                "key": "Ctrl + Z / Ctrl + Shift + Z",
+                "description": "Undo / redo"
+            },
+            {
+                "key": "Ctrl + S / F12",
+                "description": "Save / render"
+            }
+        ]
+    },
+    {
+        "name": "Object",
+        "shortcuts": [
+            {
+                "key": "G / R / S (+ X/Y/Z)",
+                "description": "Move / rotate / scale (axis)"
+            },
+            {
+                "key": "Alt + G / R / S",
+                "description": "Clear location / rotation / scale"
+            },
+            {
+                "key": "Shift + D / Alt + D",
+                "description": "Duplicate / linked duplicate"
+            },
+            {
+                "key": "Ctrl + J / Ctrl + P",
+                "description": "Join / parent"
+            },
+            {
+                "key": "Ctrl + A",
+                "description": "Apply menu"
+            },
+            {
+                "key": "Shift + S",
+                "description": "Snap pie"
+            },
+            {
+                "key": "H / Alt + H",
+                "description": "Hide / unhide"
+            }
+        ]
+    },
+    {
+        "name": "View",
+        "shortcuts": [
+            {
+                "key": "Numpad 1 / 3 / 7",
+                "description": "Front / right / top"
+            },
+            {
+                "key": "Numpad 0 / 5",
+                "description": "Camera / ortho toggle"
+            },
+            {
+                "key": "` (backtick)",
+                "description": "View pie"
+            },
+            {
+                "key": "Z / Shift + Z",
+                "description": "Shading pie / toggle wireframe"
+            },
+            {
+                "key": "Alt + Z",
+                "description": "Toggle X-ray"
+            },
+            {
+                "key": "Ctrl + Tab",
+                "description": "Mode pie"
+            },
+            {
+                "key": "Home / Numpad .",
+                "description": "Frame all / selected"
+            },
+            {
+                "key": "Numpad /",
+                "description": "Local view"
+            }
+        ]
+    },
+    {
+        "name": "Edit mode",
+        "shortcuts": [
+            {
+                "key": "1 / 2 / 3",
+                "description": "Vertex / edge / face"
+            },
+            {
+                "key": "A / Alt + A",
+                "description": "Select all / none"
+            },
+            {
+                "key": "Alt + Click / Ctrl + L",
+                "description": "Select loop / linked"
+            },
+            {
+                "key": "E / I",
+                "description": "Extrude / inset"
+            },
+            {
+                "key": "Ctrl + R",
+                "description": "Loop cut"
+            },
+            {
+                "key": "K",
+                "description": "Knife"
+            },
+            {
+                "key": "M",
+                "description": "Merge"
+            },
+            {
+                "key": "Ctrl + B",
+                "description": "Bevel"
+            }
+        ]
+    }
+]

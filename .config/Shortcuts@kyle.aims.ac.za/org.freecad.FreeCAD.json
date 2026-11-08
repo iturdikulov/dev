@@ -1,0 +1,102 @@
+[
+    {
+        "name": "View",
+        "shortcuts": [
+            {
+                "key": "0",
+                "description": "Isometric"
+            },
+            {
+                "key": "1 / 2 / 3",
+                "description": "Front / top / right"
+            },
+            {
+                "key": "V, F / V, S",
+                "description": "Fit all / fit selection"
+            },
+            {
+                "key": "V, O / V, P",
+                "description": "Orthographic / perspective"
+            },
+            {
+                "key": "Ctrl + B",
+                "description": "Box zoom"
+            },
+            {
+                "key": "V, 1…7",
+                "description": "Draw style"
+            },
+            {
+                "key": "Space",
+                "description": "Toggle visibility"
+            }
+        ]
+    },
+    {
+        "name": "General",
+        "shortcuts": [
+            {
+                "key": "Ctrl + Z / Ctrl + Y",
+                "description": "Undo / redo"
+            },
+            {
+                "key": "Del",
+                "description": "Delete"
+            },
+            {
+                "key": "Ctrl + R / Ctrl + Shift + R",
+                "description": "Refresh / recompute"
+            },
+            {
+                "key": "Shift + B",
+                "description": "Box selection"
+            },
+            {
+                "key": "Ctrl + S",
+                "description": "Save"
+            }
+        ]
+    },
+    {
+        "name": "Sketcher geometry",
+        "shortcuts": [
+            {
+                "key": "G, L / G, M",
+                "description": "Line / polyline"
+            },
+            {
+                "key": "G, C / G, A",
+                "description": "Circle / arc"
+            },
+            {
+                "key": "G, R",
+                "description": "Rectangle"
+            },
+            {
+                "key": "G, T",
+                "description": "Trim"
+            },
+            {
+                "key": "G, N",
+                "description": "Toggle construction"
+            }
+        ]
+    },
+    {
+        "name": "Sketcher constraints",
+        "shortcuts": [
+            {
+                "key": "C",
+                "description": "Coincident"
+            },
+            {
+                "key": "H / V",
+                "description": "Horizontal / vertical"
+            },
+            {
+                "key": "D",
+                "description": "Dimension"
+            }
+        ]
+    }
+]

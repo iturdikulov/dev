@@ -1,0 +1,147 @@
+[
+    {
+        "name": "Editor",
+        "shortcuts": [
+            {
+                "key": "Ctrl + F1 / F2 / F3",
+                "description": "2D / 3D / Script workspace"
+            },
+            {
+                "key": "Ctrl + Shift + P",
+                "description": "Command palette"
+            },
+            {
+                "key": "Ctrl + O / Ctrl + Shift + O",
+                "description": "Open scene / quick open scene"
+            },
+            {
+                "key": "Ctrl + Alt + O / Shift + Alt + O",
+                "description": "Quick open script / any resource"
+            },
+            {
+                "key": "Ctrl + S",
+                "description": "Save scene"
+            },
+            {
+                "key": "Ctrl + Tab / Ctrl + Shift + W",
+                "description": "Next scene tab / close scene"
+            },
+            {
+                "key": "Ctrl + Shift + T",
+                "description": "Reopen closed scene"
+            },
+            {
+                "key": "Ctrl + Alt + P",
+                "description": "Focus FileSystem filter"
+            },
+            {
+                "key": "Ctrl + J",
+                "description": "Toggle bottom panel"
+            },
+            {
+                "key": "F1",
+                "description": "Search help"
+            },
+            {
+                "key": "Alt + K",
+                "description": "Clear output (custom)"
+            }
+        ]
+    },
+    {
+        "name": "Run",
+        "shortcuts": [
+            {
+                "key": "F5 / F6",
+                "description": "Run project / current scene"
+            },
+            {
+                "key": "Ctrl + Shift + F5",
+                "description": "Run specific scene"
+            },
+            {
+                "key": "F7 / F8",
+                "description": "Pause / stop"
+            }
+        ]
+    },
+    {
+        "name": "Scene tree",
+        "shortcuts": [
+            {
+                "key": "Ctrl + A",
+                "description": "Add child node"
+            },
+            {
+                "key": "Ctrl + Shift + A",
+                "description": "Instantiate child scene"
+            },
+            {
+                "key": "Ctrl + D / F2",
+                "description": "Duplicate / rename"
+            }
+        ]
+    },
+    {
+        "name": "Script",
+        "shortcuts": [
+            {
+                "key": "Ctrl + Space",
+                "description": "Code completion"
+            },
+            {
+                "key": "Ctrl + K / Ctrl + /",
+                "description": "Toggle comment"
+            },
+            {
+                "key": "Ctrl + Shift + D",
+                "description": "Duplicate selection"
+            },
+            {
+                "key": "Alt + Up / Down",
+                "description": "Move line"
+            },
+            {
+                "key": "Ctrl + Shift + K",
+                "description": "Delete line"
+            },
+            {
+                "key": "Ctrl + G / Ctrl + Alt + F",
+                "description": "Go to line / function"
+            },
+            {
+                "key": "Ctrl + Click / F2",
+                "description": "Go to definition / rename symbol"
+            },
+            {
+                "key": "F9",
+                "description": "Toggle breakpoint"
+            },
+            {
+                "key": "Ctrl + Shift + F",
+                "description": "Find in files"
+            }
+        ]
+    },
+    {
+        "name": "2D / 3D viewport",
+        "shortcuts": [
+            {
+                "key": "Q / W / E / R",
+                "description": "2D: select / move / rotate / scale"
+            },
+            {
+                "key": "V / W / E / R",
+                "description": "3D: select / move / rotate / scale"
+            },
+            {
+                "key": "F / Shift + F",
+                "description": "3D: focus / freelook"
+            },
+            {
+                "key": "T / Y",
+                "description": "3D: local space / snap"
+            }
+        ]
+    }
+]

@@ -1,0 +1,94 @@
+[
+    {
+        "name": "Tabs",
+        "shortcuts": [
+            {
+                "key": "Ctrl + T / Ctrl + W",
+                "description": "New / close tab"
+            },
+            {
+                "key": "Ctrl + Shift + T",
+                "description": "Reopen closed tab"
+            },
+            {
+                "key": "Ctrl + Tab / Ctrl + Shift + Tab",
+                "description": "Next / previous tab"
+            },
+            {
+                "key": "Ctrl + 1…8 / Ctrl + 9",
+                "description": "Go to tab 1–8 / last tab"
+            },
+            {
+                "key": "Ctrl + Shift + A",
+                "description": "Search tabs"
+            }
+        ]
+    },
+    {
+        "name": "Navigation",
+        "shortcuts": [
+            {
+                "key": "Ctrl + L",
+                "description": "Focus address bar"
+            },
+            {
+                "key": "Alt + Left / Right",
+                "description": "Back / forward"
+            },
+            {
+                "key": "F5 / Ctrl + F5",
+                "description": "Reload / hard reload"
+            },
+            {
+                "key": "Ctrl + F",
+                "description": "Find in page"
+            }
+        ]
+    },
+    {
+        "name": "Windows",
+        "shortcuts": [
+            {
+                "key": "Ctrl + N",
+                "description": "New window"
+            },
+            {
+                "key": "Ctrl + Shift + N",
+                "description": "New InPrivate window"
+            }
+        ]
+    },
+    {
+        "name": "Tools",
+        "shortcuts": [
+            {
+                "key": "Ctrl + H / Ctrl + J",
+                "description": "History / downloads"
+            },
+            {
+                "key": "Ctrl + D",
+                "description": "Bookmark page"
+            },
+            {
+                "key": "Ctrl + Shift + O",
+                "description": "Favorites"
+            },
+            {
+                "key": "Ctrl + Shift + B",
+                "description": "Toggle favorites bar"
+            },
+            {
+                "key": "F12",
+                "description": "DevTools"
+            },
+            {
+                "key": "Ctrl + Shift + Del",
+                "description": "Clear browsing data"
+            },
+            {
+                "key": "Ctrl + = / − / 0",
+                "description": "Zoom in / out / reset"
+            }
+        ]
+    }
+]

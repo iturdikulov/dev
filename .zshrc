@@ -250,7 +250,6 @@ fi
 
 # devcontainer
 if [[ -n "$REMOTE_CONTAINERS" || -n "$CODESPACES" ]]; then
-    alias codex="codex --dangerously-bypass-approvals-and-sandbox"
     alias agent="agent --yolo"
     alias agent-ltms="cd /workspace/ && agent --yolo 'Активируй скилл ltms и дождись моих указаний'"
 fi

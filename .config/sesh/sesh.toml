@@ -1,3 +1,6 @@
 #:schema https://github.com/joshmedeski/sesh/raw/main/sesh.schema.json
 
 git_namer_use_worktree_root = true
+
+# Скрываем служебные сессии агентов pi (pi_1 <id>) из sesh list / sesh last
+blacklist = ["^pi_"]

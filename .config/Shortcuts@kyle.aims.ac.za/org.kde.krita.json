@@ -1,0 +1,159 @@
+[
+    {
+        "name": "Tools",
+        "shortcuts": [
+            {
+                "key": "B / E",
+                "description": "Brush / eraser mode"
+            },
+            {
+                "key": "T / Ctrl + T",
+                "description": "Move / transform"
+            },
+            {
+                "key": "C",
+                "description": "Crop"
+            },
+            {
+                "key": "F / G",
+                "description": "Fill / gradient"
+            },
+            {
+                "key": "P / Ctrl + Click",
+                "description": "Color sampler"
+            },
+            {
+                "key": "Ctrl + R / J / S",
+                "description": "Select: rect / ellipse / outline (custom)"
+            },
+            {
+                "key": "Alt + C / Alt + D",
+                "description": "Interaction / path tool (custom)"
+            },
+            {
+                "key": "Ctrl + Shift + T",
+                "description": "Text tool (custom)"
+            }
+        ]
+    },
+    {
+        "name": "Brush / color",
+        "shortcuts": [
+            {
+                "key": "[ / ]",
+                "description": "Brush size"
+            },
+            {
+                "key": "Shift + drag",
+                "description": "Brush size"
+            },
+            {
+                "key": "I / O",
+                "description": "Opacity down / up"
+            },
+            {
+                "key": "D / X",
+                "description": "Reset / swap colors"
+            },
+            {
+                "key": "Shift + Backspace",
+                "description": "Fill with foreground color"
+            },
+            {
+                "key": "/",
+                "description": "Previous preset"
+            }
+        ]
+    },
+    {
+        "name": "Layers",
+        "shortcuts": [
+            {
+                "key": "Ins / Ctrl + J",
+                "description": "New / duplicate layer"
+            },
+            {
+                "key": "Ctrl + E",
+                "description": "Merge down"
+            },
+            {
+                "key": "Shift + Del",
+                "description": "Remove layer"
+            },
+            {
+                "key": "F2 / F3",
+                "description": "Rename / properties"
+            },
+            {
+                "key": "PgUp / PgDn",
+                "description": "Next / previous layer"
+            },
+            {
+                "key": "Ctrl + G",
+                "description": "Group"
+            },
+            {
+                "key": "Ctrl + Shift + V",
+                "description": "Toggle visibility (custom)"
+            }
+        ]
+    },
+    {
+        "name": "Selection / view",
+        "shortcuts": [
+            {
+                "key": "Ctrl + A / Ctrl + Shift + A",
+                "description": "Select all / deselect"
+            },
+            {
+                "key": "Ctrl + Shift + I / Ctrl + Shift + D",
+                "description": "Invert / reselect"
+            },
+            {
+                "key": "Ctrl + H",
+                "description": "Show / hide selection"
+            },
+            {
+                "key": "Tab",
+                "description": "Canvas only"
+            },
+            {
+                "key": "M",
+                "description": "Mirror view"
+            },
+            {
+                "key": "Space + drag",
+                "description": "Pan"
+            },
+            {
+                "key": "Shift + Space + drag / Ctrl + Space + drag",
+                "description": "Rotate / zoom canvas"
+            },
+            {
+                "key": "4 / 6 / 5 (Ctrl + [ / ])",
+                "description": "Rotate left / right / reset"
+            },
+            {
+                "key": "Ctrl + = / − / 0",
+                "description": "Zoom in / out / 100%"
+            }
+        ]
+    },
+    {
+        "name": "File",
+        "shortcuts": [
+            {
+                "key": "Ctrl + Enter",
+                "description": "Search actions"
+            },
+            {
+                "key": "Ctrl + Alt + S",
+                "description": "Save incremental version"
+            },
+            {
+                "key": "Ctrl + Alt + Shift + E",
+                "description": "Export (custom)"
+            }
+        ]
+    }
+]

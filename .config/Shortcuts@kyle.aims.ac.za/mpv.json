@@ -1,0 +1,130 @@
+[
+    {
+        "name": "Playback",
+        "shortcuts": [
+            {
+                "key": "Space / p",
+                "description": "Pause"
+            },
+            {
+                "key": "h / l, Left / Right",
+                "description": "Seek −5 / +5 s (h/l custom)"
+            },
+            {
+                "key": "j / k, Down / Up",
+                "description": "Seek −60 / +60 s (j/k custom)"
+            },
+            {
+                "key": "Shift + Left / Right",
+                "description": "Seek exactly −1 / +1 s"
+            },
+            {
+                "key": "PgDn / PgUp",
+                "description": "Previous / next chapter"
+            },
+            {
+                "key": ", / .",
+                "description": "Frame back / step"
+            },
+            {
+                "key": "[ / ] / Backspace",
+                "description": "Speed down / up / reset"
+            },
+            {
+                "key": "< / > / Enter",
+                "description": "Previous / next file"
+            },
+            {
+                "key": "L",
+                "description": "Loop file"
+            },
+            {
+                "key": "q / Q",
+                "description": "Quit / quit & remember position"
+            }
+        ]
+    },
+    {
+        "name": "Audio / video",
+        "shortcuts": [
+            {
+                "key": "9 / 0 / m",
+                "description": "Volume down / up / mute"
+            },
+            {
+                "key": "f / T",
+                "description": "Fullscreen / always on top"
+            },
+            {
+                "key": "Alt + j / k",
+                "description": "Window scale − / + (custom)"
+            },
+            {
+                "key": "s / S",
+                "description": "Screenshot / without subs"
+            },
+            {
+                "key": "i / I",
+                "description": "Stats / toggle stats"
+            }
+        ]
+    },
+    {
+        "name": "Subtitles",
+        "shortcuts": [
+            {
+                "key": "S",
+                "description": "Cycle subtitles (custom)"
+            },
+            {
+                "key": "v",
+                "description": "Show / hide subtitles"
+            },
+            {
+                "key": "z / x",
+                "description": "Subtitle delay − / +"
+            },
+            {
+                "key": "Ctrl + Left / Right",
+                "description": "Previous / next subtitle line"
+            }
+        ]
+    },
+    {
+        "name": "Menus / custom",
+        "shortcuts": [
+            {
+                "key": "Tab / Shift + Tab",
+                "description": "uosc: timeline / toggle UI"
+            },
+            {
+                "key": "Shift + Enter",
+                "description": "Playlist manager"
+            },
+            {
+                "key": "g-p / g-s / g-a / g-c",
+                "description": "Select playlist / sub / audio / chapter"
+            },
+            {
+                "key": "g-h",
+                "description": "Watch history"
+            },
+            {
+                "key": "Ctrl + v",
+                "description": "Append path from clipboard"
+            },
+            {
+                "key": "c",
+                "description": "Copy path (custom)"
+            },
+            {
+                "key": "Alt + r",
+                "description": "yt-dlp download (custom)"
+            },
+            {
+                "key": "Cyrillic layout",
+                "description": "Same keys work (й = q …)"
+            }
+        ]
+    }
+]
