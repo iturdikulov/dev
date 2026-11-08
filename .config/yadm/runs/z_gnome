@@ -153,6 +153,67 @@ set_vpn_toggle_shortcut() {
     set_gsetting_if_different "$schema" binding '<Super><Shift>v'
 }
 
+# Pre-grant portal screenshot access so Flameshot can capture without a dialog.
+ensure_flameshot_screenshot_permission() {
+    command_exists gdbus || return 0
+    local app
+    for app in '' flameshot org.flameshot.Flameshot; do
+        gdbus call --session \
+            --dest org.freedesktop.impl.portal.PermissionStore \
+            --object-path /org/freedesktop/impl/portal/PermissionStore \
+            --method org.freedesktop.impl.portal.PermissionStore.SetPermission \
+            screenshot true screenshot "$app" "['yes']" >/dev/null 2>&1 || true
+    done
+}
+
+# Free Print from GNOME screenshot UI, then bind Flameshot.
+# Wayland needs QT_QPA_PLATFORM + XDG_CURRENT_DESKTOP; stdin must be closed
+# (</dev/null). media-keys does not run a shell, so wrap with sh -c.
+set_flameshot_shortcut() {
+    local path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
+    local schema="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$path"
+    local current target
+    local command="sh -c 'env QT_QPA_PLATFORM=wayland XDG_CURRENT_DESKTOP=GNOME flameshot gui </dev/null'"
+    local shot_schema=org.gnome.shell.keybindings
+    local shot_current
+
+    ensure_flameshot_screenshot_permission
+
+    shot_current="$(gsettings get "$shot_schema" show-screenshot-ui 2>/dev/null || true)"
+    if [[ "$shot_current" != "@as []" && "$shot_current" != "[]" ]]; then
+        gsettings set "$shot_schema" show-screenshot-ui "[]"
+        log_info "$shot_schema show-screenshot-ui -> [] (Print → Flameshot)"
+    fi
+
+    current="$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo '@as []')"
+    if [[ "$current" != *"$path"* ]]; then
+        if [[ "$current" == "@as []" || "$current" == "[]" ]]; then
+            target="['$path']"
+        else
+            target="${current%]}, '$path']"
+        fi
+        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$target"
+        log_info "Added GNOME custom shortcut path $path"
+    fi
+
+    set_gsetting_if_different "$schema" name 'Flameshot'
+    set_gsetting_if_different "$schema" command "$command"
+    set_gsetting_if_different "$schema" binding 'Print'
+}
+
+# Super+Alt+S по умолчанию включает Orca — легко нажать случайно.
+disable_screenreader_shortcut() {
+    local schema=org.gnome.settings-daemon.plugins.media-keys
+    local current
+
+    current="$(gsettings get "$schema" screenreader 2>/dev/null || true)"
+    if [[ "$current" != "@as []" && "$current" != "[]" ]]; then
+        gsettings set "$schema" screenreader "[]"
+        log_info "$schema screenreader -> []"
+    fi
+    set_gsetting_bool_if_different org.gnome.desktop.a11y.applications screen-reader-enabled false
+}
+
 set_vt_bounce_hotkey() {
     # Evdev hotkeys — work when GNOME shortcuts / the screen are dead.
     # Super+Esc / ScrollLock → VT bounce; Ctrl+Alt+Backspace → reboot
@@ -779,6 +840,8 @@ set_gsetting_uint_if_different org.gnome.settings-daemon.plugins.power sleep-ina
 set_gsetting_if_different org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type suspend
 set_audio_toggle_shortcut
 set_vpn_toggle_shortcut
+set_flameshot_shortcut
+disable_screenreader_shortcut
 set_vt_bounce_hotkey
 set_favorite_apps
 setup_gnome_extensions

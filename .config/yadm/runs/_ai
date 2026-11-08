@@ -20,6 +20,7 @@ npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 pi install npm:@netandreus/pi-cursor-provider
 pi install npm:pi-plan
 pi install npm:pi-claude-bridge
+pi install npm:@jerryan/pi-subagent-lite
 
 # Cursor Agent CLI — latest version from https://cursor.com/install (no curl|bash)
 case "$(dpkg --print-architecture)" in

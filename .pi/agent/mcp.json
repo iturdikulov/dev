@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "blender": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/home/inom/.local/blender_mcp/mcp",
+        "run",
+        "blender-mcp"
+      ],
+      "description": "Официальный Blender Lab MCP: Python API Blender, сцена, документация"
+    }
+  }
+}

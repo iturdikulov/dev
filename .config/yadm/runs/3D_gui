@@ -71,4 +71,49 @@ fi
 
 find_old_versions "$HOME/.local/" "blender-*" "blender-$BLENDER_VERSION*" "trash"
 
+# Blender MCP (официальный сервер Blender Lab): клон репозитория + регистрация в pi
+BLENDER_MCP_URL="https://projects.blender.org/lab/blender_mcp.git"
+BLENDER_MCP_DIR="$HOME/.local/blender_mcp"
+BLENDER_MCP_NAME="blender"
+
+if git -C "$BLENDER_MCP_DIR" rev-parse --git-dir >/dev/null 2>&1; then
+    log_info "Blender MCP already present; pulling updates"
+    git -C "$BLENDER_MCP_DIR" pull --ff-only || log_warn "Blender MCP git pull failed (fix repo manually)"
+elif [[ ! -e "$BLENDER_MCP_DIR" ]]; then
+    git clone "$BLENDER_MCP_URL" "$BLENDER_MCP_DIR" || log_error "Blender MCP clone failed"
+else
+    log_error "$BLENDER_MCP_DIR exists and is not a git repository — remove or rename it, then re-run"
+fi
+
+if [[ -d "$BLENDER_MCP_DIR/mcp" ]]; then
+    if command_exists pi && command_exists uv; then
+        # pi mcp add заменяет запись, если она уже есть, — повторный запуск безопасен
+        pi mcp add "$BLENDER_MCP_NAME" \
+            --description "Официальный Blender Lab MCP: Python API Blender, сцена, документация" \
+            -- uv --directory "$BLENDER_MCP_DIR/mcp" run blender-mcp ||
+            log_warn "Failed to register Blender MCP in pi"
+    else
+        log_warn "pi or uv not found; skipping Blender MCP registration (see runs/05_python, runs/07_node)"
+    fi
+
+    # Собираем аддон в zip и ставим как расширение (переустановка обновляет его после git pull)
+    BLENDER_MCP_ADDON_SRC="$BLENDER_MCP_DIR/addon/blender_mcp_addon"
+    BLENDER_MCP_EXT_REPO="user_default"
+    BLENDER_BIN="$BLENDER_INSTALL_DIR/blender"
+    if [[ -x "$BLENDER_BIN" ]] && [[ -f "$BLENDER_MCP_ADDON_SRC/blender_manifest.toml" ]]; then
+        BLENDER_MCP_BUILD_DIR="$(mktemp -d)"
+        if "$BLENDER_BIN" --command extension build \
+            --source-dir "$BLENDER_MCP_ADDON_SRC" --output-dir "$BLENDER_MCP_BUILD_DIR" >/dev/null &&
+            "$BLENDER_BIN" --command extension install-file -r "$BLENDER_MCP_EXT_REPO" -e \
+                "$BLENDER_MCP_BUILD_DIR"/*.zip; then
+            log_info "Blender MCP add-on installed and enabled (restart Blender if it is running)"
+        else
+            log_warn "Failed to install Blender MCP add-on; install $BLENDER_MCP_ADDON_SRC manually"
+        fi
+        rm -rf -- "$BLENDER_MCP_BUILD_DIR"
+    else
+        log_warn "Blender or add-on manifest not found; skipping Blender MCP add-on install"
+    fi
+fi
+
 log_info "3D setup completed successfully!"

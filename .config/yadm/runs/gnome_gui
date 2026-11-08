@@ -45,5 +45,5 @@ ensure_gdm3_display_manager() {
     fi
 }
 
-install_packages gnome-core gnome-tweaks
+install_packages gnome-core gnome-tweaks flameshot
 ensure_gdm3_display_manager

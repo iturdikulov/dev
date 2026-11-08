@@ -1,10 +1,11 @@
 {
   "packages": [
     "npm:pi-claude-bridge",
-    "vendor/pi-cursor-provider"
+    "vendor/pi-cursor-provider",
+    "npm:@jerryan/pi-subagent-lite"
   ],
-  "defaultProvider": "cursor",
-  "defaultModel": "auto",
+  "defaultProvider": "claude-bridge",
+  "defaultModel": "claude-opus-5-5",
   "lastChangelogVersion": "1.5.0",
   "enabledModels": [
     "cursor/auto",
