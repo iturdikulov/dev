@@ -32,13 +32,16 @@ addToPathFront /usr/local/go/bin
 addToPathFront "$HOME/.local/tmux/bin"
 addToPathFront "$HOME/.local/scripts"
 addToPathFront "$HOME/.config/nnn/plugins"
-addToPathFront "$HOME/.local/.npm-global/bin"
 addToPathFront "$HOME/.local/bin"
 addToPathFront "$HOME/.local/go/bin"
-addToPathFront "$HOME/.local/npm/bin"
+
+# npm globals live outside the versioned node directory, so a node upgrade does not strand them.
+# The .nvm one is the prefix itself (it has to be there for `nvm use`); PATH lists this symlink
+# to its bin/ because `nvm use` strips every $NVM_DIR/* entry from PATH.
+addToPathFront "$HOME/.local/share/npm-global/bin"
+export NPM_CONFIG_PREFIX="$HOME/.nvm/global"
 addToPathFront "$HOME/.local/cling/bin"
 addToPathFront "$HOME/.local/scrcpy"
-addToPathFront "$HOME/.local/whisper/bin"
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options

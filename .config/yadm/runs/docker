@@ -87,4 +87,4 @@ fi
 go install github.com/jesseduffield/lazydocker@latest
 
 # Devcontainers
-npm install -g @devcontainers/cli
+npm_global_ensure @devcontainers/cli

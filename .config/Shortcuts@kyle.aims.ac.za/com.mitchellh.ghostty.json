@@ -1,36 +1,11 @@
 [
     {
-        "name": "Window / tabs",
+        "name": "Main",
         "shortcuts": [
-            {
-                "key": "Ctrl + Shift + N",
-                "description": "New window"
-            },
-            {
-                "key": "Ctrl + Shift + W",
-                "description": "Close tab"
-            },
-            {
-                "key": "Ctrl + Shift + Q",
-                "description": "Quit Ghostty"
-            },
-            {
-                "key": "Ctrl + Tab / Ctrl + Shift + Tab",
-                "description": "Next / previous tab"
-            },
-            {
-                "key": "Alt + 1…8 / Alt + 9",
-                "description": "Go to tab 1–8 / last tab"
-            },
             {
                 "key": "Ctrl + Enter",
                 "description": "Toggle fullscreen"
-            }
-        ]
-    },
-    {
-        "name": "Clipboard / font",
-        "shortcuts": [
+            },
             {
                 "key": "Ctrl + Shift + C / V",
                 "description": "Copy / paste"
@@ -46,12 +21,7 @@
             {
                 "key": "Ctrl + 0",
                 "description": "Reset font size"
-            }
-        ]
-    },
-    {
-        "name": "Config / tools",
-        "shortcuts": [
+            },
             {
                 "key": "Ctrl + ,",
                 "description": "Open config"
@@ -75,7 +45,7 @@
         ]
     },
     {
-        "name": "Custom (this config)",
+        "name": "Custom",
         "shortcuts": [
             {
                 "key": "Ctrl + Shift + T",
@@ -86,7 +56,7 @@
                 "description": "nvim PasteImage (CSI-u)"
             },
             {
-                "key": "Ctrl + .",
+                "key": "Meta + x",
                 "description": "nvim Sidekick focus (CSI-u)"
             },
             {
@@ -100,10 +70,6 @@
             {
                 "key": "Ctrl + Alt + Shift + J",
                 "description": "Open screen file"
-            },
-            {
-                "key": "Alt + letter (layout-safe)",
-                "description": "Pass Alt+key as Esc+key (tmux/nvim)"
             }
         ]
     },
@@ -113,10 +79,6 @@
             {
                 "key": "Enter / Shift + Enter",
                 "description": "Submit / new line"
-            },
-            {
-                "key": "Esc",
-                "description": "Cancel / abort"
             },
             {
                 "key": "Ctrl + C / Ctrl + D",
@@ -133,10 +95,6 @@
             {
                 "key": "Ctrl + L",
                 "description": "Model selector"
-            },
-            {
-                "key": "Ctrl + P / Ctrl + Shift + P",
-                "description": "Cycle next / previous model"
             },
             {
                 "key": "Shift + Tab",

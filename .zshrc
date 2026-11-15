@@ -54,7 +54,6 @@ if [[ -t 1 ]]; then
 fi
 
 export STARDICT_DATA_DIR="$HOME/Library/dictionary"
-export EDITOR=nvim
 export SUDO_EDITOR=nvim
 export PASSWORD_STORE_ENABLE_EXTENSIONS=true
 
@@ -68,12 +67,10 @@ export GOPATH=$HOME/.local/go
 addToPathFront /usr/local/go/bin
 addToPathFront $HOME/.cargo/bin
 
-addToPathFront $HOME/.local/whisper/bin
 addToPathFront $HOME/.local/tmux/bin
 addToPathFront $HOME/scripts
 addToPathFront $HOME/.local/scripts
 addToPathFront $HOME/.config/nnn/plugins
-addToPathFront $HOME/.local/.npm-global/bin
 addToPathFront $HOME/.local/bin
 if [[ -d "$HOME/az" ]]; then
     addToPathFront "$HOME/az"
@@ -82,7 +79,10 @@ fi
 [ -f "$HOME/az/az-completion.zsh" ] && source "$HOME/az/az-completion.zsh"
 [ -f "$HOME/az/scripts/agent-sandbox/agent.zsh" ] && source "$HOME/az/scripts/agent-sandbox/agent.zsh"
 addToPathFront $HOME/.local/go/bin
-addToPathFront $HOME/.local/npm/bin
+# npm globals live outside the versioned node directory, so a node upgrade does not strand them.
+# The .nvm one is the prefix itself (it has to be there for `nvm use`); PATH lists this symlink
+# to its bin/ because `nvm use` strips every $NVM_DIR/* entry from PATH.
+addToPathFront $HOME/.local/share/npm-global/bin
 addToPathFront $HOME/.local/cling/bin
 addToPathFront $HOME/.local/scrcpy
 
@@ -408,13 +408,6 @@ pomo_bg() {
 
 alias tun2proxy='sudo /home/inom/.cargo/bin/tun2proxy-bin --setup --proxy "socks5://192.168.1.1:10808" --dns-addr 77.88.88.8 --dns virtual'
 
-# bun completions
-[ -s "/home/dev/.bun/_bun" ] && source "/home/dev/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
 # Yandex Cloud CLI is installed by ~/.config/yadm/runs/yc.
 [ -f "$HOME/.local/completion.zsh.inc" ] && source "$HOME/.local/completion.zsh.inc"
 
@@ -436,6 +429,9 @@ git() {
 
 # nvm: default node on PATH; load nvm.sh only on first `nvm` call
 export NVM_DIR="$HOME/.nvm"
+# Global npm packages live in $NVM_DIR/global instead of the version directories, so `npm i -g`
+# survives a node upgrade. The path must stay inside $NVM_DIR: `nvm use` rejects any other prefix.
+export NPM_CONFIG_PREFIX="$NVM_DIR/global"
 if [[ -s "$NVM_DIR/alias/default" ]]; then
     _nvm_default=$(<"$NVM_DIR/alias/default")
     _nvm_default=${_nvm_default%%$'\n'*}
@@ -449,12 +445,33 @@ if [[ -s "$NVM_DIR/alias/default" ]]; then
     unset _nvm_default _nvm_matches
 fi
 
-nvm() {
-    unset -f nvm
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-    [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-    nvm "$@"
+# nvm is loaded on first call, but the wrapper stays installed: it has to keep nvm.sh away from
+# EXTENDED_GLOB, where nvm's alias parsing (`${line%%#*}`) is an invalid pattern and every alias
+# lookup — `nvm use default`, `.nvmrc` with `lts/jod` — dies, and it has to put the shared npm
+# prefix back on PATH after `nvm use` scrubs every $NVM_DIR/* entry.
+_nvm_call() {
+    setopt localoptions no_extendedglob
+    _nvm_core "$@"
+    local rc=$?
+    case ":$PATH:" in
+        *":$HOME/.local/share/npm-global/bin:"*) ;;
+        *) addToPathFront "$HOME/.local/share/npm-global/bin" ;;
+    esac
+    return $rc
 }
+
+_nvm_wrapper() {
+    if (( ! $+functions[_nvm_core] )); then
+        . "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+        # nvm.sh defines `nvm` itself; keep its implementation aside and restore the wrapper.
+        functions[_nvm_core]=$functions[nvm]
+        functions[nvm]=$functions[_nvm_wrapper]
+    fi
+    _nvm_call "$@"
+}
+
+functions[nvm]=$functions[_nvm_wrapper]
 
 # task CLI via npm (@go-task/cli) — после nvm PATH, иначе $+commands[task] пуст
 # при холодном старте (после exec zsh PATH уже унаследован и срабатывало раньше).

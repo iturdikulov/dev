@@ -2,6 +2,8 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
 if ! command_exists gsettings; then
     log_warn "gsettings not found — skipping GNOME preferences"
     exit 0
@@ -153,36 +155,22 @@ set_vpn_toggle_shortcut() {
     set_gsetting_if_different "$schema" binding '<Super><Shift>v'
 }
 
-# Pre-grant portal screenshot access so Flameshot can capture without a dialog.
-ensure_flameshot_screenshot_permission() {
-    command_exists gdbus || return 0
-    local app
-    for app in '' flameshot org.flameshot.Flameshot; do
-        gdbus call --session \
-            --dest org.freedesktop.impl.portal.PermissionStore \
-            --object-path /org/freedesktop/impl/portal/PermissionStore \
-            --method org.freedesktop.impl.portal.PermissionStore.SetPermission \
-            screenshot true screenshot "$app" "['yes']" >/dev/null 2>&1 || true
-    done
-}
+# Print остаётся за штатным UI GNOME (show-screenshot-ui), Ctrl+Print снимает
+# выделение области сразу в файл через portal — без редактора поверх экрана.
+SCREENSHOT_SCRIPT="$HOME/.local/scripts/screenshot-to-tmp.sh"
 
-# Free Print from GNOME screenshot UI, then bind Flameshot.
-# Wayland needs QT_QPA_PLATFORM + XDG_CURRENT_DESKTOP; stdin must be closed
-# (</dev/null). media-keys does not run a shell, so wrap with sh -c.
-set_flameshot_shortcut() {
+set_screenshot_shortcuts() {
     local path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
     local schema="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$path"
-    local current target
-    local command="sh -c 'env QT_QPA_PLATFORM=wayland XDG_CURRENT_DESKTOP=GNOME flameshot gui </dev/null'"
     local shot_schema=org.gnome.shell.keybindings
-    local shot_current
+    local current target shot_current
 
-    ensure_flameshot_screenshot_permission
-
+    # show-screenshot-ui по умолчанию ['Print']; Flameshot его обнулял, поэтому
+    # возвращаем явно, а не полагаемся на дефолт схемы.
     shot_current="$(gsettings get "$shot_schema" show-screenshot-ui 2>/dev/null || true)"
-    if [[ "$shot_current" != "@as []" && "$shot_current" != "[]" ]]; then
-        gsettings set "$shot_schema" show-screenshot-ui "[]"
-        log_info "$shot_schema show-screenshot-ui -> [] (Print → Flameshot)"
+    if [[ "$shot_current" != "['Print']" ]]; then
+        gsettings set "$shot_schema" show-screenshot-ui "['Print']"
+        log_info "$shot_schema show-screenshot-ui -> ['Print']"
     fi
 
     current="$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo '@as []')"
@@ -196,9 +184,14 @@ set_flameshot_shortcut() {
         log_info "Added GNOME custom shortcut path $path"
     fi
 
-    set_gsetting_if_different "$schema" name 'Flameshot'
-    set_gsetting_if_different "$schema" command "$command"
-    set_gsetting_if_different "$schema" binding 'Print'
+    if [[ ! -x "$SCREENSHOT_SCRIPT" ]]; then
+        log_warn "Missing $SCREENSHOT_SCRIPT — skipping Ctrl+Print binding"
+        return 0
+    fi
+
+    set_gsetting_if_different "$schema" name 'Скриншот области в ~/tmp/screens'
+    set_gsetting_if_different "$schema" command "$SCREENSHOT_SCRIPT"
+    set_gsetting_if_different "$schema" binding '<Control>Print'
 }
 
 # Super+Alt+S по умолчанию включает Orca — легко нажать случайно.
@@ -238,6 +231,108 @@ EOF
     systemctl --user daemon-reload
     systemctl --user enable --now vt-bounce-hotkey.service
     log_info "vt-bounce-hotkey.service enabled (Super+Esc bounce, Ctrl+Alt+Backspace reboot)"
+}
+
+# physlock — блокировка консолей через PAM, ниже уровня графики. Щит GNOME требует
+# демона gdm3 (см. runs/gnome_gui), а Wayland-локерам нужен ext-session-lock-v1,
+# которого в mutter 48 нет. physlock работает на VT, поэтому ему всё равно.
+# -d отцепиться (нужно для suspend-хука), -m не показывать сообщения ядра,
+# -s выключить SysRq на время блокировки (иначе им можно обойти лок).
+PHYSLOCK_CMD='physlock -dms'
+PHYSLOCK_PAM=/etc/pam.d/physlock
+PHYSLOCK_SLEEP_UNIT=/etc/systemd/system/physlock-sleep.service
+
+# Простой, после которого GNOME уходит в сон (2 часа). Лок ставит
+# physlock-sleep.service до сна (см. ensure_physlock_sleep_unit).
+SUSPEND_AFTER_SEC=7200
+
+ensure_physlock_pam() {
+    # Не @include login: он тянет pam_u2f.so cue, а у physlock простой
+    # PAM-conversation на один запрос — пароль уходит в u2f и не доходит до
+    # pam_unix. nologin/faildelay/motd локеру тоже не нужны.
+    local tmp
+
+    tmp="$(mktemp)"
+    cat >"$tmp" <<'EOF'
+#%PAM-1.0
+auth       include      common-auth
+account    include      common-account
+session    include      common-session
+EOF
+
+    if [[ -f "$PHYSLOCK_PAM" ]] && cmp -s "$tmp" "$PHYSLOCK_PAM"; then
+        rm -f "$tmp"
+        log_info "$PHYSLOCK_PAM already up to date"
+        return 0
+    fi
+
+    sudo install -m 644 "$tmp" "$PHYSLOCK_PAM"
+    rm -f "$tmp"
+    log_info "Wrote $PHYSLOCK_PAM (пароль через common-auth)"
+}
+
+ensure_physlock_sleep_unit() {
+    # Лок ставится ДО сна отдельным юнитом — так это делает пример из самого
+    # пакета physlock (/usr/share/doc/physlock/examples). Старт на post в
+    # sleep-хуке не работает: physlock в этот момент упирается в занятый VT.
+    # `-d` обязателен вместе с Type=forking: parent отдаёт управление сразу,
+    # поэтому sleep.target не ждёт разблокировки.
+    local tmp
+
+    tmp="$(mktemp)"
+    cat >"$tmp" <<'EOF'
+[Unit]
+Description=Lock consoles with physlock before sleep
+Before=sleep.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/physlock -dms
+
+[Install]
+WantedBy=sleep.target
+EOF
+
+    if [[ -f "$PHYSLOCK_SLEEP_UNIT" ]] && cmp -s "$tmp" "$PHYSLOCK_SLEEP_UNIT"; then
+        rm -f "$tmp"
+        log_info "$PHYSLOCK_SLEEP_UNIT already up to date"
+        return 0
+    fi
+
+    sudo install -m 644 "$tmp" "$PHYSLOCK_SLEEP_UNIT"
+    rm -f "$tmp"
+    sudo systemctl daemon-reload
+    systemctl is-enabled --quiet physlock-sleep.service \
+        || sudo systemctl enable physlock-sleep.service >/dev/null
+    log_info "Installed $PHYSLOCK_SLEEP_UNIT"
+}
+
+set_physlock_shortcut() {
+    local path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/"
+    local schema="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$path"
+    local current target
+
+    current="$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo '@as []')"
+    if [[ "$current" != *"$path"* ]]; then
+        if [[ "$current" == "@as []" || "$current" == "[]" ]]; then
+            target="['$path']"
+        else
+            target="${current%]}, '$path']"
+        fi
+        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$target"
+        log_info "Added GNOME custom shortcut path $path"
+    fi
+
+    set_gsetting_if_different "$schema" name 'Блокировка экрана (physlock)'
+    set_gsetting_if_different "$schema" command "$PHYSLOCK_CMD"
+    set_gsetting_if_different "$schema" binding '<Super><Shift>l'
+}
+
+setup_physlock() {
+    install_packages physlock
+    ensure_physlock_pam
+    ensure_physlock_sleep_unit
+    set_physlock_shortcut
 }
 
 set_xkb_ctrl_nocaps() {
@@ -433,12 +528,85 @@ set_favorite_apps() {
     log_info "favorite-apps -> ${#favorites[@]} pins"
 }
 
+# Дэш вписывает файл иконки в бокс целиком, а прозрачные поля внутри файла у
+# приложений разные: Edge занимает всю канву, Sioyek — 62 % (арт ещё и широкий,
+# вписывается по ширине). dock_icons.py пересобирает иконки закреплённых
+# приложений в набор dash-aligned с одинаковой видимой высотой; всё остальное
+# наследуется из текущей темы.
+DOCK_ICON_THEME=dash-aligned
+
+python3_has_gdkpixbuf() {
+    python3 - <<'PY' >/dev/null 2>&1
+import gi
+
+gi.require_version("GdkPixbuf", "2.0")
+from gi.repository import GdkPixbuf  # noqa: F401 — проверка загрузки библиотеки
+PY
+}
+
+ensure_dock_icons() {
+    local script="$script_dir/dock_icons.py"
+    local theme_dir="$HOME/.local/share/icons/$DOCK_ICON_THEME"
+    local output changed=0
+
+    if [[ ! -f "$script" ]]; then
+        log_warn "Missing $script — skipping dock icon alignment"
+        return 0
+    fi
+    if ! command_exists python3 || ! python3_has_gdkpixbuf; then
+        log_warn "python3-gi (GdkPixbuf) missing — skipping dock icon alignment"
+        return 0
+    fi
+
+    # Скрипт читает favorite-apps, поэтому вызывать его можно только после
+    # set_favorite_apps.
+    if ! output="$(python3 "$script" 2>&1)"; then
+        printf '%s\n' "$output"
+        log_warn "Dock icons were not generated — keeping current icon theme"
+        return 0
+    fi
+    printf '%s\n' "$output"
+    if grep -q 'обновлено' <<<"$output"; then
+        changed=1
+    fi
+
+    if [[ ! -f "$theme_dir/index.theme" ]]; then
+        log_warn "$theme_dir/index.theme missing — keeping current icon theme"
+        return 0
+    fi
+
+    set_gsetting_if_different org.gnome.desktop.interface icon-theme "$DOCK_ICON_THEME"
+    if ((changed)); then
+        reload_dock_icons "$theme_dir/index.theme"
+    fi
+}
+
+# Дэш держит текстуры в кэше по пути файла, а сбрасывает его только на смену
+# темы иконок: без такого тычка пересобранные png остаются на экране старыми.
+reload_dock_icons() {
+    local parent
+    parent="$(sed -n 's/^Inherits=//p' "$1" | head -1)"
+    [[ -n "$parent" ]] || parent=Adwaita
+
+    gsettings set org.gnome.desktop.interface icon-theme "$parent"
+    gsettings set org.gnome.desktop.interface icon-theme "$DOCK_ICON_THEME"
+    log_info "Icon theme cache refreshed ($DOCK_ICON_THEME → $parent → $DOCK_ICON_THEME)"
+}
+
 gnome_shell_version() {
     gnome-shell --version 2>/dev/null | awk '{print $3}'
 }
 
 extension_is_installed() {
-    [[ -f "$HOME/.local/share/gnome-shell/extensions/$1/metadata.json" ]]
+    local uuid="$1"
+    local dir
+
+    # Расширения из apt (например GSConnect) ставятся в системный каталог,
+    # поэтому одного ~/.local/share недостаточно.
+    for dir in "$HOME/.local/share/gnome-shell/extensions" /usr/share/gnome-shell/extensions; do
+        [[ -f "$dir/$uuid/metadata.json" ]] && return 0
+    done
+    return 1
 }
 
 gsettings_string_array() {
@@ -696,10 +864,87 @@ setup_gnome_extensions() {
     set_extension_enabled draw-on-gnome@daveprowse.github.io enable
     # Keyboard shortcuts cheat sheet: Super+Alt+S (ensure_shortcuts_appspecific).
     set_extension_enabled Shortcuts@kyle.aims.ac.za enable
+    setup_gsconnect
     ensure_run_or_raise_dbus
     ensure_deja_window_rules
     ensure_shortcuts_appspecific
     restart_gnome_shell_if_needed
+}
+
+# GSConnect (KDE Connect для GNOME): обмен файлами, уведомления, буфер обмена
+# и медиа с телефоном. Ставится пакетом — Debian собирает его под текущий
+# GNOME Shell и тянет sshfs и python3-nautilus, без которых не монтируется ФС
+# телефона и нет интеграции с Nautilus. systemd-юнита gsconnect.service в этой
+# версии нет: сервис daemon.js поднимается по D-Bus при первом обращении, а UI
+# приходит из расширения shell.
+setup_gsconnect() {
+    local -a pkgs=(gnome-shell-extension-gsconnect)
+
+    # -browsers регистрирует native messaging host для chromium и firefox;
+    # Edge в списке нет — его манифест раскладывает ensure_gsconnect_edge_host.
+    if edge_is_installed; then
+        pkgs+=(gnome-shell-extension-gsconnect-browsers)
+    fi
+    install_packages "${pkgs[@]}"
+
+    if ! extension_is_installed gsconnect@andyholmes.github.io; then
+        log_warn "GSConnect missing after install — skipping enable"
+        return 0
+    fi
+
+    set_extension_enabled gsconnect@andyholmes.github.io enable
+    ensure_gsconnect_firewall
+    ensure_gsconnect_edge_host
+}
+
+edge_is_installed() {
+    command_exists microsoft-edge-stable || command_exists microsoft-edge \
+        || [[ -d "$HOME/.config/microsoft-edge" ]]
+}
+
+# Edge — тот же Chromium, но манифесты native messaging он ищет в своём
+# каталоге (строки в /opt/microsoft/msedge/msedge: NativeMessagingHosts в
+# профиле и /etc/opt/edge/native-messaging-hosts), а не в /etc/chromium, куда
+# кладёт пакет -browsers. Копия в профиль не требует sudo.
+ensure_gsconnect_edge_host() {
+    local src="/usr/share/gnome-shell-extension-gsconnect/org.gnome.shell.extensions.gsconnect.json"
+    local dest_dir="$HOME/.config/microsoft-edge/NativeMessagingHosts"
+    local dest="$dest_dir/org.gnome.shell.extensions.gsconnect.json"
+
+    edge_is_installed || return 0
+    [[ -f "$src" ]] || {
+        log_warn "GSConnect browser manifest missing ($src)"
+        return 0
+    }
+
+    ensure_directory "$dest_dir"
+    if [[ -f "$dest" ]] && cmp -s "$src" "$dest"; then
+        log_info "Edge native messaging host already registered"
+        return 0
+    fi
+
+    cp "$src" "$dest"
+    log_info "Registered GSConnect native messaging host for Edge"
+}
+
+# GSConnect работает по протоколу KDE Connect: телефон ищется broadcast/mDNS
+# пакетами на 1716-1764, payload идёт по TCP оттуда же. ufw по умолчанию
+# режет весь входящий трафик, поэтому без правил устройство не находится.
+ensure_gsconnect_firewall() {
+    local rules
+
+    command_exists ufw || return 0
+    systemctl is-active --quiet ufw || return 0
+
+    # sudo -n: статус читается без пароля, иначе идём сразу к добавлению правил.
+    if rules="$(sudo -n ufw status 2>/dev/null)" && grep -q '1716' <<<"$rules"; then
+        log_info "ufw already allows GSConnect ports"
+        return 0
+    fi
+
+    sudo ufw allow 1716:1764/tcp comment 'GSConnect'
+    sudo ufw allow 1716:1764/udp comment 'GSConnect'
+    log_info "ufw: opened 1716-1764 tcp/udp for GSConnect"
 }
 
 # Enables run-or-raise DBus Call (raise existing window by class without re-Exec).
@@ -854,20 +1099,26 @@ set_gsetting_if_different org.gnome.desktop.interface color-scheme prefer-dark
 set_gsetting_if_different org.gnome.desktop.default-applications.office.calendar exec 'thunderbird -calendar'
 set_gsetting_bool_if_different org.gnome.desktop.notifications show-in-lock-screen false
 set_gsetting_bool_if_different org.gnome.desktop.interface enable-hot-corners false
-set_gsetting_bool_if_different org.gnome.desktop.screensaver lock-enabled true
+# Щит GNOME разблокируется только через демон gdm3 (Gdm.UserVerifier на
+# org.gnome.DisplayManager). Под greetd демона нет, поэтому блокировка
+# выключена: иначе экран запирается без поля ввода. См. runs/gnome_gui.
+set_gsetting_bool_if_different org.gnome.desktop.screensaver lock-enabled false
+set_gsetting_bool_if_different org.gnome.desktop.lockdown disable-lock-screen true
 # Default true: auto-download + install non-reboot updates (locks dpkg vs apt).
 set_gsetting_bool_if_different org.gnome.software download-updates false
-# Never blank the screen on idle; suspend after 1h20 instead.
+# Экран по простою не гасим: через SUSPEND_AFTER_SEC сессия уходит в сон, а
+# экран выключает сам suspend. 0 — не гасить никогда.
 set_gsetting_uint_if_different org.gnome.desktop.session idle-delay 0
-set_gsetting_uint_if_different org.gnome.desktop.screensaver lock-delay 60
-set_gsetting_uint_if_different org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 4800
+set_gsetting_uint_if_different org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout "$SUSPEND_AFTER_SEC"
 set_gsetting_if_different org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type suspend
 set_audio_toggle_shortcut
 set_vpn_toggle_shortcut
-set_flameshot_shortcut
+set_screenshot_shortcuts
 disable_screenreader_shortcut
 set_vt_bounce_hotkey
+setup_physlock
 set_favorite_apps
+ensure_dock_icons
 setup_gnome_extensions
 
 log_info "Setting default applications..."

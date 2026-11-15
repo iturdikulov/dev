@@ -19,24 +19,24 @@
                 "description": "Back / forward"
             },
             {
-                "key": "Ctrl + 1…8 / Alt + 1…8",
+                "key": "Ctrl + 1…8 / Alt+1…8",
                 "description": "Go to tab"
             },
             {
-                "key": "Ctrl + T / Ctrl + W / Ctrl + Tab",
-                "description": "New / close / next tab"
+                "key": "Ctrl + T / Ctrl + W",
+                "description": "New / close tab"
             },
             {
                 "key": "F3 / F4",
                 "description": "Left / right sidebar"
             },
             {
-                "key": "Alt + H / L / J",
-                "description": "Focus left / right pane / editor"
+                "key": "Alt + H / L",
+                "description": "Focus left / right pane"
             },
             {
-                "key": "Ctrl + G / Alt + B",
-                "description": "Graph / backlinks"
+                "key": "Ctrl + G",
+                "description": "Graph"
             }
         ]
     },
@@ -48,8 +48,8 @@
                 "description": "New note from template"
             },
             {
-                "key": "Alt + V / W / I",
-                "description": "Template: permanent / wbr / flashcard"
+                "key": "Alt + W / I",
+                "description": "Template: wbr / flashcard"
             },
             {
                 "key": "Ctrl + Shift + 1 / 2 / 3",
@@ -73,16 +73,8 @@
                 "description": "Toggle reading / editing view"
             },
             {
-                "key": "Ctrl + Enter",
-                "description": "Toggle checkbox"
-            },
-            {
                 "key": "Ctrl + K",
                 "description": "Insert link"
-            },
-            {
-                "key": "Ctrl + Shift + L",
-                "description": "Cycle list / checklist"
             },
             {
                 "key": "Ctrl + Alt + I",
@@ -119,7 +111,7 @@
             },
             {
                 "key": "Alt + S",
-                "description": "SRS statistics"
+                "description": "SRS deck tree (due / new / seen / total)"
             }
         ]
     },
@@ -127,12 +119,24 @@
         "name": "Agent / app",
         "shortcuts": [
             {
-                "key": "Alt + A / Alt + R",
-                "description": "Agent: approve / reject permission"
+                "key": "Alt + X",
+                "description": "Agent: focus chat view (new one if none)"
             },
             {
-                "key": "Alt + K",
-                "description": "Agent: next chat view"
+                "key": "Alt + Shift + N",
+                "description": "Agent: new chat view (new right-sidebar tab)"
+            },
+            {
+                "key": "Alt + K / Alt+Shift+K",
+                "description": "Agent: next / previous chat view"
+            },
+            {
+                "key": "Alt + O",
+                "description": "Agent: session manager (switch between chats)"
+            },
+            {
+                "key": "Alt + A / Alt + R",
+                "description": "Agent: approve / reject permission"
             },
             {
                 "key": "Ctrl + Shift + P",
@@ -162,6 +166,38 @@
             {
                 "key": "Space p v / p o / p s",
                 "description": "Files / outline / sidebar"
+            },
+            {
+                "key": "Space t t",
+                "description": "Toggle checkbox (line or selection)"
+            },
+            {
+                "key": "Space t l",
+                "description": "Cycle list / checklist"
+            },
+            {
+                "key": "Space t b / Space t n",
+                "description": "Bullet / numbered list"
+            },
+            {
+                "key": "Space m b / m i",
+                "description": "Bold / italics"
+            },
+            {
+                "key": "Space m s / m h",
+                "description": "Strikethrough / highlight"
+            },
+            {
+                "key": "Space m k / m c",
+                "description": "Inline code / comment"
+            },
+            {
+                "key": "Space m l / m t",
+                "description": "Link / tag"
+            },
+            {
+                "key": "Space m q / Space f l",
+                "description": "Blockquote / lint file"
             },
             {
                 "key": "g d",

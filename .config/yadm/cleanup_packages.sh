@@ -277,6 +277,84 @@ cleanup_korganizer() {
         "KOrganizer View"
 }
 
+# Plasma тянет за собой весь KDE-стек. Удаляем одним вызовом apt только то, что
+# реально установлено; хвосты и приложения, которых больше никто не требует,
+# собирает autoremove — с показом списка и подтверждением.
+#
+# Krita здесь нет: она собрана на Qt5 и от Plasma не зависит. Библиотеки KF6/Qt6
+# тоже остаются — их требуют qbittorrent, freecad и прочий не-KDE софт.
+plasma_packages=(
+    plasma-desktop plasma-desktop-data plasma-desktop-doc plasma-desktoptheme
+    plasma-workspace plasma-workspace-data plasma-workspace-doc
+    plasma-activities-bin plasma-dataengines-addons plasma-runners-addons
+    plasma-widgets-addons plasma-wallpapers-addons plasma-browser-integration
+    plasma-disks plasma-firewall plasma-integration plasma-nm plasma-pa
+    plasma-systemmonitor plasma-thunderbolt plasma-vault plasma-welcome
+    plasma5-integration
+    kwin-common kwin-data kwin-wayland kwin-x11 kwin-style-breeze
+    kscreen powerdevil powerdevil-data kactivitymanagerd kglobalacceld
+    kde-cli-tools kde-cli-tools-data kde-config-gtk-style
+    kde-config-screenlocker kde-config-sddm
+    polkit-kde-agent-1 xdg-desktop-portal-kde
+    sddm sddm-theme-breeze sddm-theme-debian-breeze
+    breeze breeze-icon-theme breeze-gtk-theme breeze-cursor-theme
+    breeze-wallpaper
+)
+
+# Breeze нужен Qt-приложениям, а не Plasma: ~/.config/environment.d/qt.conf задаёт
+# QT_STYLE_OVERRIDE=Breeze и QT_QPA_SYSTEM_ICON_THEME=breeze-dark. Стиль собран
+# для Qt6 и Qt5 отдельно (Krita 5.2 — Qt5). Пакеты приехали как auto, поэтому без
+# явного `apt-mark manual` следующий autoremove снесёт их и Qt свалится на Fusion.
+qt_look_packages=(
+    kde-style-breeze kde-style-breeze-qt5 kde-style-breeze-data
+    kf6-breeze-icon-theme
+)
+
+# Эти KDE-приложения помечены как manual, autoremove их не тронет.
+kde_app_packages=(kdeconnect kdenlive kwalletmanager kdialog keditbookmarks kfind khelpcenter)
+
+cleanup_plasma() {
+    local -a installed=()
+    local pkg answer
+
+    for pkg in "${plasma_packages[@]}" "${kde_app_packages[@]}"; do
+        if package_installed "$pkg"; then
+            installed+=("$pkg")
+        fi
+    done
+
+    if ((${#installed[@]} == 0)); then
+        log_info "Plasma/KDE is not installed"
+        return 0
+    fi
+
+    log_info "Removing Plasma/KDE (${#installed[@]} packages)"
+    log_info "${installed[*]}"
+
+    local -a keep_qt_look=()
+    for pkg in "${qt_look_packages[@]}"; do
+        package_installed "$pkg" && keep_qt_look+=("$pkg")
+    done
+    if ((${#keep_qt_look[@]})); then
+        log_info "Keeping Breeze for Qt apps: ${keep_qt_look[*]}"
+        sudo apt-mark manual "${keep_qt_look[@]}"
+    fi
+
+    sudo apt remove -y --purge "${installed[@]}"
+
+    log_warn "Autoremove would also remove:"
+    apt-get -s autoremove | sed -n '/^Remv/p'
+    read -r -p "Remove them? [y/N] " answer
+    case "$answer" in
+    [Yy] | [Yy][Ee][Ss])
+        sudo apt autoremove -y --purge
+        ;;
+    *)
+        log_info "Skipped; run 'sudo apt autoremove --purge' later"
+        ;;
+    esac
+}
+
 remove_desktop_and_package() {
     local desktop_file="$1"
     local package_name="$2"
@@ -323,6 +401,7 @@ main() {
     cleanup_console
     cleanup_foot
     cleanup_shotwell
+    cleanup_plasma
     log_info "Finished package cleanup"
 }
 

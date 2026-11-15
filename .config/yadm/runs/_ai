@@ -3,18 +3,22 @@
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
 # Agents
-# Allow scripts to run for opencode-ai package
-npm config set allow-scripts=opencode-ai --location=user
-
 # Ketch search
-npm install -g ketch-cli
-npm install -g opencode-ai@latest
+npm_global_ensure ketch-cli
 
 # Pi coding agent (official npm; no lifecycle scripts required)
-npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+npm_global_ensure --ignore-scripts @earendil-works/pi-coding-agent
 pi install npm:@netandreus/pi-cursor-provider
 pi install npm:pi-plan
 pi install npm:pi-claude-bridge
+pi install npm:pi-commandcode-provider
+
+# ACP-адаптер для pi: Obsidian Agent Client, Zed и прочие ACP-клиенты поднимают pi-acp,
+# а тот запускает `pi --mode rpc`. Из GUI PATH находится через ~/.nvm/global/bin
+# (общий npm-префикс вне каталога версии node, см. 07_node и environment.d/60-path.conf).
+npm_global_ensure --ignore-scripts pi-acp
+
+# Local LLM: ~/.config/yadm/runs/strata (standalone; not wired from _ai)
 
 # Ketch для pi: нативные инструменты ketch_* + research skill вместо MCP (см. plugins/pi в репо ketch)
 pi install git:github.com/1broseidon/ketch

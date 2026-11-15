@@ -1,0 +1,362 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# shellcheck source=runs/utils.sh
+source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
+
+# Strata LLM day-1 launcher (Qwen3.8-Flash-Next ISTA IQ2_XS).
+# Standalone yadm runner — not called from _ai.
+# Bare invoke (= no args) runs full install. systemd uses: …/strata start
+#
+# Env (optional overrides):
+#   STRATA_PRESET     preset name (default: day1)
+#   STRATA_PORT       API port (default: 8081)
+#   STRATA_CONTEXT    32k|64k|128k|… (default: 128k)
+#   STRATA_PARALLEL   concurrent slots (default: 2)
+#   STRATA_VISION     off|on|gpu|cpu (default: cpu)
+#   STRATA_DRAFTING   auto|mtp|dflash2|off (default: mtp)
+#   STRATA_ACCESS     local|lan|… (default: lan)
+#   STRATA_DATA_DIR   model library (default: /opt/models)
+#   STRATA_VRAM_RESERVE_MIB  VRAM kept free for other programs, MiB (default: 1600; engine default 700)
+#   STRATA_TUNE       quick|thorough|skip (default: quick; reused after first measure)
+#   STRATA_API_KEY    or file ~/.config/strata/api.key / EnvironmentFile
+
+readonly unit_name="strata.service"
+readonly unit_path="${HOME}/.config/systemd/user/${unit_name}"
+readonly runner_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+readonly unit_template="${runner_dir}/${unit_name}.in"
+readonly runner_path="${runner_dir}/strata"
+readonly config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/strata"
+readonly env_file="${config_dir}/env"
+readonly key_file="${config_dir}/api.key"
+
+readonly preset_name="${STRATA_PRESET:-day1}"
+readonly port="${STRATA_PORT:-8081}"
+readonly context="${STRATA_CONTEXT:-128k}"
+readonly parallel="${STRATA_PARALLEL:-2}"
+readonly vision="${STRATA_VISION:-cpu}"
+readonly drafting="${STRATA_DRAFTING:-mtp}"
+readonly access="${STRATA_ACCESS:-lan}"
+readonly data_dir="${STRATA_DATA_DIR:-/opt/models}"
+readonly family="${STRATA_FAMILY:-qwen}"
+readonly model="${STRATA_MODEL:-iq2_xs}"
+readonly vram_reserve_mib="${STRATA_VRAM_RESERVE_MIB:-2812}"
+readonly tune_mode="${STRATA_TUNE:-quick}"
+
+ensure_key() {
+	ensure_directory "$config_dir"
+	if [[ ! -f "$key_file" ]]; then
+		umask 077
+		openssl rand -hex 32 >"$key_file"
+		chmod 600 "$key_file"
+		log_info "Generated API key at ${key_file}"
+	fi
+	if [[ ! -f "$env_file" ]] || ! grep -q '^STRATA_API_KEY=' "$env_file" 2>/dev/null; then
+		umask 077
+		printf 'STRATA_API_KEY=%s\n' "$(tr -d '\n' <"$key_file")" >"$env_file"
+		chmod 600 "$env_file"
+	fi
+	# shellcheck disable=SC1090
+	set -a
+	# shellcheck source=/dev/null
+	source "$env_file"
+	set +a
+	if [[ -z "${STRATA_API_KEY:-}" ]]; then
+		log_error "STRATA_API_KEY empty; check ${env_file}"
+		exit 1
+	fi
+}
+
+launch_args() {
+	local -a args=(
+		launch
+		--family "$family"
+		--model "$model"
+		--context "$context"
+		--vision "$vision"
+		--parallel "$parallel"
+		--drafting "$drafting"
+		--mtp on
+		--tune "$tune_mode"
+		--set "vram-reserve-mib=${vram_reserve_mib}"
+		--access "$access"
+		--port "$port"
+		--data-dir "$data_dir"
+		--api-key-env STRATA_API_KEY
+		--save-preset "$preset_name"
+		--yes
+		--no-tui
+	)
+	printf '%s\n' "${args[@]}"
+}
+
+server_is_up() {
+	local status_out=""
+	status_out="$(strata launch --status 2>&1 || true)"
+	printf '%s\n' "$status_out" | grep -qiE 'http://|https://|:808[0-9]'
+}
+
+stop_server() {
+	ensure_strata_cli
+	if ! server_is_up && ! ss -lntp 2>/dev/null | grep -q ":${port} "; then
+		log_info "Strata already stopped"
+		return 0
+	fi
+	log_info "Stopping Strata (unload model / free VRAM)…"
+	strata launch --stop --preset "$preset_name" 2>/dev/null || strata launch --stop || true
+	local i
+	for i in $(seq 1 60); do
+		if ! server_is_up && ! ss -lntp 2>/dev/null | grep -q ":${port} "; then
+			log_info "Strata stopped"
+			return 0
+		fi
+		sleep 1
+	done
+	log_warn "Stop timed out; port ${port} may still be busy"
+}
+
+# Путь для юнита: %h вместо $HOME, чтобы файл не привязывался к пользователю.
+portable_path() {
+	local path="$1"
+	printf '%s' "${path/#"${HOME}"/%h}"
+}
+
+# Подставляет параметры запуска (STRATA_*) в шаблон юнита.
+render_systemd_unit() {
+	sed \
+		-e "s|@FAMILY@|${family}|g" \
+		-e "s|@MODEL@|${model}|g" \
+		-e "s|@CONTEXT@|${context}|g" \
+		-e "s|@PORT@|${port}|g" \
+		-e "s|@ENV_FILE@|$(portable_path "$env_file")|g" \
+		-e "s|@RUNNER_PATH@|$(portable_path "$runner_path")|g" \
+		"$unit_template"
+}
+
+install_systemd_unit() {
+	if [[ ! -f "$unit_template" ]]; then
+		log_error "Missing ${unit_template} — cannot install ${unit_name}"
+		return 1
+	fi
+	ensure_directory "${HOME}/.config/systemd/user"
+	ensure_key
+
+	local rendered
+	rendered="$(render_systemd_unit)"
+	# Готовый юнит — артефакт: в репозитории живёт только шаблон.
+	if [[ -f "$unit_path" ]] && [[ "$(<"$unit_path")" == "$rendered" ]]; then
+		log_info "${unit_name} already up to date"
+	else
+		printf '%s\n' "$rendered" >"$unit_path"
+		systemctl --user daemon-reload
+		log_info "Installed ${unit_name}. Start: systemctl --user start ${unit_name}"
+	fi
+
+	systemctl --user enable "$unit_name"
+	if command_exists loginctl; then
+		sudo loginctl enable-linger "$USER" || log_warn "Could not enable linger (sudo required); unit starts only after login"
+	fi
+}
+
+ensure_strata_cli() {
+	if command_exists strata; then
+		return 0
+	fi
+	log_info "Installing Strata CLI…"
+	local tmp
+	tmp="$(mktemp)"
+	curl -fsSL https://github.com/Niko1221/Strata/releases/latest/download/install.sh -o "$tmp"
+	sh "$tmp"
+	rm -f -- "$tmp"
+	export PATH="${HOME}/.local/bin:${PATH}"
+	if ! command_exists strata; then
+		log_error "strata still not in PATH after install (expected ~/.local/bin/strata)"
+		exit 1
+	fi
+}
+
+# Full setup: CLI + systemd + UFW + Pi → download/launch → smoke → web UI key helper.
+install_all() {
+	ensure_strata_cli
+	install_systemd_unit
+	apply_firewall
+	connect_pi
+	systemctl --user reset-failed "$unit_name" 2>/dev/null || true
+	start_server
+	smoke_local
+	seed_web_ui_key
+	log_info "install done: CLI + systemd + firewall + Pi + server + ui-key"
+}
+
+start_server() {
+	ensure_strata_cli
+	ensure_key
+	ensure_directory "$data_dir"
+
+	# Unload first so --tune quick measures against free VRAM (not a hot resident KV/experts).
+	if server_is_up; then
+		stop_server
+	fi
+
+	mapfile -t args < <(launch_args)
+	log_info "Starting Strata: ${family}/${model} ctx=${context} vision=${vision} parallel=${parallel} drafting=${drafting} tune=${tune_mode} ${access}:${port}"
+	if [[ "$tune_mode" == "quick" ]]; then
+		log_info "First tune takes ~20 min (later starts reuse the stored result; force with: ${runner_path} tune)"
+	elif [[ "$tune_mode" == "thorough" ]]; then
+		log_info "Thorough tune can take up to ~2 h"
+	fi
+	strata "${args[@]}"
+}
+
+# Force a fresh measure even if this model was already tuned on this PC.
+retune_server() {
+	ensure_strata_cli
+	ensure_key
+	ensure_directory "$data_dir"
+	stop_server
+	mapfile -t args < <(launch_args)
+	log_info "Retuning (${tune_mode}) then serving…"
+	strata "${args[@]}" --retune
+}
+
+connect_pi() {
+	ensure_key
+	if ! command_exists strata; then
+		log_error "strata not found in PATH"
+		exit 1
+	fi
+	strata connect pi \
+		--url "http://127.0.0.1:${port}" \
+		--key-env STRATA_API_KEY \
+		--model "$model" \
+		--context "$context" \
+		--preset "$preset_name" \
+		--write --yes
+
+	# Official connect marks the model text-only; restore image when vision is enabled.
+	if [[ "$vision" != "off" ]]; then
+		python3 - "$HOME/.pi/agent/models.json" "$model" <<'PY'
+import json, sys
+path, mid = sys.argv[1], sys.argv[2]
+with open(path, encoding="utf-8") as f:
+    data = json.load(f)
+prov = data.get("providers", {}).get("strata")
+if not prov:
+    raise SystemExit(0)
+for m in prov.get("models", []):
+    if m.get("id") == mid:
+        inp = m.setdefault("input", ["text"])
+        if "image" not in inp:
+            inp.append("image")
+        break
+with open(path, "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2)
+    f.write("\n")
+PY
+		log_info "Pi model ${model}: enabled image input (vision=${vision})"
+	fi
+	log_info "Pi connected to Strata (default provider/model set by strata connect)"
+}
+
+apply_firewall() {
+	# Needs sudo; idempotent LAN whitelist for the API port.
+	if ! command_exists ufw; then
+		log_error "ufw not installed"
+		exit 1
+	fi
+	sudo ufw delete allow 11434/tcp >/dev/null 2>&1 || true
+	sudo ufw delete allow from 192.168.1.0/24 to any port 11434 proto tcp >/dev/null 2>&1 || true
+	sudo ufw allow from 192.168.1.0/24 to any port "${port}" proto tcp comment 'Strata LLM LAN'
+	sudo ufw status numbered | grep -E "${port}|11434" || sudo ufw status verbose
+	log_info "LAN ${port}/tcp allowed from 192.168.1.0/24 (API key still required)"
+}
+
+smoke_local() {
+	ensure_key
+	local url="http://127.0.0.1:${port}/v1/models"
+	log_info "GET ${url}"
+	curl -fsS -H "Authorization: Bearer ${STRATA_API_KEY}" "$url" | head -c 2000
+	echo
+}
+
+# Web UI stores the key only in browser localStorage (strata.apikey) — no server-side file.
+# Best we can do: clipboard + open About; paste once (or run the printed JS in DevTools).
+seed_web_ui_key() {
+	ensure_key
+	local url="http://127.0.0.1:${port}/#about"
+	local key="$STRATA_API_KEY"
+	if command_exists wl-copy; then
+		printf '%s' "$key" | wl-copy
+		log_info "API key copied to clipboard (wl-copy)"
+	elif command_exists xclip; then
+		printf '%s' "$key" | xclip -selection clipboard
+		log_info "API key copied to clipboard (xclip)"
+	else
+		log_info "No wl-copy/xclip — key: ${key_file}"
+	fi
+	if command_exists xdg-open; then
+		xdg-open "$url" >/dev/null 2>&1 || true
+		log_info "Opened ${url} — paste into About → Settings → API key"
+	else
+		log_info "Open ${url} and paste the key into About → Settings"
+	fi
+	# Same-origin console one-liner if you prefer zero paste into the form:
+	log_info "Or DevTools console on that origin:"
+	printf "localStorage.setItem('strata.apikey', %s); location.reload()\n" "$(python3 -c 'import json,os; print(json.dumps(os.environ["STRATA_API_KEY"]))')"
+}
+
+check_not_root
+check_home_set
+
+case "${1:-}" in
+	"" | install)
+		install_all
+		exit 0
+		;;
+	uninstall)
+		systemctl --user disable --now "$unit_name" 2>/dev/null || true
+		rm -f -- "$unit_path"
+		systemctl --user daemon-reload
+		log_info "Removed ${unit_name}"
+		exit 0
+		;;
+	start)
+		# Used by systemd ExecStart — lean, no sudo/Pi rewrite.
+		start_server
+		exit 0
+		;;
+	stop)
+		stop_server
+		exit 0
+		;;
+	tune | retune)
+		retune_server
+		exit 0
+		;;
+	connect-pi)
+		connect_pi
+		exit 0
+		;;
+	firewall)
+		apply_firewall
+		exit 0
+		;;
+	smoke)
+		smoke_local
+		exit 0
+		;;
+	ui-key | web-key)
+		seed_web_ui_key
+		exit 0
+		;;
+	status)
+		strata launch --status || true
+		exit 0
+		;;
+	*)
+		log_error "Usage: strata [install|uninstall|start|stop|tune|connect-pi|firewall|smoke|ui-key|status]"
+		log_error "  (no args = install; start includes --tune ${tune_mode}, reuse after first measure)"
+		exit 2
+		;;
+esac

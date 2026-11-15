@@ -1,0 +1,12 @@
+# Единственная сессия в меню greetd: GNOME Wayland. Каталог копируется в
+# /etc/greetd/wayland-sessions.d раннером runs/gnome_gui.
+# Почему свой файл, а не /usr/share/wayland-sessions: в trixie там лежат и
+# gnome.desktop, и gnome-wayland.desktop с одинаковым именем «GNOME» и одним
+# Exec — выбор между ними случаен, а дефолт оказывается неопределённым.
+
+[Desktop Entry]
+Name=GNOME
+Comment=GNOME Wayland
+Exec=/usr/bin/gnome-session
+Type=Application
+DesktopNames=GNOME

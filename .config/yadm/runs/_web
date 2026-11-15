@@ -10,10 +10,7 @@ packages=(
     postcss-cli
     @343dev/optimizt
     autoprefixer
-    typescript
     @google/clasp
 )
 
-for package in "${packages[@]}"; do
-    npm install -g "$package"
-done
+npm_global_ensure "${packages[@]}"

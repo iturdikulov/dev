@@ -10,4 +10,4 @@ remove_packages okular # will be used Firefox & Foliate as default
 install_packages hunspell-ru mythes-ru sdcv pandoc
 install_packages visidata python3-openpyxl
 
-npm install -g single-file-cli
+npm_global_ensure single-file-cli

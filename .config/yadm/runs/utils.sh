@@ -455,6 +455,79 @@ load_nvm() {
             || nvm use --delete-prefix >/dev/null 2>&1 \
             || true
     fi
+
+    # `nvm use` drops every $NVM_DIR/* entry from PATH, taking the shared npm prefix with it.
+    npm_global_path
+}
+
+# Global npm CLIs live in a prefix outside the nvm version directories, so a node upgrade no
+# longer strands them. The path has to stay inside $NVM_DIR: `nvm use` rejects any other prefix
+# (nvm_die_on_prefix in nvm.sh). Installers therefore skip what is already installed instead of
+# reinstalling the whole list on every run.
+NPM_GLOBAL_PREFIX="${NPM_GLOBAL_PREFIX:-$HOME/.nvm/global}"
+# The prefix itself must sit inside $NVM_DIR, so PATH points at a symlink to its bin/ instead:
+# `nvm use` strips every $NVM_DIR/* entry from PATH.
+NPM_GLOBAL_BIN="$HOME/.local/share/npm-global/bin"
+
+npm_global_path() {
+    case ":$PATH:" in
+        *":$NPM_GLOBAL_BIN:"*) ;;
+        *) export PATH="$NPM_GLOBAL_BIN:$PATH" ;;
+    esac
+}
+
+# Strips the version spec while keeping scoped names whole: "ketch-cli@latest" -> "ketch-cli",
+# "@go-task/cli@latest" -> "@go-task/cli".
+npm_global_package_name() {
+    local spec=$1 scope rest
+    if [[ $spec == @*/* ]]; then
+        scope=${spec%%/*}
+        rest=${spec#*/}
+        printf '%s/%s\n' "$scope" "${rest%%@*}"
+    else
+        printf '%s\n' "${spec%%@*}"
+    fi
+}
+
+# Ensures the given packages are installed globally, keeping any leading flags for npm.
+# Usage: npm_global_ensure [--ignore-scripts] <package>...
+npm_global_ensure() {
+    local flags=()
+    while [[ ${1:-} == -* ]]; do
+        flags+=("$1")
+        shift
+    done
+    (( $# )) || return 0
+
+    load_nvm || true
+
+    # Runners may be started from a context that never sourced a profile (systemd unit, cron,
+    # GUI launcher), so the prefix is set here as well as in the profiles.
+    export NPM_CONFIG_PREFIX="$NPM_GLOBAL_PREFIX"
+    npm_global_path
+
+    local root
+    if ! root="$(npm root -g 2>/dev/null)" || [[ -z $root ]]; then
+        log_error "npm is unavailable, cannot install: $*"
+        return 1
+    fi
+    if [[ $root == "$HOME"/.nvm/versions/node/* ]]; then
+        log_warn "npm prefix is inside the node version directory ($root): globals will not survive a node upgrade"
+    fi
+
+    local pkg name missing=()
+    for pkg in "$@"; do
+        name=$(npm_global_package_name "$pkg")
+        if [[ -d "$root/$name" ]]; then
+            log_debug "npm global already installed: $name"
+        else
+            missing+=("$pkg")
+        fi
+    done
+    (( ${#missing[@]} )) || return 0
+
+    log_info "Installing npm globals: ${missing[*]}"
+    npm install --global "${flags[@]}" "${missing[@]}"
 }
 
 # Toolchain packange managers

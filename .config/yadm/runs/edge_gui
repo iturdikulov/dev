@@ -16,11 +16,9 @@ if ! package_installed microsoft-edge-stable; then
     sudo apt-get update
     ensure_directory "$(dirname "$APT_UPDATE_STAMP")"
     date +%s >"$APT_UPDATE_STAMP"
-
-    install_packages microsoft-edge-stable
-else
-    log_info "microsoft-edge-stable is already installed"
 fi
+
+install_packages microsoft-edge-stable
 
 mkdir -p "$HOME/.local/share/applications"
 rm -f "$HOME/.local/share/applications/microsoft-edge.desktop"

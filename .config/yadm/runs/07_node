@@ -38,4 +38,68 @@ if [[ "$(node -v)" != "v${NODE_MAJOR}."* ]]; then
     exit 1
 fi
 
+# Global npm packages (pi, ketch, task, mmdc, …) must not live in the versioned directory:
+# `nvm install` of a new patch release creates an empty bin/ and silently drops them. The prefix
+# stays inside NVM_DIR because `nvm use` rejects any other location (nvm_die_on_prefix);
+# ~/.zshrc, ~/.bashrc and environment.d export the same value.
+NPM_GLOBAL_PREFIX="${NPM_GLOBAL_PREFIX:-$NVM_DIR/global}"
+export NPM_CONFIG_PREFIX="$NPM_GLOBAL_PREFIX"
+ensure_directory "$NPM_GLOBAL_PREFIX/bin"
+
+# PATH must not name the prefix directly: `nvm use` strips every $NVM_DIR/* entry, so profiles
+# point at this symlink to its bin/ instead. Only its parent has to exist for `ln -sfn`.
+NPM_GLOBAL_BIN_LINK="$HOME/.local/share/npm-global/bin"
+ensure_directory "$(dirname "$NPM_GLOBAL_BIN_LINK")"
+ln -sfn "$NPM_GLOBAL_PREFIX/bin" "$NPM_GLOBAL_BIN_LINK"
+
+# corepack's own `enable` writes its shims next to the node binary, which is versioned; point it
+# at the shared prefix so the yarn shims survive an upgrade. pnpm stays an npm global: it is
+# called outside a project (`.zshrc`, `cleanup.sh`), where corepack has no version to resolve.
+if command_exists corepack; then
+    corepack enable --install-directory "$NPM_GLOBAL_PREFIX/bin" yarn
+else
+    log_warn "corepack is missing in node $(node -v); yarn will not be available"
+fi
+
+npm_prefix=$(npm config get prefix)
+if [[ "$npm_prefix" != "$NPM_GLOBAL_PREFIX" ]]; then
+    log_error "npm prefix is ${npm_prefix}, expected ${NPM_GLOBAL_PREFIX}"
+    exit 1
+fi
+
+# Globals installed by the old scheme stay in <version>/bin and shadow the shared ones on PATH,
+# so an upgrade would look like a rollback of whatever they contain.
+version_bin="$NVM_DIR/versions/node/$(nvm version default)/bin"
+leftovers=()
+for entry in "$version_bin"/*; do
+    case "$(basename "$entry")" in
+        node | npm | npx | corepack | corepack-shims) continue ;;
+    esac
+    leftovers+=("$(basename "$entry")")
+done
+if (( ${#leftovers[@]} )); then
+    log_warn "Globals left in the versioned bin (${version_bin}): ${leftovers[*]}"
+    log_warn "They vanish on the next node upgrade; re-run the runners that own them (utils.sh npm_global_ensure)"
+fi
+
+# GUI sessions (Obsidian, .desktop launchers) read PATH from environment.d, which cannot
+# express nvm's versioned directory. Expose the current default through a stable symlink
+# so an upgrade moves the path instead of leaving a dead one behind.
+NODE_CURRENT_LINK="$HOME/.local/share/nvm-current"
+ensure_directory "$(dirname "$NODE_CURRENT_LINK")"
+ln -sfn "$(dirname "$(dirname "$(nvm which default)")")" "$NODE_CURRENT_LINK"
+
+# Corepack writes its shims as symlinks into the versioned directory; route them through the
+# stable nvm-current link so they keep resolving after that version is removed.
+COREPACK_DIST="$NODE_CURRENT_LINK/lib/node_modules/corepack/dist"
+for shim in yarn yarnpkg; do
+    if [[ -e "$COREPACK_DIST/$shim.js" ]]; then
+        ln -sfn "$COREPACK_DIST/$shim.js" "$NPM_GLOBAL_PREFIX/bin/$shim"
+    else
+        log_warn "no corepack entry point at ${COREPACK_DIST}/${shim}.js: ${shim} may break after a node upgrade"
+    fi
+done
+
 log_info "Node.js installed: $(node -v) (npm $(npm -v)); default: $(nvm version default)"
+log_info "npm globals prefix: ${npm_prefix}"
+log_info "GUI link: ${NODE_CURRENT_LINK} -> $(readlink -f "$NODE_CURRENT_LINK")"

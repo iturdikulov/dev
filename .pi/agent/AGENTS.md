@@ -2,9 +2,76 @@
 
 ## Language and Communication
 
-- Respond in Russian by default. Write code, identifiers, and filenames in English; write comments and descriptions in Russian.
+- Respond in Russian by default. Write code, identifiers, and filenames in English; the language of
+  comments and docstrings follows the project (see Comments and Docstrings).
 - Keep explanations clear, concise, and practical.
 - When explaining technical concepts, prefer examples over abstract descriptions.
+
+## AGENTS.md Files
+
+- **Never delegate a rule to another `AGENTS.md`.** No "see `../AGENTS.md`", no "details live in
+  `~/.pi/agent/AGENTS.md`": an agent may read only the nearest file, so the pointer dangles where it
+  matters. Either the rule applies here — state it in full, in this file's own words — or it does not
+  apply here — then say nothing about it.
+- **Naming a file to read is not the same as delegating a rule.** "Each submodule ships its own
+  `AGENTS.md`; read it before changing code" is navigation and stays. "Suppression rules — see the
+  global file" is delegation and goes.
+- **No duplication for its own sake.** A rule stated one level up is not copied down verbatim; the
+  nearest file carries only what its own scope needs, written out rather than referenced.
+
+## Comments and Docstrings
+
+First determine the documentation language of the project: look at docstrings and comments in
+neighbouring modules, its `AGENTS.md`, its README — and write in that language. A Russian docstring in
+an English package is foreign matter; English in a Russian one looks like a patch. For a new project
+with no established style — Russian. Latin technical names (`payload`, `Structure`, `CANDIDATE_CAP`)
+stay Latin either way.
+
+Language-agnostic rules:
+
+- **A comment explains "why", not "what".** What the line does is visible in the code; only the
+  reason, the order of operations and the trap are worth writing down.
+- **A docstring states the purpose** — it does not restate the signature and types.
+- **Verify claims.** "Enabled by default" must match the code and the config, not the memory of how
+  it used to be.
+- **Split a dense function into sections**: a blank line and a one-line header each, so it can be
+  skimmed diagonally. Section headers are the exception to "why not what" — they are the table of
+  contents. **Do not number them** (`# 1. …`, `# 2. …`): a new step in the middle renumbers the rest,
+  and any "see step 3" left in prose rots on the spot. Numbers are allowed only where order is the
+  point and you never reference them elsewhere.
+- **Justify every suppression.** Any switch that silences a linter or a type checker — `# noqa`,
+  `# type: ignore`, `@ts-expect-error`, `// eslint-disable-next-line`, `//nolint`, `# rubocop:disable`,
+  whatever the language calls it — carries a short reason, on the same line or the line above: without
+  it nobody can tell whether the exception is still required, and a stale one is never removed.
+- **Refer to code by function or module name** (`_list_payload`, `audit_delta.py`), never by line
+  numbers ("lines 100–120") — those rot with the first edit.
+- **Decode a domain term once**, where it first appears.
+- **No history in the code.** No "before/after" snippets, no branch names, no ticket ids
+  (`AS-2545`, `#1234`) in comments or docstrings: the reader has no way to check them, they name
+  things that may be gone, and they outlive the reason they were written for. A comment describes
+  the current rule; the *why* of the change belongs to the commit message and the plan.
+
+When the text is Russian — published prose, not a chat message:
+
+- **One concept — one term.** "Поиск", "фильтр" and "запрос" must not take turns meaning the same
+  thing; a Latin identifier is quoted once (`CANDIDATE_CAP`) and then used unchanged.
+- **Typography:** «ёлочки» for quotes, a long dash with spaces and a hyphen without, a non-breaking
+  space before a dash and between a number and its unit, one space after a comma, no double spaces;
+  «ё» and spellings stay consistent across the file.
+- **No transliteration or calques.** Either the Latin term as is, or a Russian equivalent: "кап" →
+  "предел `CANDIDATE_CAP`", "галка" → "явная выдача", "статы" → "счётчики", "дёрнуть" → "вызвать",
+  "прокинуть" → "передать".
+- **Do not decline Latin words with Russian case endings** ("капом", "фильтром из `filter`") —
+  rephrase: "ограничивает выдачу пределом `CANDIDATE_CAP`".
+- **Python docstrings**: the summary starts on the line with the opening `"""`, the closing `"""`
+  goes on its own line, the first sentence is in the third person ("Собирает…", "Возвращает…").
+
+### The essence
+
+A comment says what the code cannot: why this way, which invariant holds, what breaks if changed. The
+shape is PEP 257's — a one-line summary, a blank line, the body; the summary must stand alone in an
+index or a tooltip. Delete the comment: if nothing non-obvious is lost, delete it for good. A comment
+that contradicts the code is worse than none, so it changes in the same commit.
 
 ## Learning and Development
 

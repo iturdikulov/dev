@@ -77,6 +77,14 @@
                 "description": "Quick filter"
             },
             {
+                "key": "F6 / Shift + F6",
+                "description": "Focus next / previous pane (toolbar → folders → messages → message)"
+            },
+            {
+                "key": "Alt + X",
+                "description": "Toggle focus: message list ⇄ message (tbkeys)"
+            },
+            {
                 "key": "F8",
                 "description": "Toggle message pane"
             },

@@ -82,10 +82,6 @@
                 "description": "DevTools"
             },
             {
-                "key": "Ctrl + Shift + Del",
-                "description": "Clear browsing data"
-            },
-            {
                 "key": "Ctrl + = / − / 0",
                 "description": "Zoom in / out / reset"
             }

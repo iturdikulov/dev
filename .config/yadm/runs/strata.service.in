@@ -1,0 +1,19 @@
+# Рендерится из runs/strata.service.in через install_systemd_unit (runs/strata):
+# правки в установленной копии теряются при следующем install. Пути заданы через
+# %h, чтобы юнит не зависел от домашнего каталога пользователя.
+[Unit]
+Description=Strata LLM (@FAMILY@/@MODEL@ @CONTEXT@ on 0.0.0.0:@PORT@)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+TimeoutStartSec=0
+Environment=PATH=%h/.local/bin:%h/.cargo/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-@ENV_FILE@
+ExecStart=@RUNNER_PATH@ start
+ExecStop=%h/.local/bin/strata launch --stop
+
+[Install]
+WantedBy=default.target

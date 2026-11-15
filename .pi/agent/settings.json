@@ -2,20 +2,41 @@
   "packages": [
     "npm:pi-claude-bridge",
     "vendor/pi-cursor-provider",
-    "git:github.com/1broseidon/ketch"
+    "git:github.com/1broseidon/ketch",
+    "npm:pi-commandcode-provider",
+    "npm:@netandreus/pi-cursor-provider",
+    "npm:pi-plan"
   ],
-  "defaultProvider": "claude-bridge",
-  "defaultModel": "claude-opus-5-5",
-  "lastChangelogVersion": "1.5.0",
+  "defaultProvider": "strata",
+  "defaultModel": "iq2_xs",
+  "lastChangelogVersion": "1.5.2",
   "enabledModels": [
     "cursor/auto",
     "claude-bridge/claude-haiku-5-5",
     "claude-bridge/claude-opus-5-5",
     "claude-bridge/claude-sonnet-5-5",
-    "llama-server/occamy"
+    "strata/iq2_xs",
+    "commandcode/inclusionai/ling-3.1-flash-1019",
+    "commandcode/deepseek/deepseek-v4.1-flash-ultrafast",
+    "commandcode/stealth/crouton-alpha",
+    "commandcode/moonshotai/Kimi-K3.1-Pro",
+    "commandcode/minimax/minimax-m3.1-flash",
+    "commandcode/deepseek/deepseek-v4.1-flash-fast",
+    "commandcode/deepseek/deepseek-v4.1-flash",
+    "commandcode/z-ai/glm-5.3-flash",
+    "commandcode/tencent/hy3-paid",
+    "commandcode/Qwen/Qwen3.8-27B"
   ],
   "extensionChangelogVersions": {
     "{\"source\":\"vendor/pi-cursor-provider\",\"scope\":\"user\"}": "0.1.5",
-    "{\"source\":\"git:github.com/1broseidon/ketch\",\"scope\":\"user\"}": "0.20.5"
-  }
+    "{\"source\":\"git:github.com/1broseidon/ketch\",\"scope\":\"user\"}": "0.21.1",
+    "{\"source\":\"npm:pi-commandcode-provider\",\"scope\":\"user\"}": "0.8.3"
+  },
+  "defaultThinkingLevel": "medium",
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 64644,
+    "keepRecentTokens": 4000
+  },
+  "hideThinkingBlock": false
 }

@@ -92,6 +92,8 @@ video/x-theora+ogg=mpv.desktop;
 x-scheme-handler/http=com.microsoft.Edge.desktop;
 x-scheme-handler/https=com.microsoft.Edge.desktop;
 application/octet-stream=nvim.desktop;
+x-scheme-handler/sms=org.gnome.Shell.Extensions.GSConnect.desktop;
+x-scheme-handler/tel=org.gnome.Shell.Extensions.GSConnect.desktop;
 
 [Default Applications]
 application/epub+zip=sioyek.desktop;

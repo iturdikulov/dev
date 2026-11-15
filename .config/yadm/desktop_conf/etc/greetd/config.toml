@@ -1,0 +1,18 @@
+# greetd вместо GDM. Источник правды — этот файл; в /etc/greetd его копирует
+# runs/gnome_gui.
+#
+# Список сессий свой, с одной записью GNOME: в /usr/share/wayland-sessions
+# лежат два файла «GNOME» с одним Exec, и дефолт становится неопределённым.
+# --sessions и --xsessions описывают список целиком, а не дополняют дефолт.
+# Пустой xsessions.d отключает X11 (иначе tuigreet идёт через startx, мимо
+# /etc/X11/Xsession). Вернуть X11 = убрать --xsessions.
+#
+# tuigreet выставляет XDG_SESSION_TYPE до открытия PAM-сессии — для GNOME
+# Wayland это обязательно.
+
+[terminal]
+vt = 7
+
+[default_session]
+command = "tuigreet --time --remember --remember-user-session --user-menu --asterisks --sessions /etc/greetd/wayland-sessions.d --xsessions /etc/greetd/xsessions.d --power-shutdown 'systemctl poweroff' --power-reboot 'systemctl reboot'"
+user = "_greetd"

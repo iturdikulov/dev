@@ -100,7 +100,10 @@ fi
 npm config set allow-scripts=tree-sitter-cli,puppeteer --location=user
 
 echo "Installing tree-sitter"
-npm install -g tree-sitter-cli
+npm_global_ensure tree-sitter-cli
 
 echo "Installing mermaid-cli (mmdc for snacks.image)"
-npm install -g @mermaid-js/mermaid-cli
+npm_global_ensure @mermaid-js/mermaid-cli
+
+# eslint_d — линтер для nvim-lint (nvim/lua/plugins/nvim-lint.lua); Mason его не ставит.
+npm_global_ensure eslint_d

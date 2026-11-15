@@ -2,48 +2,152 @@
 
 source "$(dirname -- "${BASH_SOURCE[0]}")/utils.sh"
 
-# GNOME Shell ScreenShield (idle blank/lock) requires GDM, not SDDM.
-ensure_gdm3_display_manager() {
-    local gdm_bin="/usr/sbin/gdm3"
-    local current
+# Display manager: greetd + tuigreet. Пакет gdm3 остаётся установленным, но не
+# запускается: gnome-core жёстко зависит от gdm3, и apt autoremove после снятия
+# метапакета унёс бы весь стек GNOME. Блокировку экрана GNOME под greetd
+# отключает runs/z_gnome — щит разблокируется только через демон gdm3
+# (Gdm.UserVerifier на org.gnome.DisplayManager).
 
-    install_packages gdm3
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+greetd_config_src="$script_dir/../desktop_conf/etc/greetd/config.toml"
+greetd_config_dest="/etc/greetd/config.toml"
+greetd_sessions_src="$script_dir/../desktop_conf/etc/greetd/wayland-sessions.d"
+greetd_sessions_dest="/etc/greetd/wayland-sessions.d"
+# Пустой каталог вместо /usr/share/xsessions: X11-сессии в меню tuigreet не нужны
+# (см. конфиг). Каталог пуст намеренно.
+greetd_xsessions_dir="/etc/greetd/xsessions.d"
 
-    if [[ ! -x "$gdm_bin" ]]; then
-        log_error "gdm3 binary missing after install ($gdm_bin)"
+greetd_config_is_valid() {
+    if ! command_exists python3; then
+        log_error "python3 missing — cannot validate $greetd_config_src"
+        return 1
+    fi
+    python3 -c 'import sys, tomllib; tomllib.load(open(sys.argv[1], "rb"))' "$1"
+}
+
+greetd_greeter_command() {
+    python3 - "$greetd_config_src" <<'PY'
+import sys, tomllib
+
+print(tomllib.load(open(sys.argv[1], "rb"))["default_session"]["command"])
+PY
+}
+
+# Greeter с несуществующим флагом означает загрузку без экрана входа, поэтому
+# команду проверяем до переключения DM: tuigreet разбирает аргументы раньше,
+# чем отвечает на --version, и опечатка даёт rc != 0.
+ensure_greeter_command_runs() {
+    local command
+
+    command="$(greetd_greeter_command)" || {
+        log_error "cannot read default_session.command from $greetd_config_src"
+        return 1
+    }
+
+    if ! sh -c "$command --version" >/dev/null 2>&1; then
+        log_error "greeter does not start: $command --version"
+        return 1
+    fi
+    log_info "greeter command ok: ${command%% *}"
+}
+
+ensure_greetd_sessions() {
+    local src dest name
+
+    sudo mkdir -p "$greetd_sessions_dest"
+
+    for src in "$greetd_sessions_src"/*.desktop; do
+        name="$(basename "$src")"
+        dest="$greetd_sessions_dest/$name"
+
+        if [[ -f "$dest" ]] && cmp -s "$src" "$dest"; then
+            continue
+        fi
+
+        sudo install -m 644 "$src" "$dest"
+        log_info "$dest <- yadm"
+    done
+
+    # Лишние файлы в этом каталоге добавят пункты в меню greetd и снова сделают
+    # дефолт неоднозначным — про них нужно знать, но удалять чужие не наше дело.
+    while IFS= read -r dest; do
+        [[ -f "$greetd_sessions_src/$(basename "$dest")" ]] && continue
+        log_warn "Foreign session file: $dest (greetd will offer it too)"
+    done < <(find "$greetd_sessions_dest" -maxdepth 1 -name '*.desktop' | sort)
+}
+
+ensure_greetd_config() {
+    if [[ ! -f "$greetd_config_src" ]]; then
+        log_error "greetd config missing in yadm: $greetd_config_src"
         return 1
     fi
 
-    echo "gdm3 shared/default-x-display-manager select gdm3" | sudo debconf-set-selections
-    if package_installed sddm; then
-        echo "sddm shared/default-x-display-manager select gdm3" | sudo debconf-set-selections
+    if ! greetd_config_is_valid "$greetd_config_src"; then
+        log_error "invalid TOML: $greetd_config_src"
+        return 1
     fi
 
-    current="$(cat /etc/X11/default-display-manager 2>/dev/null || true)"
-    if [[ "$current" != "$gdm_bin" ]]; then
-        printf '%s\n' "$gdm_bin" | sudo tee /etc/X11/default-display-manager >/dev/null
-        log_info "default-display-manager -> $gdm_bin"
-    else
-        log_info "default-display-manager already $gdm_bin"
+    sudo mkdir -p "$(dirname "$greetd_config_dest")" "$greetd_xsessions_dir"
+    if [[ -f "$greetd_config_dest" ]] && cmp -s "$greetd_config_src" "$greetd_config_dest"; then
+        log_info "$greetd_config_dest already up to date"
+        return 0
     fi
 
-    # dpkg-reconfigure updates display-manager.service symlink to gdm3.
-    sudo DEBIAN_FRONTEND=noninteractive dpkg-reconfigure -f noninteractive gdm3 >/dev/null
-
-    if systemctl is-enabled sddm.service &>/dev/null; then
-        sudo systemctl disable sddm.service >/dev/null
-        log_info "Disabled sddm.service"
+    # Файл — conffile пакета; оригинал дистрибутива сохраняем один раз.
+    if [[ -f "$greetd_config_dest" && ! -e "$greetd_config_dest.yadm-orig" ]]; then
+        sudo cp -a "$greetd_config_dest" "$greetd_config_dest.yadm-orig"
+        log_info "Saved distro config to $greetd_config_dest.yadm-orig"
     fi
+
+    sudo cp "$greetd_config_src" "$greetd_config_dest"
+    log_info "$greetd_config_dest <- $greetd_config_src"
+
+    # Рестартовать greetd нельзя: юнит живёт с Restart=always и
+    # KillMode=control-group, а его cgroup держит worker'ы сессии.
+    if systemctl is-active --quiet greetd.service; then
+        log_warn "greetd still runs the old config; reboot to apply"
+    fi
+}
+
+ensure_greetd_display_manager() {
+    # Только установка, без апгрейда: greetd.postinst на обновление делает
+    # `invoke-rc.d --skip-systemd-native restart` мимо systemd, что из живой
+    # сессии под greetd убивает её процессы. Апгрейд — дело `apt upgrade`.
+    if ! package_installed greetd || ! package_installed tuigreet; then
+        install_packages greetd tuigreet
+    fi
+
+    ensure_greetd_config
+    ensure_greetd_sessions
+    ensure_greeter_command_runs
+
+    # greetd.service несёт Alias=display-manager.service; --force перебивает
+    # симлинк на gdm3.service, который остаётся от установленного gdm3.
+    sudo systemctl enable --force greetd.service >/dev/null
 
     local dm_link
     dm_link="$(readlink -f /etc/systemd/system/display-manager.service 2>/dev/null || true)"
-    if [[ "$dm_link" == *gdm* ]]; then
-        log_info "display-manager.service -> $dm_link (reboot to leave SDDM session)"
-    else
-        log_warn "display-manager.service is not gdm ($dm_link); check dpkg-reconfigure gdm3"
+    if [[ "$dm_link" != *greetd.service ]]; then
+        log_error "display-manager.service -> ${dm_link:-nothing}, expected greetd.service"
+        return 1
+    fi
+    log_info "display-manager.service -> $dm_link"
+
+    # Файл читают /etc/init.d/greetd и gdm3.postinst: с путём на gdm3 апгрейд
+    # gdm3 вернул бы симлинк на GDM, а `dpkg-reconfigure gdm3` — тоже.
+    if [[ "$(cat /etc/X11/default-display-manager 2>/dev/null || true)" != "/usr/sbin/greetd" ]]; then
+        printf '%s\n' /usr/sbin/greetd | sudo tee /etc/X11/default-display-manager >/dev/null
+        log_info "default-display-manager -> /usr/sbin/greetd"
+    fi
+
+    if systemctl is-active --quiet gdm.service; then
+        log_warn "gdm still serves this boot; reboot to land on tuigreet"
+    fi
+    if ! systemctl is-enabled --quiet greetd.service; then
+        log_error "greetd.service is not enabled"
         return 1
     fi
 }
 
-install_packages gnome-core gnome-tweaks flameshot
-ensure_gdm3_display_manager
+install_packages gnome-core gnome-tweaks
+ensure_greetd_display_manager
