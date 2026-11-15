@@ -7,8 +7,8 @@
     "npm:@netandreus/pi-cursor-provider",
     "npm:pi-plan"
   ],
-  "defaultProvider": "strata",
-  "defaultModel": "iq2_xs",
+  "defaultProvider": "commandcode",
+  "defaultModel": "deepseek/deepseek-v4.1-flash-ultrafast",
   "lastChangelogVersion": "1.5.2",
   "enabledModels": [
     "cursor/auto",

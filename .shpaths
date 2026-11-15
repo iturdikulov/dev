@@ -1,0 +1,66 @@
+# Shared PATH for bash and zsh. POSIX sh only, so the same file works under /bin/sh, bash and zsh.
+# Sourced by: .profile (bash login), .zprofile (zsh login — zsh never reads .profile), .zshenv (every
+# zsh, interactive or not), .bashrc and .zshrc (interactive shells, e.g. tmux panes).
+#
+# This is one of a pair. Processes that read no rc file — the GUI session, systemd user units, the
+# tmux server captured at startup — get their PATH from ~/.config/environment.d/60-path.conf
+# instead, which is KEY=value and cannot source this file. A directory added here has to be added
+# there too; that file carries the command that checks the two lists against each other.
+
+# Full-field match, so /usr/bin does not count as present just because /usr/bin/foo is: a bare
+# substring test would call `/usr/b` a duplicate.
+addToPath() {
+    case ":$PATH:" in
+        *":$1:"*) return 0 ;;
+    esac
+    PATH="$PATH:$1"
+    export PATH
+}
+
+# Idempotent, so sourcing this file twice in one shell — .profile and .bashrc both do it — adds
+# nothing the second time.
+addToPathFront() {
+    case ":$PATH:" in
+        *":$1:"*) return 0 ;;
+    esac
+    PATH="$1:$PATH"
+    export PATH
+}
+
+# Front to back, the result is: ~/.local/bin, nvm-current, npm-global, ~/az, the az sandbox helpers,
+# ~/.local/scripts, scrcpy, cling, ~/.local/go/bin, nnn plugins, ~/.local/tmux/bin, ~/scripts,
+# /usr/local/go/bin, ~/.cargo/bin, /usr/sbin, then whatever the login environment brought,
+# then ~/.dotnet/tools and ~/.lmstudio/bin. Every call prepends, hence the calls below read as that
+# order reversed. Directories that do not exist are skipped — a dead entry costs a failed lookup on
+# every command — so this list is a superset of what any given machine gets.
+
+addToPath /usr/local/games
+addToPath /usr/games
+addToPathFront /usr/sbin
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+[ -d /usr/local/go/bin ] && addToPathFront /usr/local/go/bin
+[ -d "$HOME/scripts" ] && addToPathFront "$HOME/scripts"
+[ -d "$HOME/.local/tmux/bin" ] && addToPathFront "$HOME/.local/tmux/bin"
+[ -d "$HOME/.config/nnn/plugins" ] && addToPathFront "$HOME/.config/nnn/plugins"
+[ -d "$HOME/.local/go/bin" ] && addToPathFront "$HOME/.local/go/bin"
+[ -d "$HOME/.local/cling/bin" ] && addToPathFront "$HOME/.local/cling/bin"
+[ -d "$HOME/.local/scrcpy" ] && addToPathFront "$HOME/.local/scrcpy"
+[ -d "$HOME/.local/scripts" ] && addToPathFront "$HOME/.local/scripts"
+if [ -d "$HOME/az" ]; then
+    [ -d "$HOME/az/scripts/agent-sandbox/host" ] && addToPathFront "$HOME/az/scripts/agent-sandbox/host"
+    addToPathFront "$HOME/az"
+fi
+[ -d "$HOME/.local/share/npm-global/bin" ] && addToPathFront "$HOME/.local/share/npm-global/bin"
+# Symlink kept in step with the default node version by runs/07_node; a shell cannot work out the
+# versioned path itself, so this is the portable form of the nvm bin directory.
+[ -d "$HOME/.local/share/nvm-current/bin" ] && addToPathFront "$HOME/.local/share/nvm-current/bin"
+[ -d "$HOME/bin" ] && addToPathFront "$HOME/bin"
+[ -d "$HOME/.local/bin" ] && addToPathFront "$HOME/.local/bin"
+
+# `npm i -g` must target the shared prefix, not the versioned node directory, so global CLIs survive
+# a node upgrade. The prefix has to stay inside $NVM_DIR: `nvm use` rejects any other one
+# (nvm_die_on_prefix in nvm.sh).
+export NPM_CONFIG_PREFIX="$HOME/.nvm/global"
+
+[ -d "$HOME/.dotnet/tools" ] && addToPath "$HOME/.dotnet/tools"
+[ -d "$HOME/.lmstudio/bin" ] && addToPath "$HOME/.lmstudio/bin"

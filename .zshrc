@@ -18,19 +18,9 @@ bindkey "^N" history-search-forward
 
 unsetopt correct_all
 
-addToPath() {
-    if [[ "$PATH" != *"$1"* ]]; then
-        export PATH=$PATH:$1
-    fi
-}
-
-addToPathFront() {
-    if [[ ! -z "$2" ]] || [[ "$PATH" != *"$1"* ]]; then
-        export PATH=$1:$PATH
-    fi
-}
-
-addToPathFront /usr/sbin
+# PATH and its helpers live in one file shared with bash. .zshenv already sources it for every zsh,
+# interactive or not; this line also covers shells that skipped .zshenv.
+[ -f "$HOME/.shpaths" ] && source "$HOME/.shpaths"
 
 # Init tools (also inside Neovim :terminal / Snacks).
 # Skip when stdout is not a tty — nvim :! uses -lic without ZLE/tty, and
@@ -64,31 +54,12 @@ if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
 fi
 
 export GOPATH=$HOME/.local/go
-addToPathFront /usr/local/go/bin
-addToPathFront $HOME/.cargo/bin
-
-addToPathFront $HOME/.local/tmux/bin
-addToPathFront $HOME/scripts
-addToPathFront $HOME/.local/scripts
-addToPathFront $HOME/.config/nnn/plugins
-addToPathFront $HOME/.local/bin
-if [[ -d "$HOME/az" ]]; then
-    addToPathFront "$HOME/az"
-    addToPathFront "$HOME/az/scripts/agent-sandbox/host"
-fi
 [ -f "$HOME/az/az-completion.zsh" ] && source "$HOME/az/az-completion.zsh"
 [ -f "$HOME/az/scripts/agent-sandbox/agent.zsh" ] && source "$HOME/az/scripts/agent-sandbox/agent.zsh"
-addToPathFront $HOME/.local/go/bin
-# npm globals live outside the versioned node directory, so a node upgrade does not strand them.
-# The .nvm one is the prefix itself (it has to be there for `nvm use`); PATH lists this symlink
-# to its bin/ because `nvm use` strips every $NVM_DIR/* entry from PATH.
-addToPathFront $HOME/.local/share/npm-global/bin
-addToPathFront $HOME/.local/cling/bin
-addToPathFront $HOME/.local/scrcpy
 
+# Versioned install path, changes with every IDEA update, so it is not in ~/.shpaths and not in
+# ~/.config/environment.d/60-path.conf.
 addToPath /opt/idea-IU-262.8665.337/bin/
-addToPath /usr/local/games
-addToPath /usr/games
 
 alias sudo=$'nocorrect sudo\t'
 alias rm='rm -i'
@@ -411,9 +382,6 @@ alias tun2proxy='sudo /home/inom/.cargo/bin/tun2proxy-bin --setup --proxy "socks
 # Yandex Cloud CLI is installed by ~/.config/yadm/runs/yc.
 [ -f "$HOME/.local/completion.zsh.inc" ] && source "$HOME/.local/completion.zsh.inc"
 
-# >>> Codex installer >>>
-export PATH="/home/inom/.local/bin:$PATH"
-# <<< Codex installer <<<
 setopt INTERACTIVE_COMMENTS
 
 git() {
@@ -429,9 +397,6 @@ git() {
 
 # nvm: default node on PATH; load nvm.sh only on first `nvm` call
 export NVM_DIR="$HOME/.nvm"
-# Global npm packages live in $NVM_DIR/global instead of the version directories, so `npm i -g`
-# survives a node upgrade. The path must stay inside $NVM_DIR: `nvm use` rejects any other prefix.
-export NPM_CONFIG_PREFIX="$NVM_DIR/global"
 if [[ -s "$NVM_DIR/alias/default" ]]; then
     _nvm_default=$(<"$NVM_DIR/alias/default")
     _nvm_default=${_nvm_default%%$'\n'*}

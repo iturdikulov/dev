@@ -8,40 +8,9 @@ case $- in
       *) return;;
 esac
 
-addToPath() {
-    if [[ ":$PATH:" != *":$1:"* ]]; then
-        export PATH="$PATH:$1"
-    fi
-}
-
-addToPathFront() {
-    if [[ -n "${2:-}" ]] || [[ ":$PATH:" != *":$1:"* ]]; then
-        export PATH="$1:$PATH"
-    fi
-}
-
-addToPathFront /usr/sbin
-
-addToPathFront /usr/local/games
-addToPathFront /usr/games
-addToPathFront /bin
-addToPathFront /usr/bin
-addToPathFront /usr/local/bin
-addToPathFront "$HOME/.cargo/bin"
-addToPathFront /usr/local/go/bin
-addToPathFront "$HOME/.local/tmux/bin"
-addToPathFront "$HOME/.local/scripts"
-addToPathFront "$HOME/.config/nnn/plugins"
-addToPathFront "$HOME/.local/bin"
-addToPathFront "$HOME/.local/go/bin"
-
-# npm globals live outside the versioned node directory, so a node upgrade does not strand them.
-# The .nvm one is the prefix itself (it has to be there for `nvm use`); PATH lists this symlink
-# to its bin/ because `nvm use` strips every $NVM_DIR/* entry from PATH.
-addToPathFront "$HOME/.local/share/npm-global/bin"
-export NPM_CONFIG_PREFIX="$HOME/.nvm/global"
-addToPathFront "$HOME/.local/cling/bin"
-addToPathFront "$HOME/.local/scrcpy"
+# PATH and its helpers live in one file shared with zsh (.zshenv sources it for every zsh, .profile
+# and .zprofile for login shells).
+[ -f "$HOME/.shpaths" ] && . "$HOME/.shpaths"
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options

@@ -16,21 +16,9 @@ if [ -n "$BASH_VERSION" ]; then
     fi
 fi
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
-
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
-
-. "$HOME/.cargo/env"
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/home/inom/.lmstudio/bin"
-# End of LM Studio CLI section
+# PATH and its helpers live in one file shared with zsh (.zprofile, .zshenv, .zshrc, .bashrc).
+# zsh does not read .profile, so the zsh login shell gets the same list through .zprofile.
+[ -f "$HOME/.shpaths" ] && . "$HOME/.shpaths"
 
 # Load X resources for xterm and other Xft-aware apps.
 if [ -f "$HOME/.xprofile" ]; then
