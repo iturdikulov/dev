@@ -14,6 +14,8 @@
 намеренно: run_runner.sh собирает ранеры через find -executable.
 """
 
+from __future__ import annotations
+
 import ast
 import functools
 import json
@@ -22,21 +24,38 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-import gi
+# PyGObject — C-расширение из системного пакета python3-gi: в venv он не виден.
+# z_gnome этот случай ловит сам, ручной запуск получает внятное сообщение.
+try:
+    import gi  # pyright: ignore[reportMissingTypeStubs] — стабов в Debian нет
 
-gi.require_version("GdkPixbuf", "2.0")
-from gi.repository import GLib, GdkPixbuf  # noqa: E402 — после require_version иначе не грузится
+    gi.require_version("GdkPixbuf", "2.0")
+    # gi.repository собирается в рантайме: require_version выше требует импорт не в
+    # начале файла (E402), а стабы о его символах не знают.
+    from gi.repository import GLib, GdkPixbuf  # noqa: E402  # pyright: ignore[reportAttributeAccessIssue, reportMissingTypeStubs]
+except (ImportError, ValueError) as gi_error:
+    print(
+        f"[ERROR] Нужен PyGObject из системы: python3-gi + gir1.2-gdkpixbuf-2.0 ({gi_error})",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 try:
     import numpy as np
 except ImportError:  # без numpy работает, просто медленнее на больших png
     np = None
 
-try:
+# Аннотации выше — строки (from __future__ import annotations), поэтому без Pillow
+# модуль импортируется: ветка else нужна только ради runtime-имён.
+if TYPE_CHECKING:
     from PIL import Image, ImageDraw, ImageFont
-except ImportError:  # без Pillow иконки выравниваются, но без меток хоткеев
-    Image = None
+else:
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+    except ImportError:  # без Pillow иконки выравниваются, но без меток хоткеев
+        Image = ImageDraw = ImageFont = None
 
 # Канва и доля арта в ней. 512 — с запасом на масштаб 2x (дэш рисует ~96 логических px).
 CANVAS = 512
@@ -418,7 +437,9 @@ def alpha_bbox(pixbuf: GdkPixbuf.Pixbuf) -> tuple[int, int, int, int] | None:
     width, height = pixbuf.get_width(), pixbuf.get_height()
     channels = pixbuf.get_n_channels()
     stride = pixbuf.get_rowstride()
-    data = pixbuf.get_pixels()
+    # bytes(): старые PyGObject отдавали здесь list[int], а np.frombuffer работает
+    # только с объектом, поддерживающим buffer-протокол.
+    data = bytes(pixbuf.get_pixels())
 
     if np is not None:
         alpha = np.frombuffer(data, dtype=np.uint8).reshape(height, stride)
@@ -698,11 +719,9 @@ def main() -> int:
 
         try:
             pixbuf = load_pixbuf(source)
-            if max(pixbuf.get_width(), pixbuf.get_height()) < CANVAS // 2:
-                warn(
-                    f"{desktop_id}: исходник {pixbuf.get_width()}×{pixbuf.get_height()}"
-                    " — при увеличении до 512 px будет мыло"
-                )
+            width, height = pixbuf.get_width(), pixbuf.get_height()
+            if max(width, height) < CANVAS // 2:
+                warn(f"{desktop_id}: исходник {width}×{height} — до 512 px будет мыло")
             canvas, before, after = render(pixbuf)
             label = labels.get(desktop_id, "")
             # Наложение поверх чужой копии набора запрещено: иначе метка легла бы
@@ -729,10 +748,8 @@ def main() -> int:
             note.append("высота ограничена шириной арта")
         if patch and patch_desktop(desktop, destination):
             note.append("Icon= переписан")
-        print(
-            f"{desktop_id}: {before * 100:.0f}% -> {after * 100:.0f}%"
-            f"  ({source.name}{', ' + ', '.join(note) if note else ''})"
-        )
+        suffix = f"  ({source.name}{', ' + ', '.join(note) if note else ''})"
+        print(f"{desktop_id}: {before * 100:.0f}% -> {after * 100:.0f}%{suffix}")
 
     # Мусор от прежних прогонов: иконки имён, которые больше не закреплены. Файлы
     # dock-*.png не трогаем — на них ссылаются .desktop из ~/.local/share/,

@@ -19,3 +19,4 @@
 az/az
 .config/yadm/ob_nm/system/etc/mihomo/config.yaml
 .config/nomacs/Image Lounge.conf
+.pi/agent/models.json
