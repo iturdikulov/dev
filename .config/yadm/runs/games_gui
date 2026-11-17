@@ -123,3 +123,59 @@ install_packages flatpak
 flatpak remote-add --user --if-not-exists flathub https://flathub.org
 flatpak install --user -y flathub org.libretro.RetroArch
 flatpak override --user --filesystem="$HOME/Media/games/RetroArch/" org.libretro.RetroArch
+
+# NVIDIA GL runtime for Flatpak apps (Bottles, Steam). The Mesa runtime cannot drive an NVIDIA
+# GPU: libglvnd in the sandbox dlopen()s libGLX_nvidia.so.0 and, with no such library, falls back
+# to indirect GLX, which exposes no framebuffer configurations — wined3d then aborts with
+# "Direct3DCreate8 failed". Flatpak picks the NVIDIA extension only when it matches the host driver
+# version exactly, hence the version is read from /proc; GL32 is the one 32-bit Wine prefixes load.
+# Branches of previous drivers stay installed after an upgrade, each several hundred megabytes.
+NVIDIA_DRIVER_VERSION=""
+if [ -r /proc/driver/nvidia/version ]; then
+    # Two-component versions (550.120) exist too, and GCC's line carries a three-component one.
+    NVIDIA_DRIVER_VERSION="$(grep -oE '[0-9]+(\.[0-9]+)+' /proc/driver/nvidia/version | head -n 1 || true)"
+fi
+
+if [ -z "$NVIDIA_DRIVER_VERSION" ]; then
+    log_info "NVIDIA driver is not loaded; skipping Flatpak NVIDIA GL extensions"
+else
+    NVIDIA_FLATPAK_SUFFIX="nvidia-${NVIDIA_DRIVER_VERSION//./-}"
+
+    # An extension is visible only in the installation it belongs to, so each scope that hosts
+    # applications gets its own copy; empty scopes are skipped to avoid a needless download.
+    for flatpak_scope in system user; do
+        # The system scope lives in /var/lib/flatpak, hence sudo; --user needs none.
+        if [ "$flatpak_scope" = system ]; then
+            flatpak_scope_args=(--system)
+            flatpak_sudo=(sudo)
+        else
+            flatpak_scope_args=(--user)
+            flatpak_sudo=()
+        fi
+
+        if [ -z "$(flatpak list "${flatpak_scope_args[@]}" --app --columns=application)" ]; then
+            continue
+        fi
+
+        if [ "$flatpak_scope" = system ]; then
+            "${flatpak_sudo[@]}" flatpak remote-add --system --if-not-exists flathub https://flathub.org \
+                || log_warn "cannot add flathub to the system installation"
+        fi
+
+        flatpak_installed="$(flatpak list "${flatpak_scope_args[@]}" --columns=application)"
+
+        for flatpak_extension in GL GL32; do
+            flatpak_app="org.freedesktop.Platform.${flatpak_extension}.${NVIDIA_FLATPAK_SUFFIX}"
+
+            if grep -qx "$flatpak_app" <<< "$flatpak_installed"; then
+                log_info "$flatpak_app is already installed ($flatpak_scope)"
+                continue
+            fi
+
+            log_info "Installing $flatpak_app ($flatpak_scope)..."
+            if ! "${flatpak_sudo[@]}" flatpak install "${flatpak_scope_args[@]}" -y flathub "$flatpak_app"; then
+                log_warn "could not install $flatpak_app ($flatpak_scope); the app keeps indirect GLX and Wine may still fail with Direct3DCreate8"
+            fi
+        done
+    done
+fi

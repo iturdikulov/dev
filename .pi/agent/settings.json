@@ -8,7 +8,7 @@
     "npm:pi-plan"
   ],
   "defaultProvider": "commandcode",
-  "defaultModel": "deepseek/deepseek-v4.1-flash-ultrafast",
+  "defaultModel": "deepseek/deepseek-v4.1-flash",
   "lastChangelogVersion": "1.5.2",
   "enabledModels": [
     "cursor/auto",
@@ -16,16 +16,16 @@
     "claude-bridge/claude-opus-5-5",
     "claude-bridge/claude-sonnet-5-5",
     "strata/iq2_xs",
-    "commandcode/inclusionai/ling-3.1-flash-1019",
     "commandcode/deepseek/deepseek-v4.1-flash-ultrafast",
-    "commandcode/stealth/crouton-alpha",
     "commandcode/moonshotai/Kimi-K3.1-Pro",
     "commandcode/minimax/minimax-m3.1-flash",
     "commandcode/deepseek/deepseek-v4.1-flash-fast",
     "commandcode/deepseek/deepseek-v4.1-flash",
     "commandcode/z-ai/glm-5.3-flash",
     "commandcode/tencent/hy3-paid",
-    "commandcode/Qwen/Qwen3.8-27B"
+    "commandcode/Qwen/Qwen3.8-27B",
+    "commandcode/inclusionai/ling-3.1-flash",
+    "commandcode/stealth/glyph-cluster:free"
   ],
   "extensionChangelogVersions": {
     "{\"source\":\"vendor/pi-cursor-provider\",\"scope\":\"user\"}": "0.1.5",

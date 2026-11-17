@@ -238,6 +238,7 @@ application/vnd.apple.mpegurl=mpv.desktop
 audio/x-pn-au=mpv.desktop
 audio/3gpp=mpv.desktop
 video/vnd.avi=mpv.desktop
+x-scheme-handler/unityhub=unityhub.desktop
 
 [Removed Associations]
 application/vnd.openxmlformats-officedocument.presentationml.presentation=libreoffice-startcenter.desktop;

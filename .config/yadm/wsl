@@ -21,6 +21,6 @@ if ! [ -e "/mnt/c/Users/inom/.wslconfig" ]; then
     echo "WSL config for win copied successfully."
 fi
 
-"$script_dir/run_runner.sh" --no-gui --no-ufw --blacklist "01_debian _hardware nvidia xone games gamedev _media _virt borg nginx resilio-sync singbox ttyd.sh"
+"$script_dir/run_runner.sh" --no-gui --no-ufw --blacklist "01_debian _hardware 09_nvidia xone games gamedev _media _virt borg nginx resilio-sync singbox ttyd.sh"
 
 "$script_dir/sync.sh"

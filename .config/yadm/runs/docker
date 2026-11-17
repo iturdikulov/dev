@@ -34,7 +34,7 @@ if [ "$docker_repo_added" -eq 1 ]; then
   sudo apt-get update
 fi
 
-# NVIDIA Container Toolkit from the CUDA debian13 repo (same as runs/nvidia)
+# NVIDIA Container Toolkit from the CUDA debian13 repo (same as runs/09_nvidia)
 if ! package_installed cuda-keyring; then
   download_file https://developer.download.nvidia.com/compute/cuda/repos/debian13/x86_64/cuda-keyring_1.1-1_all.deb /tmp/cuda-keyring.deb
   sudo dpkg -i /tmp/cuda-keyring.deb && rm -f /tmp/cuda-keyring.deb

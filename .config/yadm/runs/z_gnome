@@ -328,6 +328,47 @@ set_physlock_shortcut() {
     set_gsetting_if_different "$schema" binding '<Super><Shift>l'
 }
 
+# Клавиша Play/Pause в GNOME достаётся MPRIS-плееру, а у mpv такого интерфейса
+# нет — поэтому управление mpv вынесено на отдельные сочетания. Скрипт говорит
+# с mpv по IPC-сокету (input-ipc-server в mpv.conf), активное окно не нужно.
+MPV_HOTKEY_SCRIPT="$HOME/.local/scripts/mpv-hotkey.py"
+
+# $1 — путь customN, $2 — имя, $3 — аргументы скрипта, $4 — сочетание клавиш.
+set_mpv_hotkey_shortcut() {
+    local path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/$1/"
+    local schema="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$path"
+    local current target
+
+    current="$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings 2>/dev/null || echo '@as []')"
+    if [[ "$current" != *"$path"* ]]; then
+        if [[ "$current" == "@as []" || "$current" == "[]" ]]; then
+            target="['$path']"
+        else
+            target="${current%]}, '$path']"
+        fi
+        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$target"
+        log_info "Added GNOME custom shortcut path $path"
+    fi
+
+    if [[ ! -x "$MPV_HOTKEY_SCRIPT" ]]; then
+        log_warn "Missing $MPV_HOTKEY_SCRIPT — skipping mpv hotkeys"
+        return 0
+    fi
+
+    set_gsetting_if_different "$schema" name "$2"
+    set_gsetting_if_different "$schema" command "$MPV_HOTKEY_SCRIPT $3"
+    set_gsetting_if_different "$schema" binding "$4"
+}
+
+set_mpv_hotkeys() {
+    # Стрелки со <Super><Shift> заняты mutter'ом (move-to-monitor-left/right),
+    # поэтому перемотка сидит на «<» и «>» — тех же клавишах, что в плеерах
+    # соответствуют шагу назад/вперёд.
+    set_mpv_hotkey_shortcut custom4 'Пауза mpv' play-pause '<Super><Shift>p'
+    set_mpv_hotkey_shortcut custom5 'Назад на 5 с (mpv)' 'seek -5' '<Super><Shift>comma'
+    set_mpv_hotkey_shortcut custom6 'Вперёд на 5 с (mpv)' 'seek 5' '<Super><Shift>period'
+}
+
 setup_physlock() {
     install_packages physlock
     ensure_physlock_pam
@@ -503,7 +544,21 @@ set_favorite_apps() {
     favorites+=(
         org.zealdocs.zeal.desktop
         org.freecad.FreeCAD.desktop
+        # Телемост — отдельное окно Edge, ярлык делает runs/edge_gui (Super+Y в
+        # ~/.config/run-or-raise/shortcuts.conf поднимает его или запускает).
+        msedge-telemost.yandex.ru__-Default.desktop
     )
+
+    # Unity Editor намеренно после цифровой группы: метка хоткея в доке берётся
+    # из shortcuts.conf, у Unity это буква (Super+U), а вклинивание в середину
+    # сдвинуло бы привязанные к местам цифры у krita/nomacs/mpv/spotify.
+    # Берём стабильный ярлык Hub: у versioned-ярлыка StartupWMClass=Unity-<версия>,
+    # и док не склеил бы его с окном wm_class Unity.
+    if desktop_file_path unityhub-unity-editor.desktop >/dev/null; then
+        favorites+=(unityhub-unity-editor.desktop)
+    else
+        log_warn "Unity Editor desktop not found — skipping pin"
+    fi
 
     for desktop in "${favorites[@]}"; do
         if ! desktop_file_path "$desktop" >/dev/null; then
@@ -1114,6 +1169,7 @@ set_gsetting_if_different org.gnome.settings-daemon.plugins.power sleep-inactive
 set_audio_toggle_shortcut
 set_vpn_toggle_shortcut
 set_screenshot_shortcuts
+set_mpv_hotkeys
 disable_screenreader_shortcut
 set_vt_bounce_hotkey
 setup_physlock

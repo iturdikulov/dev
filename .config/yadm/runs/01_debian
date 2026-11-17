@@ -48,7 +48,7 @@ mapfile -t held_kernels < <(apt-mark showhold | grep -E '^linux-(image|headers)-
 if ((${#held_kernels[@]} > 0)); then
     sudo apt-mark unhold "${held_kernels[@]}"
 fi
-log_info "Installing stable kernel, do not forget to re-run nvidia/xone runners if DKMS modules fail to build"
+log_info "Installing stable kernel, do not forget to re-run 09_nvidia/xone runners if DKMS modules fail to build"
 install_packages linux-image-amd64 linux-headers-amd64
 
 log_info "Remove discover update notifier"

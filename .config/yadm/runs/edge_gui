@@ -52,3 +52,34 @@ Exec=/usr/bin/microsoft-edge-stable --remote-debugging-port=9222 --user-data-dir
 EOF
 
 update-desktop-database "$HOME/.local/share/applications/"
+
+# Телемост — окно приложения (--app) без адресной строки и вкладок.
+# Имя файла и StartupWMClass повторяют Wayland app_id окна Edge
+# (msedge-<хост>__-<профиль>): по нему GNOME находит иконку и группирует окно,
+# по нему же поднимает окно run-or-raise (Super+Y). Метку «Y» в углу иконки
+# рисует runs/dock_icons.py — он берёт её из той же строки shortcuts.conf.
+TELEMOST_ID="msedge-telemost.yandex.ru__-Default"
+TELEMOST_ICON="$HOME/.local/share/icons/telemost.png"
+
+ensure_directory "$(dirname "$TELEMOST_ICON")"
+curl -fsSL -o "$TELEMOST_ICON" \
+    "https://yastatic.net/s3/chat-static/favicons/tm/apple-touch-icon-512.png" \
+    || log_warn "Telemost icon download failed — keeping $TELEMOST_ICON"
+
+create_desktop_entry "$TELEMOST_ID" "[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Telemost
+GenericName=Video meetings
+GenericName[ru]=Видеовстречи
+Comment=Yandex Telemost in an app-like window without browser UI
+Comment[ru]=Яндекс Телемост в окне приложения, без браузерного интерфейса
+Name[ru]=Телемост
+Exec=/usr/bin/microsoft-edge-stable --app=\"https://telemost.yandex.ru/\" --start-maximized --no-first-run --no-default-browser-check
+Icon=$TELEMOST_ICON
+Terminal=false
+Categories=Network;Chat;VideoConference;
+Keywords=telemost;conference;meeting;call;
+Keywords[ru]=телемост;видеозвонок;созвон;
+StartupNotify=true
+StartupWMClass=$TELEMOST_ID"
